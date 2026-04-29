@@ -3,13 +3,14 @@ plugins {
 }
 
 group = "no.nav.helse"
-version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
 }
 
 dependencies {
+    implementation(libs.tbd.naisful.app)
     testImplementation(kotlin("test"))
 }
 

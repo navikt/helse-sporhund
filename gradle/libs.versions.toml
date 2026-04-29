@@ -1,0 +1,5 @@
+[versions]
+tbd-libs = "20260423.1246"
+
+[libraries]
+tbd-naisful-app = { module = "com.github.navikt.tbd-libs:naisful-app", version.ref = "tbd-libs" }
