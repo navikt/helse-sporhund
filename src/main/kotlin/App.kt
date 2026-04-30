@@ -10,6 +10,6 @@ fun main() {
         objectMapper = jacksonObjectMapper(),
         applicationLogger = LoggerFactory.getLogger("Application"),
         callLogger = LoggerFactory.getLogger("CallLogger"),
-        applicationModule = {}
+        applicationModule = {},
     ).start(wait = true)
 }
