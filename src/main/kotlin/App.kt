@@ -2,14 +2,18 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.kafka.AivenConfig
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.naisful.naisApp
+import db.PgTransactionProvider
 import io.ktor.server.application.ApplicationStarted
 import io.ktor.server.application.ApplicationStopping
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kafka.KafkaConsumer
+import kafka.KafkaProducer
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
 
+const val DIALOGMELDING_FRA_NAY_TOPIC = "teamsykefravr.isdialogmelding-behandler-dialogmelding-bestilling"
 const val DIALOGMELDING_STATUS_TOPIC = "teamsykefravr.behandler-dialogmelding-status"
 const val DIALOGMELDING_FRA_BEHANDLER_TOPIC = "teamsykefravr.melding-fra-behandler"
 const val LEGEERKLÆRING_TOPIC = "teamsykmelding.legeerklaering"
@@ -22,15 +26,26 @@ fun main() {
             LEGEERKLÆRING_TOPIC,
         )
     val config = AivenConfig.default
+    app(config, topics, DIALOGMELDING_FRA_NAY_TOPIC)
+}
+
+fun app(
+    config: AivenConfig,
+    readTopics: List<String>,
+    writeTopic: String,
+) {
     val factory = ConsumerProducerFactory(config)
     val running = AtomicBoolean(false)
     val kafkaConsumer =
         KafkaConsumer(
-            topics = topics,
+            topics = readTopics,
             consumerGroupId = System.getenv("KAFKA_CONSUMER_GROUP_ID"),
             readyToConsume = running,
             factory,
         )
+
+    val transactionProvider = PgTransactionProvider()
+    val kafkaProducer = KafkaProducer(writeTopic, factory, transactionProvider)
 
     naisApp(
         meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
@@ -40,7 +55,8 @@ fun main() {
         applicationModule = {
             this.monitor.subscribe(ApplicationStarted) {
                 running.set(true)
-                kafkaConsumer.start()
+                launch { kafkaConsumer.start() }
+                launch { kafkaProducer.start() }
             }
             this.monitor.subscribe(ApplicationStopping) {
                 running.set(false)
