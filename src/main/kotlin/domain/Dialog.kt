@@ -11,7 +11,7 @@ value class DialogId(
 class Dialog private constructor(
     val id: DialogId,
     val conversationRef: UUID,
-    val identitetsnummer: String,
+    val identitetsnummer: Identitetsnummer,
     meldinger: List<Dialogmelding>,
 ) {
     private val _meldinger = meldinger.toMutableList()
@@ -23,7 +23,7 @@ class Dialog private constructor(
 
     companion object {
         fun ny(
-            identitetsnummer: String,
+            identitetsnummer: Identitetsnummer,
             melding: Dialogmelding.FraNav,
         ): Dialog =
             Dialog(DialogId(UUID.randomUUID()), UUID.randomUUID(), identitetsnummer, emptyList())
@@ -32,7 +32,7 @@ class Dialog private constructor(
         fun fraLagring(
             id: DialogId,
             conversationRef: UUID,
-            identitetsnummer: String,
+            identitetsnummer: Identitetsnummer,
             meldinger: List<Dialogmelding>,
         ): Dialog = Dialog(id, conversationRef, identitetsnummer, meldinger)
     }
