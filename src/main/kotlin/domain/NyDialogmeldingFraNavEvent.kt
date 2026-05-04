@@ -1,7 +1,7 @@
 package domain
 
 data class NyDialogmeldingFraNavEvent(
-    val conversationRef: String,
-    val behandlerRef: String,
+    val conversationRef: ConversationRef,
+    val behandlerRef: BehandlerRef,
     val identitetsnummer: Identitetsnummer,
 )
