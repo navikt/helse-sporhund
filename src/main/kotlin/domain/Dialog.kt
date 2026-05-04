@@ -22,8 +22,24 @@ class Dialog private constructor(
     private val _meldinger = meldinger.toMutableList()
     val meldinger get() = _meldinger.toList()
 
+    private val events = mutableListOf<NyDialogmeldingFraNavEvent>()
+
+    fun events() = events.toList().also { events.clear() }
+
     fun nyMelding(dialogmelding: Dialogmelding) {
         _meldinger.add(dialogmelding)
+        if (dialogmelding is Dialogmelding.FraNav) {
+            events.add(
+                NyDialogmeldingFraNavEvent(
+                    conversationRef = conversationRef,
+                    behandlerRef = dialogmelding.mottaker,
+                    identitetsnummer = identitetsnummer,
+                    meldingId = dialogmelding.id,
+                    type = "", // TODO: Finne ut hvilke typer vi skal ha og sende de med her
+                    tekst = dialogmelding.melding,
+                ),
+            )
+        }
     }
 
     companion object {
@@ -57,13 +73,42 @@ interface Dialogmelding {
     val tidspunkt: Instant
     val melding: String
 
-    class FraNav(
+    class FraNav private constructor(
         override val id: DialogmeldingId,
         override val tidspunkt: Instant,
         override val melding: String,
         val navIdent: NavIdent,
         val mottaker: BehandlerRef,
-    ) : Dialogmelding
+    ) : Dialogmelding {
+        companion object {
+            fun ny(
+                navIdent: NavIdent,
+                mottaker: BehandlerRef,
+                melding: String,
+            ): FraNav =
+                FraNav(
+                    id = DialogmeldingId(UUID.randomUUID()),
+                    tidspunkt = Instant.now(),
+                    melding = melding,
+                    navIdent = navIdent,
+                    mottaker = mottaker,
+                )
+
+            fun fraLagring(
+                id: DialogmeldingId,
+                tidspunkt: Instant,
+                melding: String,
+                navIdent: NavIdent,
+                mottaker: BehandlerRef,
+            ) = FraNav(
+                id = id,
+                tidspunkt = tidspunkt,
+                melding = melding,
+                navIdent = navIdent,
+                mottaker = mottaker,
+            )
+        }
+    }
 
     class FraBehandler(
         override val id: DialogmeldingId,
