@@ -78,5 +78,3 @@ spec:
   env:
     - name: KAFKA_CONSUMER_GROUP_ID
       value: tbd-sporhund-v1
-    - name: JDK_JAVA_OPTIONS
-      value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=sporhund,-cprof_enable_heap_sampling=true,-logtostderr,-minloglevel=1,-cprof_project_id=tbd-dev-7ff9
