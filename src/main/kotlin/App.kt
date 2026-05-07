@@ -7,6 +7,7 @@ import io.ktor.server.application.ApplicationStarted
 import io.ktor.server.application.ApplicationStopping
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import kafka.KafkaConfig
 import kafka.KafkaConsumer
 import kafka.KafkaProducer
 import kotlinx.coroutines.launch
@@ -19,33 +20,37 @@ const val DIALOGMELDING_FRA_BEHANDLER_TOPIC = "teamsykefravr.melding-fra-behandl
 const val LEGEERKLÆRING_TOPIC = "teamsykmelding.legeerklaering"
 
 fun main() {
-    val topics =
-        listOf(
-            DIALOGMELDING_STATUS_TOPIC,
-            DIALOGMELDING_FRA_BEHANDLER_TOPIC,
-            LEGEERKLÆRING_TOPIC,
+    val kafkaConfig =
+        KafkaConfig(
+            aivenConfig = AivenConfig.default,
+            readTopics =
+                listOf(
+                    DIALOGMELDING_STATUS_TOPIC,
+                    DIALOGMELDING_FRA_BEHANDLER_TOPIC,
+                    LEGEERKLÆRING_TOPIC,
+                ),
+            writeTopic = DIALOGMELDING_FRA_NAY_TOPIC,
         )
-    val config = AivenConfig.default
-    app(config, topics, DIALOGMELDING_FRA_NAY_TOPIC)
+    app(
+        kafkaConfig = kafkaConfig,
+    )
 }
 
 fun app(
-    config: AivenConfig,
-    readTopics: List<String>,
-    writeTopic: String,
+    kafkaConfig: KafkaConfig,
 ) {
-    val factory = ConsumerProducerFactory(config)
+    val factory = ConsumerProducerFactory(kafkaConfig.aivenConfig)
     val running = AtomicBoolean(false)
     val kafkaConsumer =
         KafkaConsumer(
-            topics = readTopics,
+            topics = kafkaConfig.readTopics,
             consumerGroupId = System.getenv("KAFKA_CONSUMER_GROUP_ID"),
             readyToConsume = running,
             factory,
         )
 
     val transactionProvider = PgTransactionProvider()
-    val kafkaProducer = KafkaProducer(writeTopic, factory, transactionProvider)
+    val kafkaProducer = KafkaProducer(kafkaConfig.writeTopic, factory, transactionProvider)
 
     naisApp(
         meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
