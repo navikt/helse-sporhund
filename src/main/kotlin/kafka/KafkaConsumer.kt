@@ -36,6 +36,7 @@ class KafkaConsumer(
                     }
                 }
             } catch (err: WakeupException) {
+                throw err
 //            log.info("Exiting consumer after ${if (!running.get()) "receiving shutdown signal" else "being interrupted by someone" }")
             }
         }
