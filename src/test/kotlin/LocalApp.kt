@@ -1,6 +1,7 @@
 import db.testhelpers.TestcontainersDatabase
 import kafka.KafkaConfig
 import kafka.LocalKafkaConfig
+import kafka.ReadTopics
 import org.testcontainers.kafka.KafkaContainer
 
 fun main() {
@@ -15,10 +16,10 @@ fun main() {
     )
 
     val topics =
-        listOf(
-            DIALOGMELDING_STATUS_TOPIC,
-            DIALOGMELDING_FRA_BEHANDLER_TOPIC,
-            LEGEERKLÆRING_TOPIC,
+        ReadTopics(
+            dialogmeldingFraBehandlerTopic = DIALOGMELDING_FRA_BEHANDLER_TOPIC,
+            dialogmeldingStatusTopic = DIALOGMELDING_STATUS_TOPIC,
+            legeerklæringTopic = LEGEERKLÆRING_TOPIC,
         )
 
     app(

@@ -21,6 +21,7 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kafka.KafkaConfig
 import kafka.KafkaConsumer
 import kafka.KafkaProducer
+import kafka.ReadTopics
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
@@ -36,10 +37,10 @@ fun main() {
         KafkaConfig(
             aivenConfig = AivenConfig.default,
             readTopics =
-                listOf(
-                    DIALOGMELDING_STATUS_TOPIC,
-                    DIALOGMELDING_FRA_BEHANDLER_TOPIC,
-                    LEGEERKLÆRING_TOPIC,
+                ReadTopics(
+                    dialogmeldingFraBehandlerTopic = DIALOGMELDING_FRA_BEHANDLER_TOPIC,
+                    dialogmeldingStatusTopic = DIALOGMELDING_STATUS_TOPIC,
+                    legeerklæringTopic = DIALOGMELDING_STATUS_TOPIC, // TODO: Endre tilbake til legeerklæring-topicet når vi har fått tilgang
                 ),
             writeTopic = DIALOGMELDING_FRA_NAY_TOPIC,
         )
@@ -62,6 +63,10 @@ fun app(
 ) {
     val factory = ConsumerProducerFactory(kafkaConfig.aivenConfig)
     val running = AtomicBoolean(false)
+
+    val dataSourceBuilder = DataSourceBuilder(dbConfig)
+
+    val transactionProvider = PgTransactionProvider(dataSourceBuilder.build())
     val kafkaConsumer =
         KafkaConsumer(
             topics = kafkaConfig.readTopics,
@@ -69,10 +74,6 @@ fun app(
             readyToConsume = running,
             factory,
         )
-
-    val dataSourceBuilder = DataSourceBuilder(dbConfig)
-
-    val transactionProvider = PgTransactionProvider(dataSourceBuilder.build())
     val kafkaProducer = KafkaProducer(kafkaConfig.writeTopic, factory, transactionProvider)
 
     naisApp(

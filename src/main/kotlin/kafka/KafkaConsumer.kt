@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.collections.set
 
 class KafkaConsumer(
-    private val topics: List<String>,
+    private val topics: ReadTopics,
     consumerGroupId: String,
     private val readyToConsume: AtomicBoolean,
     consumerProducerFactory: ConsumerProducerFactory,
@@ -22,7 +22,7 @@ class KafkaConsumer(
 
     fun start() {
         consumer.use {
-            consumer.subscribe(topics)
+            consumer.subscribe(topics.alleTopics)
 
             try {
                 consumer.poll(readyToConsume::get) { records ->
