@@ -1,5 +1,6 @@
 package kafka
 
+import application.TransactionProvider
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.kafka.poll
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -13,6 +14,7 @@ class KafkaConsumer(
     consumerGroupId: String,
     private val readyToConsume: AtomicBoolean,
     consumerProducerFactory: ConsumerProducerFactory,
+    private val transactionProvider: TransactionProvider,
 ) {
     private val defaultConsumerProperties =
         Properties().apply {
@@ -27,6 +29,7 @@ class KafkaConsumer(
             try {
                 consumer.poll(readyToConsume::get) { records ->
                     records.forEach { record ->
+                        if (record.topic() == topics.dialogmeldingFraBehandlerTopic) håndterSvarFraBehandler(transactionProvider, record)
                         // lytt på og oppdater status
                         // lytt på melding fra behandler og knytt til dialog
                         // lytt på legeerklæringer og knytt til dialog

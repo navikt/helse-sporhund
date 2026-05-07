@@ -72,7 +72,8 @@ fun app(
             topics = kafkaConfig.readTopics,
             consumerGroupId = System.getenv("KAFKA_CONSUMER_GROUP_ID") ?: "local-group",
             readyToConsume = running,
-            factory,
+            consumerProducerFactory = factory,
+            transactionProvider = transactionProvider,
         )
     val kafkaProducer = KafkaProducer(kafkaConfig.writeTopic, factory, transactionProvider)
 
