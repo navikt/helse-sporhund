@@ -22,9 +22,11 @@ import kafka.KafkaConfig
 import kafka.KafkaConsumer
 import kafka.KafkaProducer
 import kafka.ReadTopics
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration.Companion.seconds
 
 const val DIALOGMELDING_FRA_NAY_TOPIC = "teamsykefravr.isdialogmelding-behandler-dialogmelding-bestilling"
 const val DIALOGMELDING_STATUS_TOPIC = "teamsykefravr.behandler-dialogmelding-status"
@@ -84,14 +86,20 @@ fun app(
         callLogger = LoggerFactory.getLogger("tjenestekall"),
         port = port,
         developmentMode = false,
+        gracefulShutdownDelay = 10.seconds,
         applicationModule = {
             this.monitor.subscribe(ApplicationStarting) {
                 dataSourceBuilder.migrate()
             }
             this.monitor.subscribe(ApplicationStarted) {
                 running.set(true)
-                launch { kafkaConsumer.start() }
-                launch { kafkaProducer.start() }
+                val exceptionHandler =
+                    CoroutineExceptionHandler { _, throwable ->
+                        it.log.error("Feil i coroutine, terminerer appen", throwable)
+                        it.engine.stop()
+                    }
+                launch(exceptionHandler) { kafkaConsumer.start() }
+                launch(exceptionHandler) { kafkaProducer.start() }
             }
             this.monitor.subscribe(ApplicationStopping) {
                 running.set(false)
