@@ -62,6 +62,10 @@ spec:
       rules:
         - application: speil
           cluster: dev-gcp
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
   gcp:
     sqlInstances:
       - type: POSTGRES_17
