@@ -44,11 +44,11 @@ spec:
     path: /metrics
   kafka:
     pool: nav-dev
-#  azure:
-#    application:
-#      enabled: true
-#      tenant: trygdeetaten.no
-#      claims:
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+      allowAllUsers: true
 #        extra:
 #          - "NAVident"
 #        groups:
