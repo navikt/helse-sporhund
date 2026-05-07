@@ -106,8 +106,15 @@ fun app(
                         swaggerUI("../openapi.json")
                     }
 
-                    get("/dialogmeldinger", {
+                    get("/personer/{pseudoId}/dialogmeldinger", {
+                        operationId = "getDialogmeldinger"
                         description = "Hent alle dialogmeldinger for en gitt person"
+                        request {
+                            pathParameter<String>("pseudoId") {
+                                description = "Pseudonymisert person-ID"
+                                required = true
+                            }
+                        }
                         response {
                             HttpStatusCode.OK to {
                                 description = "A success response"
@@ -115,6 +122,8 @@ fun app(
                             }
                         }
                     }) {
+//                        val pseudoId = call.parameters["pseudoId"]
+//                        veksle pseudoId med fødselsnummer her
                         call.respond(mockDialogmeldinger())
                     }
                 }
