@@ -16,8 +16,13 @@ fun håndterSvarFraBehandler(
     val dialogmeldingFraBehandler = record.parseDialogmeldingFraBehandler()
 
     when (dialogmeldingFraBehandler) {
-        is SvarFraBehandler.MedConversationRef -> TODO()
-        is SvarFraBehandler.UtenConversationRef -> håndterSvarUtenConversationRef(transactionProvider, dialogmeldingFraBehandler.json)
+        is SvarFraBehandler.MedConversationRef -> {
+            håndterSvarMedConversationRef(transactionProvider, dialogmeldingFraBehandler.json)
+        }
+
+        is SvarFraBehandler.UtenConversationRef -> {
+            håndterSvarUtenConversationRef(transactionProvider, dialogmeldingFraBehandler.json)
+        }
     }
 }
 
@@ -26,7 +31,7 @@ private fun ConsumerRecord<String, String>.parseDialogmeldingFraBehandler(): Sva
     val behandlerRef = BehandlerRef(json["behandlerRef"].textValue())
     val identitetsnummer = Identitetsnummer.fraString(json["personIdentPasient"].textValue())
 
-    return if (json["conversationRef"].textValue() != null) {
+    return if (json["conversationRef"] != null) {
         SvarFraBehandler.MedConversationRef(
             conversationRef = ConversationRef(UUID.fromString(json["conversationRef"].textValue())),
             behandlerRef = behandlerRef,
@@ -46,4 +51,12 @@ private fun håndterSvarUtenConversationRef(
     transactionProvider: TransactionProvider,
     json: JsonNode,
 ) {
+    println("Svar uten conversationRef: ${json.toPrettyString()}")
+}
+
+private fun håndterSvarMedConversationRef(
+    transactionProvider: TransactionProvider,
+    json: JsonNode,
+) {
+    println("Svar med conversationRef: ${json.toPrettyString()}")
 }
