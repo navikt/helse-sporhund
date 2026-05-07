@@ -2,10 +2,10 @@ package db
 
 import application.Outbox
 import application.SessionContext
-import kotliquery.TransactionalSession
+import kotliquery.Session
 
 class PgSessionContext(
-    transactionalSession: TransactionalSession,
+    session: Session,
 ) : SessionContext {
-    override val outbox: Outbox = PgOutbox(transactionalSession)
+    override val outbox: Outbox = PgOutbox(session)
 }

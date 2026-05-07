@@ -2,7 +2,7 @@ package db
 
 import kotliquery.Query
 import kotliquery.Row
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
 import org.intellij.lang.annotations.Language
 
@@ -36,15 +36,15 @@ fun asSQLWithQuestionMarks(
 ) = queryOf(sql, *params)
 
 fun <T> Query.single(
-    session: TransactionalSession,
+    session: Session,
     mapping: (Row) -> T?,
 ) = session.run(map(mapping).asSingle)
 
 fun <T> Query.list(
-    session: TransactionalSession,
+    session: Session,
     mapping: (Row) -> T?,
 ) = session.run(map(mapping).asList)
 
-fun Query.update(session: TransactionalSession) = session.run(asUpdate)
+fun Query.update(session: Session) = session.run(asUpdate)
 
-fun Query.updateAndReturnGeneratedKey(session: TransactionalSession) = session.run(this.asUpdateAndReturnGeneratedKey)
+fun Query.updateAndReturnGeneratedKey(session: Session) = session.run(this.asUpdateAndReturnGeneratedKey)

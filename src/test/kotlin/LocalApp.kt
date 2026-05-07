@@ -1,8 +1,3 @@
-import application.Outbox
-import application.OutboxMelding
-import application.OutboxMeldingId
-import application.SessionContext
-import application.TransactionProvider
 import db.DbConfig
 import kafka.KafkaConfig
 import kafka.LocalKafkaConfig
@@ -41,21 +36,5 @@ fun main() {
                 password = postgres.password,
             ),
         port = 8282,
-        transactionProviderOverride =
-            object : TransactionProvider {
-                override fun <T> transaction(session: SessionContext.() -> T): T =
-                    session(
-                        object : SessionContext {
-                            override val outbox =
-                                object : Outbox {
-                                    override fun nyMelding(melding: OutboxMelding) = Unit
-
-                                    override fun meldinger() = emptyList<OutboxMelding>()
-
-                                    override fun meldingSendt(id: OutboxMeldingId) = Unit
-                                }
-                        },
-                    )
-            },
     )
 }

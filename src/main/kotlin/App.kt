@@ -1,4 +1,3 @@
-import application.TransactionProvider
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.kafka.AivenConfig
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
@@ -55,7 +54,6 @@ fun app(
     kafkaConfig: KafkaConfig,
     dbConfig: DbConfig,
     port: Int = 8080,
-    transactionProviderOverride: TransactionProvider? = null,
 ) {
     val factory = ConsumerProducerFactory(kafkaConfig.aivenConfig)
     val running = AtomicBoolean(false)
@@ -69,7 +67,7 @@ fun app(
 
     val dataSourceBuilder = DataSourceBuilder(dbConfig)
 
-    val transactionProvider = transactionProviderOverride ?: PgTransactionProvider(dataSourceBuilder.build())
+    val transactionProvider = PgTransactionProvider(dataSourceBuilder.build())
     val kafkaProducer = KafkaProducer(kafkaConfig.writeTopic, factory, transactionProvider)
 
     naisApp(
@@ -80,7 +78,7 @@ fun app(
         port = port,
         applicationModule = {
             this.monitor.subscribe(ApplicationStarting) {
-                if (transactionProviderOverride == null) dataSourceBuilder.migrate()
+                dataSourceBuilder.migrate()
             }
             this.monitor.subscribe(ApplicationStarted) {
                 running.set(true)

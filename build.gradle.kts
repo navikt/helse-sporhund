@@ -16,10 +16,10 @@ dependencies {
     implementation(libs.tbd.kafka)
     implementation(libs.bundles.smiley4.ktor.openapi.tools)
     implementation(libs.bundles.db)
-
+    implementation(libs.bundles.jackson)
     testImplementation(kotlin("test"))
     testImplementation(libs.testcontainers.kafka)
-    testImplementation(libs.testcontainers.postgresql)
+    testImplementation(libs.testcontainers.postgres)
 }
 
 kotlin {
