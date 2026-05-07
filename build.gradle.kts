@@ -18,7 +18,7 @@ dependencies {
     implementation(libs.bundles.db)
     implementation(libs.bundles.jackson)
 
-    testRuntimeOnly(libs.logback.classic)
+    implementation(libs.logback.classic)
 
     testImplementation(kotlin("test"))
     testImplementation(libs.testcontainers.kafka)
