@@ -17,6 +17,9 @@ dependencies {
     implementation(libs.bundles.smiley4.ktor.openapi.tools)
     implementation(libs.bundles.db)
     implementation(libs.bundles.jackson)
+
+    testRuntimeOnly(libs.logback.classic)
+
     testImplementation(kotlin("test"))
     testImplementation(libs.testcontainers.kafka)
     testImplementation(libs.testcontainers.postgres)

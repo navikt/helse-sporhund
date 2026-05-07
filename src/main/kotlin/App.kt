@@ -75,9 +75,10 @@ fun app(
     naisApp(
         meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         objectMapper = objectMapper,
-        applicationLogger = LoggerFactory.getLogger("Application"),
-        callLogger = LoggerFactory.getLogger("CallLogger"),
+        applicationLogger = LoggerFactory.getLogger("tjenestekall"),
+        callLogger = LoggerFactory.getLogger("tjenestekall"),
         port = port,
+        developmentMode = false,
         applicationModule = {
             this.monitor.subscribe(ApplicationStarting) {
                 dataSourceBuilder.migrate()
