@@ -1,3 +1,5 @@
+package api
+
 import io.github.smiley4.ktoropenapi.config.*
 import io.github.smiley4.schemakenerator.swagger.data.RefType
 import io.swagger.v3.oas.models.media.Schema

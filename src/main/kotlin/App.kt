@@ -1,3 +1,6 @@
+import api.ApiBehandlerDialoger
+import api.configureOpenApiPlugin
+import api.mockDialogmeldinger
 import com.github.navikt.tbd_libs.kafka.AivenConfig
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.naisful.naisApp

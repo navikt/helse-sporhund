@@ -1,3 +1,5 @@
+package api
+
 data class ApiVedlegg(
     val navn: String,
     val url: String,
