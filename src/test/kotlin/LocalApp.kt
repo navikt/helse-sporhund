@@ -29,7 +29,7 @@ fun main() {
                 readTopics = topics,
                 writeTopic = DIALOGMELDING_FRA_NAY_TOPIC,
             ),
-        dbConfig = postgres.testDbConfig,
+        dbConfig = postgres.dbConfig,
         port = 8282,
     )
 }
