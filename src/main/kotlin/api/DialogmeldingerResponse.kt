@@ -56,6 +56,10 @@ data class ApiNyDialogmelding(
     val melding: String,
 )
 
+data class ApiSvarPaDialog(
+    val melding: String,
+)
+
 // === Internal model + store ===
 
 private data class InternalDialog(
@@ -111,6 +115,28 @@ object MockStore {
             )
         data.add(nyInternalDialog)
         return nyInternalDialog.tilDialogDetails()
+    }
+
+    fun svarPåDialog(
+        dialogId: String,
+        svar: ApiSvarPaDialog,
+    ): ApiDialogDetails? {
+        val index = data.indexOfFirst { it.id == dialogId }
+        if (index < 0) return null
+        val dialog = data[index]
+        val nyMelding =
+            ApiDialogmelding(
+                tittel = dialog.tittel,
+                melding = svar.melding,
+                tid =
+                    java.time.LocalDateTime
+                        .now()
+                        .toString(),
+                fraNav = true,
+                vedlegg = emptyList(),
+            )
+        data[index] = dialog.copy(dialogmeldinger = dialog.dialogmeldinger + nyMelding)
+        return data[index].tilDialogDetails()
     }
 
     private fun InternalDialog.tilOversikt() =

@@ -194,6 +194,42 @@ fun app(
                         val opprettet = MockStore.leggTilMelding(ny)
                         call.respond(HttpStatusCode.Created, opprettet)
                     }
+
+                    post("/personer/{pseudoId}/dialogmeldinger/{dialogId}/svar", {
+                        operationId = "postSvarPaDialog"
+                        description = "Svar på en eksisterende dialog"
+                        request {
+                            pathParameter<String>("pseudoId") {
+                                description = "Pseudonymisert person-ID"
+                                required = true
+                            }
+                            pathParameter<String>("dialogId") {
+                                description = "ID til dialogen"
+                                required = true
+                            }
+                            body<ApiSvarPaDialog>()
+                        }
+                        response {
+                            HttpStatusCode.Created to {
+                                description = "Svar lagt til i dialogen"
+                                body<ApiDialogDetails>()
+                            }
+                            HttpStatusCode.NotFound to {
+                                description = "Dialog ikke funnet"
+                            }
+                        }
+                    }) {
+//                        val pseudoId = call.parameters["pseudoId"]
+//                        veksle pseudoId med fødselsnummer her
+                        val dialogId = call.parameters["dialogId"]!!
+                        val svar = call.receive<ApiSvarPaDialog>()
+                        val oppdatert = MockStore.svarPåDialog(dialogId, svar)
+                        if (oppdatert != null) {
+                            call.respond(HttpStatusCode.Created, oppdatert)
+                        } else {
+                            call.respond(HttpStatusCode.NotFound)
+                        }
+                    }
                 }
             }
         },
