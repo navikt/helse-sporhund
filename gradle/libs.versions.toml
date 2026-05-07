@@ -1,6 +1,16 @@
 [versions]
 tbd-libs = "20260429.1019"
+flyway = "12.4.0"
 
 [libraries]
 tbd-naisful-app = { module = "com.github.navikt.tbd-libs:naisful-app", version.ref = "tbd-libs" }
 tbd-kafka = { module = "com.github.navikt.tbd-libs:kafka", version.ref = "tbd-libs" }
+
+postgresJdbcDriver = "org.postgresql:postgresql:42.7.10"
+kotliquery = "com.github.seratch:kotliquery:1.9.1"
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+hikari = "com.zaxxer:HikariCP:7.0.2"
+
+[bundles]
+db = ["flyway-core", "flyway-postgres", "hikari", "kotliquery", "postgresJdbcDriver"]

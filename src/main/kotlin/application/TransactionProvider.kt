@@ -1,5 +1,5 @@
 package application
 
-fun interface TransactionProvider {
-    fun transaction(session: SessionContext.() -> Unit)
+interface TransactionProvider {
+    fun <T> transaction(session: SessionContext.() -> T): T
 }

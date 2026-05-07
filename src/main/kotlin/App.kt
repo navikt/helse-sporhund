@@ -2,8 +2,11 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.kafka.AivenConfig
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.naisful.naisApp
+import db.DataSourceBuilder
+import db.DbConfig
 import db.PgTransactionProvider
 import io.ktor.server.application.ApplicationStarted
+import io.ktor.server.application.ApplicationStarting
 import io.ktor.server.application.ApplicationStopping
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
@@ -20,6 +23,7 @@ const val DIALOGMELDING_FRA_BEHANDLER_TOPIC = "teamsykefravr.melding-fra-behandl
 const val LEGEERKLÆRING_TOPIC = "teamsykmelding.legeerklaering"
 
 fun main() {
+    val env = System.getenv()
     val kafkaConfig =
         KafkaConfig(
             aivenConfig = AivenConfig.default,
@@ -31,13 +35,21 @@ fun main() {
                 ),
             writeTopic = DIALOGMELDING_FRA_NAY_TOPIC,
         )
+    val dbConfig =
+        DbConfig(
+            jdbcUrl = env.getValue("DATABASE_JDBC_URL"),
+            username = env.getValue("DATABASE_USERNAME"),
+            password = env.getValue("DATABASE_PASSWORD"),
+        )
     app(
         kafkaConfig = kafkaConfig,
+        dbConfig = dbConfig,
     )
 }
 
 fun app(
     kafkaConfig: KafkaConfig,
+    dbConfig: DbConfig,
 ) {
     val factory = ConsumerProducerFactory(kafkaConfig.aivenConfig)
     val running = AtomicBoolean(false)
@@ -49,7 +61,9 @@ fun app(
             factory,
         )
 
-    val transactionProvider = PgTransactionProvider()
+    val dataSourceBuilder = DataSourceBuilder(dbConfig)
+
+    val transactionProvider = PgTransactionProvider(dataSourceBuilder.build())
     val kafkaProducer = KafkaProducer(kafkaConfig.writeTopic, factory, transactionProvider)
 
     naisApp(
@@ -58,6 +72,9 @@ fun app(
         applicationLogger = LoggerFactory.getLogger("Application"),
         callLogger = LoggerFactory.getLogger("CallLogger"),
         applicationModule = {
+            this.monitor.subscribe(ApplicationStarting) {
+                dataSourceBuilder.migrate()
+            }
             this.monitor.subscribe(ApplicationStarted) {
                 running.set(true)
                 launch { kafkaConsumer.start() }

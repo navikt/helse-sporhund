@@ -13,6 +13,7 @@ repositories {
 dependencies {
     implementation(libs.tbd.naisful.app)
     implementation(libs.tbd.kafka)
+    implementation(libs.bundles.db)
     testImplementation(kotlin("test"))
 }
 
