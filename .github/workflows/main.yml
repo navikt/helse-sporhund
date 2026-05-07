@@ -39,20 +39,20 @@ jobs:
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
 
-#  deployDev:
-#    name: deploy to dev
-#    needs: build
-#    runs-on: ubuntu-latest
-#    if: ${{github.ref_name == 'main' || startsWith(github.ref_name, 'dev-')}}
-#    permissions:
-#      id-token: write
-#    steps:
-#      - uses: actions/checkout@v6
-#      - uses: nais/deploy/actions/deploy@v2
-#        env:
-#          CLUSTER: dev-gcp
-#          RESOURCE: deploy/dev.yml
-#          IMAGE: ${{ needs.build.outputs.image }}
+  deployDev:
+    name: deploy to dev
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{github.ref_name == 'main' || startsWith(github.ref_name, 'dev-')}}
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/dev.yml
+          IMAGE: ${{ needs.build.outputs.image }}
 #
 #  deployProd:
 #    name: deploy to prod

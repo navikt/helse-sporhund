@@ -56,4 +56,23 @@ tasks {
         mainClass.set("LocalAppKt")
         environment("NAIS_CLUSTER_NAME", "local")
     }
+
+    jar {
+        archiveBaseName.set("app")
+
+        manifest {
+            attributes["Main-Class"] = "AppKt"
+            attributes["Class-Path"] =
+                configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                    it.name
+                }
+        }
+
+        doLast {
+            configurations.runtimeClasspath.get().forEach {
+                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
+                if (!file.exists()) it.copyTo(file)
+            }
+        }
+    }
 }
