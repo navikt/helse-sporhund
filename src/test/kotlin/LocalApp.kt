@@ -1,12 +1,11 @@
-import db.DbConfig
+import db.testhelpers.TestcontainersDatabase
 import kafka.KafkaConfig
 import kafka.LocalKafkaConfig
 import org.testcontainers.kafka.KafkaContainer
-import org.testcontainers.postgresql.PostgreSQLContainer
 
 fun main() {
     val kafka = KafkaContainer("apache/kafka:3.7.1").apply { start() }
-    val postgres = PostgreSQLContainer("postgres:17").apply { start() }
+    val postgres = TestcontainersDatabase("local-app")
 
     Runtime.getRuntime().addShutdownHook(
         Thread {
@@ -29,12 +28,7 @@ fun main() {
                 readTopics = topics,
                 writeTopic = DIALOGMELDING_FRA_NAY_TOPIC,
             ),
-        dbConfig =
-            DbConfig(
-                jdbcUrl = postgres.jdbcUrl,
-                username = postgres.username,
-                password = postgres.password,
-            ),
+        dbConfig = postgres.testDbConfig,
         port = 8282,
     )
 }

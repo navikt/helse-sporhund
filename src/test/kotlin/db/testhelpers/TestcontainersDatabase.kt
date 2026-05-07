@@ -21,7 +21,7 @@ class TestcontainersDatabase(
                 println("Database startet opp.\nUrl: $jdbcUrl\nBrukernavn: $username\nPassord: $password")
             }
 
-    private val testDbConfig =
+    val testDbConfig =
         DbConfig(
             jdbcUrl = postgres.jdbcUrl,
             username = postgres.username,
@@ -35,6 +35,8 @@ class TestcontainersDatabase(
         dataSourceBuilder.migrate()
         truncate()
     }
+
+    fun stop() = postgres.stop()
 
     fun truncate() {
         sessionOf(dataSource).use {

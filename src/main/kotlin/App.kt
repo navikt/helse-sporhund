@@ -1,10 +1,10 @@
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.kafka.AivenConfig
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.naisful.naisApp
 import db.DataSourceBuilder
 import db.DbConfig
 import db.PgTransactionProvider
+import db.objectMapper
 import io.github.smiley4.ktoropenapi.OpenApi
 import io.github.smiley4.ktoropenapi.openApi
 import io.github.smiley4.ktorswaggerui.swaggerUI
@@ -72,7 +72,7 @@ fun app(
 
     naisApp(
         meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
-        objectMapper = jacksonObjectMapper(),
+        objectMapper = objectMapper,
         applicationLogger = LoggerFactory.getLogger("Application"),
         callLogger = LoggerFactory.getLogger("CallLogger"),
         port = port,
