@@ -88,10 +88,8 @@ fun app(
         developmentMode = false,
         gracefulShutdownDelay = 10.seconds,
         applicationModule = {
-            this.monitor.subscribe(ApplicationStarting) {
-                dataSourceBuilder.migrate()
-            }
             this.monitor.subscribe(ApplicationStarted) {
+                dataSourceBuilder.migrate()
                 running.set(true)
                 val exceptionHandler =
                     CoroutineExceptionHandler { _, throwable ->
