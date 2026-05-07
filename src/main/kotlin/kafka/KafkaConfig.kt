@@ -1,9 +1,9 @@
 package kafka
 
-import com.github.navikt.tbd_libs.kafka.AivenConfig
+import com.github.navikt.tbd_libs.kafka.Config
 
 data class KafkaConfig(
-    val aivenConfig: AivenConfig,
+    val aivenConfig: Config,
     val readTopics: List<String>,
     val writeTopic: String,
 )

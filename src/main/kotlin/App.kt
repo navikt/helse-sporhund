@@ -1,3 +1,4 @@
+import application.TransactionProvider
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.kafka.AivenConfig
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
@@ -5,9 +6,12 @@ import com.github.navikt.tbd_libs.naisful.naisApp
 import db.DataSourceBuilder
 import db.DbConfig
 import db.PgTransactionProvider
-import io.ktor.server.application.ApplicationStarted
-import io.ktor.server.application.ApplicationStarting
-import io.ktor.server.application.ApplicationStopping
+import io.github.smiley4.ktoropenapi.OpenApi
+import io.github.smiley4.ktoropenapi.openApi
+import io.github.smiley4.ktorswaggerui.swaggerUI
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kafka.KafkaConfig
@@ -50,20 +54,22 @@ fun main() {
 fun app(
     kafkaConfig: KafkaConfig,
     dbConfig: DbConfig,
+    port: Int = 8080,
+    transactionProviderOverride: TransactionProvider? = null,
 ) {
     val factory = ConsumerProducerFactory(kafkaConfig.aivenConfig)
     val running = AtomicBoolean(false)
     val kafkaConsumer =
         KafkaConsumer(
             topics = kafkaConfig.readTopics,
-            consumerGroupId = System.getenv("KAFKA_CONSUMER_GROUP_ID"),
+            consumerGroupId = System.getenv("KAFKA_CONSUMER_GROUP_ID") ?: "local-group",
             readyToConsume = running,
             factory,
         )
 
     val dataSourceBuilder = DataSourceBuilder(dbConfig)
 
-    val transactionProvider = PgTransactionProvider(dataSourceBuilder.build())
+    val transactionProvider = transactionProviderOverride ?: PgTransactionProvider(dataSourceBuilder.build())
     val kafkaProducer = KafkaProducer(kafkaConfig.writeTopic, factory, transactionProvider)
 
     naisApp(
@@ -71,9 +77,10 @@ fun app(
         objectMapper = jacksonObjectMapper(),
         applicationLogger = LoggerFactory.getLogger("Application"),
         callLogger = LoggerFactory.getLogger("CallLogger"),
+        port = port,
         applicationModule = {
             this.monitor.subscribe(ApplicationStarting) {
-                dataSourceBuilder.migrate()
+                if (transactionProviderOverride == null) dataSourceBuilder.migrate()
             }
             this.monitor.subscribe(ApplicationStarted) {
                 running.set(true)
@@ -82,6 +89,23 @@ fun app(
             }
             this.monitor.subscribe(ApplicationStopping) {
                 running.set(false)
+            }
+
+            install(OpenApi) { configureOpenApiPlugin() }
+            // TODO auth???
+            routing {
+                route("/api") {
+                    route("/openapi.json") {
+                        openApi()
+                    }
+                    route("swagger") {
+                        swaggerUI("../openapi.json")
+                    }
+
+                    get("/dialogmeldinger") {
+                        call.respondText("OK")
+                    }
+                }
             }
         },
     ).start(wait = true)

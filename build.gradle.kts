@@ -11,10 +11,15 @@ repositories {
 }
 
 dependencies {
+    implementation(platform(libs.ktor.bom))
     implementation(libs.tbd.naisful.app)
     implementation(libs.tbd.kafka)
+    implementation(libs.bundles.smiley4.ktor.openapi.tools)
     implementation(libs.bundles.db)
+
     testImplementation(kotlin("test"))
+    testImplementation(libs.testcontainers.kafka)
+    testImplementation(libs.testcontainers.postgresql)
 }
 
 kotlin {
@@ -40,5 +45,12 @@ tasks {
                 )
             }
         }
+    }
+    register<JavaExec>("runLocal") {
+        group = "application"
+        description = "Runs LocalApp locally"
+        classpath = sourceSets["test"].runtimeClasspath
+        mainClass.set("LocalAppKt")
+        environment("NAIS_CLUSTER_NAME", "local")
     }
 }
