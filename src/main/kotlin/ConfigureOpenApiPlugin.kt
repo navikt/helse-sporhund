@@ -8,8 +8,7 @@ fun OpenApiPluginConfig.configureOpenApiPlugin() {
     autoDocumentResourcesRoutes = true
     schemas {
         generator =
-            SchemaGenerator.kotlinx {
-                serializersModule = customSerializersModule
+            SchemaGenerator.reflection {
                 referencePath = RefType.OPENAPI_SIMPLE
                 overwrite(SchemaGenerator.TypeOverwrites.JavaUuid())
                 overwrite(SchemaGenerator.TypeOverwrites.Instant())

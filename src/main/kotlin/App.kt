@@ -6,8 +6,10 @@ import db.DbConfig
 import db.PgTransactionProvider
 import db.objectMapper
 import io.github.smiley4.ktoropenapi.OpenApi
+import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.openApi
 import io.github.smiley4.ktorswaggerui.swaggerUI
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -100,8 +102,16 @@ fun app(
                         swaggerUI("../openapi.json")
                     }
 
-                    get("/dialogmeldinger") {
-                        call.respondText("OK")
+                    get("/dialogmeldinger", {
+                        description = "Hent alle dialogmeldinger for en gitt person"
+                        response {
+                            HttpStatusCode.OK to {
+                                description = "A success response"
+                                body<List<ApiBehandlerDialoger>>()
+                            }
+                        }
+                    }) {
+                        call.respond(mockDialogmeldinger())
                     }
                 }
             }
