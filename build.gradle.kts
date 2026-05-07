@@ -18,8 +18,8 @@ dependencies {
     implementation(libs.bundles.db)
     implementation(libs.bundles.jackson)
 
-    runtimeOnly(libs.logback.classic)
-    runtimeOnly(libs.logstash.logback.encoder)
+    implementation(libs.logback.classic)
+    implementation(libs.logstash.logback.encoder)
 
     testImplementation(kotlin("test"))
     testImplementation(libs.testcontainers.kafka)
