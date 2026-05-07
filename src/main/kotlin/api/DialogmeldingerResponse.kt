@@ -7,7 +7,7 @@ data class ApiVedlegg(
 
 data class ApiDialogmelding(
     val tittel: String,
-    val innehold: String,
+    val melding: String,
     val tid: String,
     val fraNav: Boolean,
     val vedlegg: List<ApiVedlegg>,
@@ -20,15 +20,73 @@ data class ApiDialog(
     val dialogmeldinger: List<ApiDialogmelding>,
 )
 
-data class ApiBehandlerDialoger(
+data class ApiBehandlerDialog(
+    val behandlerId: String,
     val behandlernavn: String,
     val dialoger: List<ApiDialog>,
 )
 
-fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
+enum class DialogmeldingType(
+    val tittel: String,
+) {
+    L8("Tilleggsopplysninger (L8)"),
+    L40("Legeerklæring (L40)"),
+}
+
+data class ApiNyDialogmelding(
+    val behandlerId: String,
+    val behandlernavn: String,
+    val type: DialogmeldingType,
+    val melding: String,
+)
+
+object MockStore {
+    private val data: MutableList<ApiBehandlerDialog> = initialMockData().toMutableList()
+
+    fun hentAlle(): List<ApiBehandlerDialog> = data.toList()
+
+    fun leggTilMelding(ny: ApiNyDialogmelding): ApiBehandlerDialog {
+        val behandlerIndex = data.indexOfFirst { it.behandlerId == ny.behandlerId }
+        val behandler = if (behandlerIndex >= 0) data[behandlerIndex] else throw NoSuchElementException("Behandler ikke funnet")
+
+        val nyDialog =
+            ApiDialog(
+                id =
+                    java.util.UUID
+                        .randomUUID()
+                        .toString(),
+                tittel = ny.type.tittel,
+                tid =
+                    java.time.LocalDateTime
+                        .now()
+                        .toString(),
+                dialogmeldinger =
+                    listOf(
+                        ApiDialogmelding(
+                            tittel = ny.type.tittel,
+                            melding = ny.melding,
+                            tid =
+                                java.time.LocalDateTime
+                                    .now()
+                                    .toString(),
+                            fraNav = true,
+                            vedlegg = emptyList(),
+                        ),
+                    ),
+            )
+        val oppdatertBehandler = behandler.copy(dialoger = behandler.dialoger + nyDialog)
+        data[behandlerIndex] = oppdatertBehandler
+        return oppdatertBehandler
+    }
+}
+
+fun mockDialogmeldinger(): List<ApiBehandlerDialog> = MockStore.hentAlle()
+
+private fun initialMockData(): List<ApiBehandlerDialog> =
     listOf(
-        ApiBehandlerDialoger(
-            behandlernavn = "Dialog med Linus Lege",
+        ApiBehandlerDialog(
+            behandlerId = "behandlerId-1",
+            behandlernavn = "Linus Lege",
             dialoger =
                 listOf(
                     ApiDialog(
@@ -39,7 +97,7 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                             listOf(
                                 ApiDialogmelding(
                                     tittel = "Forespørsel om dokumentasjon",
-                                    innehold =
+                                    melding =
                                         "Takk for tilsendt dokumentasjon. Vi trenger noen tilleggsopplysninger om " +
                                             "pasientens funksjonsnivå og eventuelle tilretteleggingsmuligheter på " +
                                             "arbeidsplassen. Kan dere gi en nærmere vurdering av dette?",
@@ -49,7 +107,7 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                                 ),
                                 ApiDialogmelding(
                                     tittel = "Svar på forespørsel",
-                                    innehold =
+                                    melding =
                                         "Hei, vedlagt finner dere den forespurte dokumentasjonen. Jeg har lagt ved " +
                                             "relevant journaldokumentasjon og vurdering av pasientens tilstand. " +
                                             "Ta gjerne kontakt dersom dere trenger ytterligere opplysninger.",
@@ -64,7 +122,7 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                                 ),
                                 ApiDialogmelding(
                                     tittel = "Ytterligere dokumentasjon",
-                                    innehold =
+                                    melding =
                                         "Hei, vi behandler saken til Mia Cathrine Svendsen og trenger ytterligere " +
                                             "dokumentasjon for å kunne fatte et vedtak. Kan dere sende over relevant " +
                                             "dokumentasjon som belyser pasientens tilstand og arbeidsevne?",
@@ -82,7 +140,7 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                             listOf(
                                 ApiDialogmelding(
                                     tittel = "Oppfølging etter sykmelding",
-                                    innehold =
+                                    melding =
                                         "Vi ønsker en oppdatering på pasientens tilstand og forventet varighet på sykmeldingen.",
                                     tid = "2026-04-20T08:30:00",
                                     fraNav = true,
@@ -92,8 +150,9 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                     ),
                 ),
         ),
-        ApiBehandlerDialoger(
-            behandlernavn = "Dialog med Solveig Lege",
+        ApiBehandlerDialog(
+            behandlerId = "behandlerId-2",
+            behandlernavn = "Solveig Lege",
             dialoger =
                 listOf(
                     ApiDialog(
@@ -104,7 +163,7 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                             listOf(
                                 ApiDialogmelding(
                                     tittel = "Forespørsel om dokumentasjon",
-                                    innehold =
+                                    melding =
                                         "Vi ber om dokumentasjon knyttet til pasientens diagnose og behandlingsplan.",
                                     tid = "2026-04-24T14:36:00",
                                     fraNav = true,
@@ -112,7 +171,7 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                                 ),
                                 ApiDialogmelding(
                                     tittel = "Svar med vedlegg",
-                                    innehold = "Vedlagt sender jeg etterspurt dokumentasjon.",
+                                    melding = "Vedlagt sender jeg etterspurt dokumentasjon.",
                                     tid = "2026-04-23T10:49:00",
                                     fraNav = false,
                                     vedlegg = listOf(ApiVedlegg(navn = "Dokumentasjon.pdf", url = "#")),
@@ -121,8 +180,9 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                     ),
                 ),
         ),
-        ApiBehandlerDialoger(
-            behandlernavn = "Dialog med Christian Lege",
+        ApiBehandlerDialog(
+            behandlerId = "behandlerId-3",
+            behandlernavn = "Christian Lege",
             dialoger =
                 listOf(
                     ApiDialog(
@@ -133,7 +193,7 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                             listOf(
                                 ApiDialogmelding(
                                     tittel = "Sykmeldingsopplysninger",
-                                    innehold =
+                                    melding =
                                         "Vi ønsker mer informasjon om diagnosen og prognosen for tilbakekomst til arbeid.",
                                     tid = "2026-04-10T09:00:00",
                                     fraNav = true,
@@ -141,7 +201,7 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                                 ),
                                 ApiDialogmelding(
                                     tittel = "Svar",
-                                    innehold =
+                                    melding =
                                         "Pasienten er sykmeldt grunnet rygglidelse. Prognosen er god, forventet tilbakekomst om 6–8 uker.",
                                     tid = "2026-04-08T13:15:00",
                                     fraNav = false,
@@ -157,7 +217,7 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                             listOf(
                                 ApiDialogmelding(
                                     tittel = "Vurdering av arbeidsevne",
-                                    innehold =
+                                    melding =
                                         "Kan dere gi en vurdering av pasientens nåværende arbeidsevne og muligheter for gradert sykmelding?",
                                     tid = "2026-04-05T11:00:00",
                                     fraNav = true,
@@ -165,7 +225,7 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                                 ),
                                 ApiDialogmelding(
                                     tittel = "Svar på vurdering",
-                                    innehold =
+                                    melding =
                                         "Pasienten kan på det nåværende tidspunkt ikke benytte seg av gradert sykmelding, " +
                                             "men vi vil revurdere dette om 2 uker.",
                                     tid = "2026-04-04T10:00:00",
@@ -182,7 +242,7 @@ fun mockDialogmeldinger(): List<ApiBehandlerDialoger> =
                             listOf(
                                 ApiDialogmelding(
                                     tittel = "Bekreftelse på behandlingsplan",
-                                    innehold = "Vi ber om bekreftelse på at behandlingsplanen er iverksatt.",
+                                    melding = "Vi ber om bekreftelse på at behandlingsplanen er iverksatt.",
                                     tid = "2026-03-28T14:00:00",
                                     fraNav = true,
                                     vedlegg = emptyList(),

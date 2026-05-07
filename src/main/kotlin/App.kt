@@ -1,4 +1,6 @@
-import api.ApiBehandlerDialoger
+import api.ApiBehandlerDialog
+import api.ApiNyDialogmelding
+import api.MockStore
 import api.configureOpenApiPlugin
 import api.mockDialogmeldinger
 import com.github.navikt.tbd_libs.kafka.AivenConfig
@@ -11,9 +13,11 @@ import db.objectMapper
 import io.github.smiley4.ktoropenapi.OpenApi
 import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.openApi
+import io.github.smiley4.ktoropenapi.post
 import io.github.smiley4.ktorswaggerui.swaggerUI
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheusmetrics.PrometheusConfig
@@ -127,14 +131,38 @@ fun app(
                         }
                         response {
                             HttpStatusCode.OK to {
-                                description = "A success response"
-                                body<List<ApiBehandlerDialoger>>()
+                                description = "Alle dialogmeldinger gruppert per behandler"
+                                body<List<ApiBehandlerDialog>>()
                             }
                         }
                     }) {
 //                        val pseudoId = call.parameters["pseudoId"]
 //                        veksle pseudoId med fødselsnummer her
                         call.respond(mockDialogmeldinger())
+                    }
+
+                    post("/personer/{pseudoId}/dialogmelding", {
+                        operationId = "postDialogmelding"
+                        description = "Send ny dialogmelding"
+                        request {
+                            pathParameter<String>("pseudoId") {
+                                description = "Pseudonymisert person-ID"
+                                required = true
+                            }
+                            body<ApiNyDialogmelding>()
+                        }
+                        response {
+                            HttpStatusCode.Created to {
+                                description = "Dialogmelding opprettet"
+                                body<ApiBehandlerDialog>()
+                            }
+                        }
+                    }) {
+//                        val pseudoId = call.parameters["pseudoId"]
+//                        veksle pseudoId med fødselsnummer her
+                        val ny = call.receive<ApiNyDialogmelding>()
+                        val oppdatert = MockStore.leggTilMelding(ny)
+                        call.respond(HttpStatusCode.Created, oppdatert)
                     }
                 }
             }
