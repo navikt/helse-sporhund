@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 const val DIALOGMELDING_FRA_NAY_TOPIC = "teamsykefravr.isdialogmelding-behandler-dialogmelding-bestilling"
 const val DIALOGMELDING_STATUS_TOPIC = "teamsykefravr.behandler-dialogmelding-status"
-const val DIALOGMELDING_FRA_BEHANDLER_TOPIC = "teamsykefravr.melding-fra-behandler"
+const val DIALOGMELDING_FRA_BEHANDLER_TOPIC = "teamsykefravr.dialogmelding"
 const val LEGEERKLÆRING_TOPIC = "teamsykmelding.legeerklaering"
 
 fun main() {
