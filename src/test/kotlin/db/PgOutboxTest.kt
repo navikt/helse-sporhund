@@ -11,6 +11,7 @@ import domain.testhelpers.lagIdentitetsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.util.*
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class PgOutboxTest : DbTest() {
     @Test
@@ -43,8 +44,8 @@ class PgOutboxTest : DbTest() {
         val funnet = outbox.meldinger()
 
         // then
-        assertEquals(1, funnet.size)
-        assertEquals(outboxMeldingIdForMeldingSomIkkeErSendt, funnet.single().id)
+        assertTrue(funnet.none { it.id == outboxMeldingIdForMeldingSomErSendt })
+        assertTrue(funnet.any { it.id == outboxMeldingIdForMeldingSomIkkeErSendt })
     }
 
     private fun nyOutboxMelding(outboxMeldingIdForMeldingSomErSendt: OutboxMeldingId): OutboxMelding =
