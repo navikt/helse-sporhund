@@ -5,7 +5,7 @@ smiley4SchemaKenerator = "2.7.2"
 ktor = "3.4.3"
 testcontainers = "2.0.5"
 flyway = "12.5.0"
-jackson = "2.21.2"
+jackson = "2.21.3"
 logback = "1.5.32"
 logstash = "9.0"
 
