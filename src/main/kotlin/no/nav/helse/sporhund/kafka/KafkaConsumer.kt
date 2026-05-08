@@ -28,6 +28,7 @@ class KafkaConsumer(
             consumer.subscribe(topics.alleTopics)
 
             try {
+                loggInfo("Etablerer consumer på følgende topics: ${topics.alleTopics.joinToString(", ")}")
                 consumer.poll(readyToConsume::get) { records ->
                     records.forEach { record ->
                         if (record.topic() == topics.dialogmeldingFraBehandlerTopic) this.håndterSvarFraBehandler(transactionProvider, record)

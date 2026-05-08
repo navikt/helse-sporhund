@@ -4,13 +4,16 @@ import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.domain.NyDialogmeldingFraNavEvent
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.intellij.lang.annotations.Language
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.milliseconds
 
 class KafkaProducer(
     private val dialogmeldingFraNayTopic: String,
+    private val readyToProduce: AtomicBoolean,
     consumerProducerFactory: ConsumerProducerFactory,
     private val transactionProvider: TransactionProvider,
 ) {
@@ -18,7 +21,8 @@ class KafkaProducer(
 
     fun start() {
         runBlocking {
-            while (true) {
+            this@KafkaProducer.loggInfo("Etablerer producer for outbox")
+            while (readyToProduce.get()) {
                 transactionProvider.transaction {
                     // sjekk mot outbox-tabellen
                     // hvis det finnes meldinger,

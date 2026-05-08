@@ -9,7 +9,9 @@ import io.ktor.server.routing.*
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.api.appRoutes
 import no.nav.helse.sporhund.api.configureOpenApiPlugin
 import no.nav.helse.sporhund.application.logg.loggError
@@ -74,8 +76,16 @@ fun app(
             consumerProducerFactory = factory,
             transactionProvider = transactionProvider,
         )
-    val kafkaProducer = KafkaProducer(kafkaConfig.writeTopic, factory, transactionProvider)
+    val kafkaProducer =
+        KafkaProducer(
+            dialogmeldingFraNayTopic = kafkaConfig.writeTopic,
+            readyToProduce = running,
+            consumerProducerFactory = factory,
+            transactionProvider = transactionProvider,
+        )
 
+    var producerJob: Job? = null
+    var consumerJob: Job? = null
     naisApp(
         meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         objectMapper = objectMapper,
@@ -93,11 +103,15 @@ fun app(
                         loggError("Feil i coroutine, terminerer appen", throwable)
                         it.engine.stop()
                     }
-                launch(exceptionHandler) { kafkaConsumer.start() }
-                launch(exceptionHandler) { kafkaProducer.start() }
+                consumerJob = launch(exceptionHandler) { kafkaConsumer.start() }
+                producerJob = launch(exceptionHandler) { kafkaProducer.start() }
             }
             this.monitor.subscribe(ApplicationStopping) {
                 running.set(false)
+                runBlocking {
+                    consumerJob?.join()
+                    producerJob?.join()
+                }
             }
 
             install(OpenApi) { configureOpenApiPlugin() }
