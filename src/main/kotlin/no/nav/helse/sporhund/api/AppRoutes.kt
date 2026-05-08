@@ -15,7 +15,7 @@ fun Routing.appRoutes() {
         route("/openapi.json") {
             openApi()
         }
-        route("swagger") {
+        route("/swagger") {
             swaggerUI("../openapi.json")
         }
 
