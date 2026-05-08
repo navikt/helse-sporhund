@@ -2,6 +2,7 @@ package no.nav.helse.sporhund.kafka
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.db.objectMapper
 import no.nav.helse.sporhund.domain.BehandlerRef
 import no.nav.helse.sporhund.domain.ConversationRef
@@ -9,11 +10,15 @@ import no.nav.helse.sporhund.domain.Identitetsnummer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.util.UUID
 
-fun håndterSvarFraBehandler(
+fun KafkaConsumer.håndterSvarFraBehandler(
     transactionProvider: TransactionProvider,
     record: ConsumerRecord<String, String>,
 ) {
-    when (val dialogmeldingFraBehandler = record.parseDialogmeldingFraBehandler()) {
+    val json = objectMapper.readTree(record.value())
+    if (json["conversationRef"] != null && !json["conversationRef"].erUuid()) {
+        loggInfo("conversationRef er ikke UUID: ${json["conversationRef"].asText()}. Ignorerer meldingen.", "melding" to json.toPrettyString())
+    }
+    when (val dialogmeldingFraBehandler = json.parseDialogmeldingFraBehandler()) {
         is SvarFraBehandler.MedConversationRef -> {
             håndterSvarMedConversationRef(transactionProvider, dialogmeldingFraBehandler.json)
         }
@@ -24,26 +29,30 @@ fun håndterSvarFraBehandler(
     }
 }
 
-private fun ConsumerRecord<String, String>.parseDialogmeldingFraBehandler(): SvarFraBehandler {
-    val json = objectMapper.readTree(this.value())
-    val behandlerRef = BehandlerRef(json["personIdentBehandler"].textValue())
-    val identitetsnummer = Identitetsnummer.fraString(json["personIdentPasient"].textValue())
+private fun JsonNode.parseDialogmeldingFraBehandler(): SvarFraBehandler {
+    val behandlerRef = BehandlerRef(this["personIdentBehandler"].asText())
+    val identitetsnummer = Identitetsnummer.fraString(this["personIdentPasient"].asText())
 
-    return if (json["conversationRef"] != null) {
+    return if (this["conversationRef"] != null) {
         SvarFraBehandler.MedConversationRef(
-            conversationRef = ConversationRef(UUID.fromString(json["conversationRef"].textValue())),
+            conversationRef = ConversationRef(UUID.fromString(this["conversationRef"].asText())),
             behandlerRef = behandlerRef,
             identitetsnummer = identitetsnummer,
-            json = json,
+            json = this,
         )
     } else {
         SvarFraBehandler.UtenConversationRef(
             behandlerRef = behandlerRef,
             identitetsnummer = identitetsnummer,
-            json = json,
+            json = this,
         )
     }
 }
+
+private fun JsonNode.erUuid(): Boolean =
+    runCatching {
+        UUID.fromString(this.asText())
+    }.isSuccess
 
 private fun håndterSvarUtenConversationRef(
     transactionProvider: TransactionProvider,
