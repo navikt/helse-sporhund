@@ -11,7 +11,7 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.route
 
 fun Routing.appRoutes() {
-    route("/no/nav/helse/sporhund/api") {
+    route("/api") {
         route("/openapi.json") {
             openApi()
         }

@@ -6,7 +6,7 @@ import io.swagger.v3.oas.models.media.Schema
 import java.math.BigDecimal
 
 fun OpenApiPluginConfig.configureOpenApiPlugin() {
-    pathFilter = { _, url -> url.firstOrNull() == "no/nav/helse/sporhund/apinav/helse/sporhund/api" }
+    pathFilter = { _, url -> url.firstOrNull() == "api" }
     autoDocumentResourcesRoutes = true
     schemas {
         generator =
