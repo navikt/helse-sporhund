@@ -45,17 +45,19 @@ data class ApiBehandlerMedDialoger(
 
 // === Request type ===
 
-enum class DialogmeldingType(
+enum class ApiFagomrade(
     val tittel: String,
 ) {
-    L8("Tilleggsopplysninger (L8)"),
-    L40("Legeerklæring (L40)"),
+    ENKELTSTAENDE_BEHANDLINGSDAGER("Enkeltstående behandlingsdager"),
+    TILBAKEDATERING("Tilbakedatering"),
+    YRKESSKADE("Yrkesskade"),
+    BESTRIDELSE("Bestridelse"),
 }
 
 data class ApiNyDialogmelding(
     val behandlerId: String,
     val behandlernavn: String,
-    val type: DialogmeldingType,
+    val fagomrade: ApiFagomrade,
     val melding: String,
 )
 
@@ -97,7 +99,7 @@ object MockStore {
                         .toString(),
                 behandlerId = ny.behandlerId,
                 behandlernavn = ny.behandlernavn,
-                tittel = ny.type.tittel,
+                tittel = ny.fagomrade.tittel,
                 tid =
                     LocalDateTime
                         .now()
@@ -105,7 +107,7 @@ object MockStore {
                 dialogmeldinger =
                     listOf(
                         ApiDialogmelding(
-                            tittel = ny.type.tittel,
+                            tittel = ny.fagomrade.tittel,
                             melding = ny.melding,
                             tid =
                                 LocalDateTime
