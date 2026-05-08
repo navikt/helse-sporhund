@@ -1,6 +1,7 @@
 package no.nav.helse.sporhund.kafka
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.db.objectMapper
@@ -15,8 +16,9 @@ fun KafkaConsumer.håndterSvarFraBehandler(
     record: ConsumerRecord<String, String>,
 ) {
     val json = objectMapper.readTree(record.value())
-    if (json["conversationRef"] != null && !json["conversationRef"].erUuid()) {
-        loggInfo("conversationRef er ikke UUID: ${json["conversationRef"].asText()}. Ignorerer meldingen.", "melding" to json.toPrettyString())
+    if (!json["conversationRef"].isMissingOrNull() && !json["conversationRef"].erUuid()) {
+        loggInfo("conversationRef er ikke UUID: ${json["conversationRef"].asText()}. Ignorerer meldingen.")
+        return
     }
     when (val dialogmeldingFraBehandler = json.parseDialogmeldingFraBehandler()) {
         is SvarFraBehandler.MedConversationRef -> {
@@ -33,15 +35,15 @@ private fun JsonNode.parseDialogmeldingFraBehandler(): SvarFraBehandler {
     val behandlerRef = BehandlerRef(this["personIdentBehandler"].asText())
     val identitetsnummer = Identitetsnummer.fraString(this["personIdentPasient"].asText())
 
-    return if (this["conversationRef"] != null) {
-        SvarFraBehandler.MedConversationRef(
-            conversationRef = ConversationRef(UUID.fromString(this["conversationRef"].asText())),
+    return if (this["conversationRef"].isMissingOrNull()) {
+        SvarFraBehandler.UtenConversationRef(
             behandlerRef = behandlerRef,
             identitetsnummer = identitetsnummer,
             json = this,
         )
     } else {
-        SvarFraBehandler.UtenConversationRef(
+        SvarFraBehandler.MedConversationRef(
+            conversationRef = ConversationRef(UUID.fromString(this["conversationRef"].asText())),
             behandlerRef = behandlerRef,
             identitetsnummer = identitetsnummer,
             json = this,
