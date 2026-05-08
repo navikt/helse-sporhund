@@ -54,7 +54,7 @@ tasks {
         group = "application"
         description = "Runs LocalApp locally"
         classpath = sourceSets["test"].runtimeClasspath
-        mainClass.set("LocalAppKt")
+        mainClass.set("no.nav.helse.sporhund.LocalAppKt")
         environment("NAIS_CLUSTER_NAME", "local")
     }
 
@@ -62,7 +62,7 @@ tasks {
         archiveBaseName.set("app")
 
         manifest {
-            attributes["Main-Class"] = "AppKt"
+            attributes["Main-Class"] = "no.nav.helse.sporhund.AppKt"
             attributes["Class-Path"] =
                 configurations.runtimeClasspath.get().joinToString(separator = " ") {
                     it.name
