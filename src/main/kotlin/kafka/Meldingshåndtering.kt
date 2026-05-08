@@ -13,9 +13,7 @@ fun håndterSvarFraBehandler(
     transactionProvider: TransactionProvider,
     record: ConsumerRecord<String, String>,
 ) {
-    val dialogmeldingFraBehandler = record.parseDialogmeldingFraBehandler()
-
-    when (dialogmeldingFraBehandler) {
+    when (val dialogmeldingFraBehandler = record.parseDialogmeldingFraBehandler()) {
         is SvarFraBehandler.MedConversationRef -> {
             håndterSvarMedConversationRef(transactionProvider, dialogmeldingFraBehandler.json)
         }
@@ -28,7 +26,7 @@ fun håndterSvarFraBehandler(
 
 private fun ConsumerRecord<String, String>.parseDialogmeldingFraBehandler(): SvarFraBehandler {
     val json = objectMapper.readTree(this.value())
-    val behandlerRef = BehandlerRef(json["behandlerRef"].textValue())
+    val behandlerRef = BehandlerRef(json["personIdentBehandler"].textValue())
     val identitetsnummer = Identitetsnummer.fraString(json["personIdentPasient"].textValue())
 
     return if (json["conversationRef"] != null) {
