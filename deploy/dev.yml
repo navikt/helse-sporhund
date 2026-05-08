@@ -29,8 +29,8 @@ spec:
       cpu: 20m
       memory: 512Mi
   replicas:
-    min: 2
-    max: 3
+    min: 1
+    max: 1
   observability:
     autoInstrumentation:
       enabled: true
