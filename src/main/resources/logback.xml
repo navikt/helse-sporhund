@@ -9,7 +9,9 @@
             <includeMdcKeyName>trace_id</includeMdcKeyName>
         </encoder>
     </appender>
+
     <appender name="team-logs" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <filter class="no.nav.helse.sporhund.application.logg.SkipTeamLogsMarkerFilter"/>
         <destination>team-logs.nais-system:5170</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>
@@ -22,6 +24,7 @@
     <logger name="tjenestekall" level="TRACE" additivity="false">
         <appender-ref ref="team-logs"/>
     </logger>
+    <logger name="no.nav.helse" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>

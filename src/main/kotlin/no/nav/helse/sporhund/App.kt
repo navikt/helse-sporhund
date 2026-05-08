@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import no.nav.helse.sporhund.api.appRoutes
 import no.nav.helse.sporhund.api.configureOpenApiPlugin
+import no.nav.helse.sporhund.application.logg.loggError
 import no.nav.helse.sporhund.db.DataSourceBuilder
 import no.nav.helse.sporhund.db.DbConfig
 import no.nav.helse.sporhund.db.PgTransactionProvider
@@ -78,8 +79,8 @@ fun app(
     naisApp(
         meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         objectMapper = objectMapper,
-        applicationLogger = LoggerFactory.getLogger("tjenestekall"),
-        callLogger = LoggerFactory.getLogger("tjenestekall"),
+        applicationLogger = LoggerFactory.getLogger("sporhund"),
+        callLogger = LoggerFactory.getLogger("sporhund"),
         port = port,
         developmentMode = false,
         gracefulShutdownDelay = 10.seconds,
@@ -89,7 +90,7 @@ fun app(
                 running.set(true)
                 val exceptionHandler =
                     CoroutineExceptionHandler { _, throwable ->
-                        it.log.error("Feil i coroutine, terminerer appen", throwable)
+                        loggError("Feil i coroutine, terminerer appen", throwable)
                         it.engine.stop()
                     }
                 launch(exceptionHandler) { kafkaConsumer.start() }

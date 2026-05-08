@@ -3,11 +3,12 @@ package no.nav.helse.sporhund.kafka
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.kafka.poll
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.application.logg.loggInfo
+import no.nav.helse.sporhund.application.logg.loggWarn
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.errors.WakeupException
-import java.util.Properties
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.collections.set
 
 class KafkaConsumer(
     private val topics: ReadTopics,
@@ -36,8 +37,8 @@ class KafkaConsumer(
                     }
                 }
             } catch (err: WakeupException) {
-                throw err
-//            log.info("Exiting consumer after ${if (!running.get()) "receiving shutdown signal" else "being interrupted by someone" }")
+                loggWarn(err.message ?: "Ukjent melding i exception", err)
+                loggInfo("Lukker kafka consumer som følge av ${if (!readyToConsume.get()) "mottatt shutdown signal" else "exception" }")
             }
         }
     }
