@@ -57,7 +57,6 @@ class PgOutboxTest : DbTest() {
                     lagBehandlerRef(),
                     identitetsnummer = lagIdentitetsnummer(),
                     meldingId = DialogmeldingId(UUID.randomUUID()),
-                    type = "En type",
                     tekst = "En tekst",
                 ),
         )

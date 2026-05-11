@@ -42,6 +42,7 @@ class KafkaProducer(
     }
 }
 
+// Se https://github.com/navikt/isdialogmelding/blob/20b18e4630e6bc94ca6d40238ad9b780c143a840/documentation/kafka/isdialogmelding-behandler-dialogmelding-bestilling.md for formatet på kafkameldingen
 private fun NyDialogmeldingFraNavEvent.toKafkaJson(): String {
     @Language("JSON")
     val json =
@@ -52,9 +53,9 @@ private fun NyDialogmeldingFraNavEvent.toKafkaJson(): String {
               "dialogmeldingUuid": "${this.meldingId.value}",
               "dialogmeldingRefParent": null,
               "dialogmeldingRefConversation": ${this.conversationRef.value},
-              "dialogmeldingType": ${this.type},
-              "dialogmeldingKodeverk": "",
-              "dialogmeldingKode": null, 
+              "dialogmeldingType": "DIALOG_FORESPORSEL",
+              "dialogmeldingKodeverk": "FORESPORSEL",
+              "dialogmeldingKode": 1, 
               "dialogmeldingTekst": ${this.tekst},
               "dialogmeldingVedlegg": null,
               "kilde": "Sykepenger"

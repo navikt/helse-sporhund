@@ -35,7 +35,6 @@ class Dialog private constructor(
                     behandlerRef = dialogmelding.mottaker,
                     identitetsnummer = identitetsnummer,
                     meldingId = dialogmelding.id,
-                    type = "", // TODO: Finne ut hvilke typer vi skal ha og sende de med her
                     tekst = dialogmelding.melding,
                 ),
             )

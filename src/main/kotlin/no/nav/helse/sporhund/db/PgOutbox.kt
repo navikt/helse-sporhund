@@ -23,7 +23,6 @@ class PgOutbox(
                 behandlerRef = melding.event.behandlerRef.value,
                 identitetsnummer = melding.event.identitetsnummer.value,
                 meldingId = melding.event.meldingId.value,
-                type = melding.event.type,
                 tekst = melding.event.tekst,
             )
         asSQL(
@@ -51,7 +50,6 @@ class PgOutbox(
                             behandlerRef = BehandlerRef(it.behandlerRef),
                             identitetsnummer = Identitetsnummer.fraString(it.identitetsnummer),
                             meldingId = DialogmeldingId(it.meldingId),
-                            type = it.type,
                             tekst = it.tekst,
                         )
                     },
@@ -71,7 +69,6 @@ class PgOutbox(
         val behandlerRef: String,
         val identitetsnummer: String,
         val meldingId: UUID,
-        val type: String,
         val tekst: String?,
     )
 }
