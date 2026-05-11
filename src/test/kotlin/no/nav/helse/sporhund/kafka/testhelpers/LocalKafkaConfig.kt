@@ -1,10 +1,10 @@
-package no.nav.helse.sporhund.kafka
+package no.nav.helse.sporhund.kafka.testhelpers
 
 import com.github.navikt.tbd_libs.kafka.Config
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
-import java.util.*
+import java.util.Properties
 
 class LocalKafkaConfig(
     private val brokers: String = "localhost:9092",

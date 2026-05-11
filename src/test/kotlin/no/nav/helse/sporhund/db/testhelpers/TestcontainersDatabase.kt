@@ -9,7 +9,7 @@ class TestcontainersDatabase(
     private val postgres =
         PostgreSQLContainer("postgres:17")
             .withReuse(true)
-            .withLabel("app", "spesialist")
+            .withLabel("app", "sporhund")
             .withLabel("module", moduleLabel)
             .withLabel("code-location", javaClass.canonicalName)
             .apply {

@@ -2,12 +2,11 @@ package no.nav.helse.sporhund
 
 import no.nav.helse.sporhund.db.testhelpers.TestcontainersDatabase
 import no.nav.helse.sporhund.kafka.KafkaConfig
-import no.nav.helse.sporhund.kafka.LocalKafkaConfig
 import no.nav.helse.sporhund.kafka.ReadTopics
-import org.testcontainers.kafka.KafkaContainer
+import no.nav.helse.sporhund.kafka.testhelpers.TestcontainersKafka
 
 fun main() {
-    val kafka = KafkaContainer("apache/kafka:3.7.1").apply { start() }
+    val kafka = TestcontainersKafka("local-app")
     val postgres = TestcontainersDatabase("local-app")
 
     Runtime.getRuntime().addShutdownHook(
@@ -27,7 +26,7 @@ fun main() {
     app(
         kafkaConfig =
             KafkaConfig(
-                aivenConfig = LocalKafkaConfig(kafka.bootstrapServers),
+                aivenConfig = kafka.config,
                 readTopics = topics,
                 writeTopic = DIALOGMELDING_FRA_NAY_TOPIC,
             ),
