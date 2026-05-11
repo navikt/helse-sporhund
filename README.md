@@ -8,7 +8,7 @@ Sporhund mottar og sender dialogmeldinger via kafka, se [Topics](#Topics).
 
 Sporhund har ansvar for å koble en utgående dialogmelding til en innkommende dialogmelding. 
 
-Sporhund fungerer som backendløsning til Speil for dialogmeldinger. 
+Sporhund fungerer som backendløsning til Speil for dialogmeldinger.
 
 Sporhund integrerer med Tilgangsmaskinen for [populasjonstilgangskontroll](https://confluence.adeo.no/spaces/TM/pages/628888614/Intro+til+Tilgangsmaskinen#IntrotilTilgangsmaskinen-Slikfungererl%C3%B8sningen).
 
