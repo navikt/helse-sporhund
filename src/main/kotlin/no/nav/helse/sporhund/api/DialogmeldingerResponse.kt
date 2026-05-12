@@ -30,6 +30,8 @@ data class ApiLegekontor(
     val kontor: String?,
     val orgnummer: String?,
     val adresse: String?,
+    val postnummer: String?,
+    val poststed: String?,
 )
 
 data class ApiBehandler(
@@ -186,7 +188,9 @@ private val BEHANDLER_LINUS =
             ApiLegekontor(
                 kontor = "Sentrum Legesenter",
                 orgnummer = "912345678",
-                adresse = "Storgata 1, 0181 Oslo",
+                adresse = "Storgata 1",
+                postnummer = "0181",
+                poststed = "Oslo",
             ),
         telefonnummer = "22334455",
     )
@@ -201,7 +205,9 @@ private val BEHANDLER_SOLVEIG =
             ApiLegekontor(
                 kontor = "Fjordklinikken",
                 orgnummer = "923456789",
-                adresse = "Havneveien 12, 5003 Bergen",
+                adresse = "Havneveien 12",
+                postnummer = "5003",
+                poststed = "Bergen",
             ),
         telefonnummer = "55667788",
     )
@@ -216,7 +222,9 @@ private val BEHANDLER_CHRISTIAN =
             ApiLegekontor(
                 kontor = "Rygghelse AS",
                 orgnummer = "934567890",
-                adresse = "Munkegata 5, 7011 Trondheim",
+                adresse = "Munkegata 5",
+                postnummer = "7011",
+                poststed = "Trondheim",
             ),
         telefonnummer = "73889900",
     )
