@@ -21,7 +21,7 @@ fun Routing.appRoutes() {
 
         get("/personer/{pseudoId}/dialogmeldinger", {
             operationId = "getDialogmeldinger"
-            description = "Hent oversikt over alle dialoger gruppert per behandler"
+            description = "Hent oversikt over alle dialoger"
             request {
                 pathParameter<String>("pseudoId") {
                     description = "Pseudonymisert person-ID"
@@ -30,8 +30,8 @@ fun Routing.appRoutes() {
             }
             response {
                 HttpStatusCode.OK to {
-                    description = "Dialogoversikt gruppert per behandler"
-                    body<List<ApiBehandlerMedDialoger>>()
+                    description = "Liste over dialoger"
+                    body<List<ApiDialogOppsummering>>()
                 }
             }
         }) {

@@ -3,6 +3,44 @@ package no.nav.helse.sporhund.api
 import java.time.LocalDateTime
 import java.util.UUID
 
+// === Behandler types ===
+
+enum class ApiBehandlerType {
+    FASTLEGE,
+    FASTLEGEVIKAR,
+    SYKMELDER,
+}
+
+enum class ApiBehandlerKategori {
+    LEGE,
+    FYSIOTERAPEUT,
+    KIROPRAKTOR,
+    MANUELLTERAPEUT,
+    TANNLEGE,
+    PSYKOLOG,
+}
+
+data class ApiBehandlerNavn(
+    val fornavn: String,
+    val mellomnavn: String?,
+    val etternavn: String,
+)
+
+data class ApiLegekontor(
+    val kontor: String?,
+    val orgnummer: String?,
+    val adresse: String?,
+)
+
+data class ApiBehandler(
+    val id: String,
+    val navn: ApiBehandlerNavn,
+    val type: ApiBehandlerType?,
+    val kategori: ApiBehandlerKategori,
+    val legekontor: ApiLegekontor,
+    val telefonnummer: String?,
+)
+
 // === Detail types (full dialog with messages) ===
 
 data class ApiVedlegg(
@@ -20,8 +58,7 @@ data class ApiDialogmelding(
 
 data class ApiDialogDetails(
     val id: String,
-    val behandlerId: String,
-    val behandlernavn: String,
+    val behandler: ApiBehandler,
     val tittel: String,
     val tid: String,
     val dialogmeldinger: List<ApiDialogmelding>,
@@ -31,16 +68,11 @@ data class ApiDialogDetails(
 
 data class ApiDialogOppsummering(
     val id: String,
+    val behandler: ApiBehandler,
     val tittel: String,
     val tid: String,
     val antallMeldinger: Int,
     val antallVedlegg: Int,
-)
-
-data class ApiBehandlerMedDialoger(
-    val behandlerId: String,
-    val behandlernavn: String,
-    val dialoger: List<ApiDialogOppsummering>,
 )
 
 // === Request type ===
@@ -55,8 +87,7 @@ enum class ApiFagomrade(
 }
 
 data class ApiNyDialogmelding(
-    val behandlerId: String,
-    val behandlernavn: String,
+    val behandler: ApiBehandler,
     val fagomrade: ApiFagomrade,
     val melding: String,
 )
@@ -69,8 +100,7 @@ data class ApiSvarPaDialog(
 
 private data class InternalDialog(
     val id: String,
-    val behandlerId: String,
-    val behandlernavn: String,
+    val behandler: ApiBehandler,
     val tittel: String,
     val tid: String,
     val dialogmeldinger: List<ApiDialogmelding>,
@@ -79,14 +109,8 @@ private data class InternalDialog(
 object MockStore {
     private val data: MutableList<InternalDialog> = initialMockData().toMutableList()
 
-    fun hentOversikt(): List<ApiBehandlerMedDialoger> =
-        data.groupBy { it.behandlerId }.map { (_, dialoger) ->
-            ApiBehandlerMedDialoger(
-                behandlerId = dialoger.first().behandlerId,
-                behandlernavn = dialoger.first().behandlernavn,
-                dialoger = dialoger.map { it.tilOversikt() },
-            )
-        }
+    fun hentOversikt(): List<ApiDialogOppsummering> =
+        data.map { it.tilOversikt() }
 
     fun hentDialog(dialogId: String): ApiDialogDetails? = data.find { it.id == dialogId }?.tilDialogDetails()
 
@@ -97,8 +121,7 @@ object MockStore {
                     UUID
                         .randomUUID()
                         .toString(),
-                behandlerId = ny.behandlerId,
-                behandlernavn = ny.behandlernavn,
+                behandler = ny.behandler,
                 tittel = ny.fagomrade.tittel,
                 tid =
                     LocalDateTime
@@ -147,6 +170,7 @@ object MockStore {
     private fun InternalDialog.tilOversikt() =
         ApiDialogOppsummering(
             id = id,
+            behandler = behandler,
             tittel = tittel,
             tid = tid,
             antallMeldinger = dialogmeldinger.size,
@@ -156,20 +180,57 @@ object MockStore {
     private fun InternalDialog.tilDialogDetails() =
         ApiDialogDetails(
             id = id,
-            behandlerId = behandlerId,
-            behandlernavn = behandlernavn,
+            behandler = behandler,
             tittel = tittel,
             tid = tid,
             dialogmeldinger = dialogmeldinger,
         )
 }
 
+private val BEHANDLER_LINUS = ApiBehandler(
+    id = "behandlerId-1",
+    navn = ApiBehandlerNavn(fornavn = "Linus", mellomnavn = null, etternavn = "Lege"),
+    type = ApiBehandlerType.FASTLEGE,
+    kategori = ApiBehandlerKategori.LEGE,
+    legekontor = ApiLegekontor(
+        kontor = "Sentrum Legesenter",
+        orgnummer = "912345678",
+        adresse = "Storgata 1, 0181 Oslo",
+    ),
+    telefonnummer = "22334455",
+)
+
+private val BEHANDLER_SOLVEIG = ApiBehandler(
+    id = "behandlerId-2",
+    navn = ApiBehandlerNavn(fornavn = "Solveig", mellomnavn = "Marie", etternavn = "Lege"),
+    type = ApiBehandlerType.FASTLEGE,
+    kategori = ApiBehandlerKategori.LEGE,
+    legekontor = ApiLegekontor(
+        kontor = "Fjordklinikken",
+        orgnummer = "923456789",
+        adresse = "Havneveien 12, 5003 Bergen",
+    ),
+    telefonnummer = "55667788",
+)
+
+private val BEHANDLER_CHRISTIAN = ApiBehandler(
+    id = "behandlerId-3",
+    navn = ApiBehandlerNavn(fornavn = "Christian", mellomnavn = null, etternavn = "Lege"),
+    type = ApiBehandlerType.SYKMELDER,
+    kategori = ApiBehandlerKategori.KIROPRAKTOR,
+    legekontor = ApiLegekontor(
+        kontor = "Rygghelse AS",
+        orgnummer = "934567890",
+        adresse = "Munkegata 5, 7011 Trondheim",
+    ),
+    telefonnummer = "73889900",
+)
+
 private fun initialMockData(): List<InternalDialog> =
     listOf(
         InternalDialog(
             id = "dialogId-1",
-            behandlerId = "behandlerId-1",
-            behandlernavn = "Linus Lege",
+            behandler = BEHANDLER_LINUS,
             tittel = "Forespørsel om dokumentasjon",
             tid = "2026-04-24T14:36:00",
             dialogmeldinger =
@@ -213,8 +274,7 @@ private fun initialMockData(): List<InternalDialog> =
         ),
         InternalDialog(
             id = "dialogId-2",
-            behandlerId = "behandlerId-1",
-            behandlernavn = "Linus Lege",
+            behandler = BEHANDLER_LINUS,
             tittel = "Oppfølging etter sykmelding",
             tid = "2026-04-20T08:30:00",
             dialogmeldinger =
@@ -231,8 +291,7 @@ private fun initialMockData(): List<InternalDialog> =
         ),
         InternalDialog(
             id = "dialogId-3",
-            behandlerId = "behandlerId-2",
-            behandlernavn = "Solveig Lege",
+            behandler = BEHANDLER_SOLVEIG,
             tittel = "Forespørsel om dokumentasjon",
             tid = "2026-04-24T14:36:00",
             dialogmeldinger =
@@ -256,8 +315,7 @@ private fun initialMockData(): List<InternalDialog> =
         ),
         InternalDialog(
             id = "dialogId-4",
-            behandlerId = "behandlerId-3",
-            behandlernavn = "Christian Lege",
+            behandler = BEHANDLER_CHRISTIAN,
             tittel = "Sykmeldingsopplysninger",
             tid = "2026-04-10T09:00:00",
             dialogmeldinger =
@@ -282,8 +340,7 @@ private fun initialMockData(): List<InternalDialog> =
         ),
         InternalDialog(
             id = "dialogId-5",
-            behandlerId = "behandlerId-3",
-            behandlernavn = "Christian Lege",
+            behandler = BEHANDLER_CHRISTIAN,
             tittel = "Vurdering av arbeidsevne",
             tid = "2026-04-05T11:00:00",
             dialogmeldinger =
@@ -309,8 +366,7 @@ private fun initialMockData(): List<InternalDialog> =
         ),
         InternalDialog(
             id = "dialogId-6",
-            behandlerId = "behandlerId-3",
-            behandlernavn = "Christian Lege",
+            behandler = BEHANDLER_CHRISTIAN,
             tittel = "Bekreftelse på behandlingsplan",
             tid = "2026-03-28T14:00:00",
             dialogmeldinger =
