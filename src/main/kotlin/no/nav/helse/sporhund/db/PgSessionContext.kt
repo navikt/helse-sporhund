@@ -8,4 +8,5 @@ class PgSessionContext(
     session: Session,
 ) : SessionContext {
     override val outbox: Outbox = PgOutbox(session)
+    override val dialogRepository = PgDialogRepository(session)
 }
