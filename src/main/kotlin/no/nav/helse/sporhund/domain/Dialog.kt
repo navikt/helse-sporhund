@@ -32,7 +32,7 @@ class Dialog private constructor(
             events.add(
                 NyDialogmeldingFraNavEvent(
                     conversationRef = conversationRef,
-                    behandlerRef = dialogmelding.mottaker,
+                    behandlerRef = dialogmelding.behandlerRef,
                     identitetsnummer = identitetsnummer,
                     meldingId = dialogmelding.id,
                     tekst = dialogmelding.melding,
@@ -76,35 +76,40 @@ interface Dialogmelding {
         override val id: DialogmeldingId,
         override val tidspunkt: Instant,
         override val melding: String,
-        val navIdent: NavIdent,
-        val mottaker: BehandlerRef,
+        val saksbehandler: NavIdent,
+        val behandlerRef: BehandlerRef,
+        val behandler: Behandler,
     ) : Dialogmelding {
         companion object {
             fun ny(
-                navIdent: NavIdent,
-                mottaker: BehandlerRef,
+                saksbehandler: NavIdent,
+                behandler: Behandler,
+                behandlerRef: BehandlerRef,
                 melding: String,
             ): FraNav =
                 FraNav(
                     id = DialogmeldingId(UUID.randomUUID()),
                     tidspunkt = Instant.now(),
                     melding = melding,
-                    navIdent = navIdent,
-                    mottaker = mottaker,
+                    saksbehandler = saksbehandler,
+                    behandler = behandler,
+                    behandlerRef = behandlerRef,
                 )
 
             fun fraLagring(
                 id: DialogmeldingId,
                 tidspunkt: Instant,
                 melding: String,
-                navIdent: NavIdent,
-                mottaker: BehandlerRef,
+                saksbehandler: NavIdent,
+                behandler: Behandler,
+                behandlerRef: BehandlerRef,
             ) = FraNav(
                 id = id,
                 tidspunkt = tidspunkt,
                 melding = melding,
-                navIdent = navIdent,
-                mottaker = mottaker,
+                saksbehandler = saksbehandler,
+                behandler = behandler,
+                behandlerRef = behandlerRef,
             )
         }
     }
@@ -113,7 +118,7 @@ interface Dialogmelding {
         override val id: DialogmeldingId,
         override val tidspunkt: Instant,
         override val melding: String,
-        val behandlerRef: BehandlerRef,
-        val vedleggsreferanse: Vedleggsreferanse?,
+        val behandler: Behandler,
+        val antallVedlegg: Int,
     ) : Dialogmelding
 }
