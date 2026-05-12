@@ -5,9 +5,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggInfo
+import no.nav.helse.sporhund.db.objectMapper
 import no.nav.helse.sporhund.domain.NyDialogmeldingFraNavEvent
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.intellij.lang.annotations.Language
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -31,8 +31,8 @@ class KafkaProducer(
                         val partitionKey =
                             it.event.conversationRef.value
                                 .toString()
-                        val kafkaJson = it.event.toKafkaJson()
-                        producer.send(ProducerRecord(dialogmeldingFraNayTopic, partitionKey, kafkaJson))
+                        val kafkaDto = it.event.toKafkaDto()
+                        producer.send(ProducerRecord(dialogmeldingFraNayTopic, partitionKey, objectMapper.writeValueAsString(kafkaDto)))
                         outbox.meldingSendt(it.id)
                     }
                 }
@@ -42,25 +42,17 @@ class KafkaProducer(
     }
 }
 
-// Se https://github.com/navikt/isdialogmelding/blob/20b18e4630e6bc94ca6d40238ad9b780c143a840/documentation/kafka/isdialogmelding-behandler-dialogmelding-bestilling.md for formatet på kafkameldingen
-private fun NyDialogmeldingFraNavEvent.toKafkaJson(): String {
-    @Language("JSON")
-    val json =
-        """
-          {
-              "behandlerRef": "${this.behandlerRef.value}",
-              "personIdent": "${this.identitetsnummer.value}",
-              "dialogmeldingUuid": "${this.meldingId.value}",
-              "dialogmeldingRefParent": null,
-              "dialogmeldingRefConversation": ${this.conversationRef.value},
-              "dialogmeldingType": "DIALOG_FORESPORSEL",
-              "dialogmeldingKodeverk": "FORESPORSEL",
-              "dialogmeldingKode": 1, 
-              "dialogmeldingTekst": ${this.tekst},
-              "dialogmeldingVedlegg": null,
-              "kilde": "Sykepenger"
-        }
-        """.trimIndent()
-
-    return json
-}
+private fun NyDialogmeldingFraNavEvent.toKafkaDto(): DialogmeldingTilBehandlerKafkaDto =
+    DialogmeldingTilBehandlerKafkaDto(
+        behandlerRef = behandlerRef.value,
+        personIdent = identitetsnummer.value,
+        dialogmeldingUuid = meldingId.value.toString(),
+        dialogmeldingRefParent = null,
+        dialogmeldingRefConversation = conversationRef.value.toString(),
+        dialogmeldingType = "DIALOG_FORESPORSEL",
+        dialogmeldingKodeverk = "FORESPORSEL",
+        dialogmeldingKode = 1,
+        dialogmeldingTekst = tekst,
+        dialogmeldingVedlegg = null,
+        kilde = "sykepenger",
+    )
