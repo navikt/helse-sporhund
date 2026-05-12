@@ -1,71 +1,82 @@
 package no.nav.helse.sporhund.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.jackson.isMissingOrNull
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.db.objectMapper
-import no.nav.helse.sporhund.domain.BehandlerRef
+import no.nav.helse.sporhund.domain.Behandler
 import no.nav.helse.sporhund.domain.ConversationRef
+import no.nav.helse.sporhund.domain.Dialogmelding
+import no.nav.helse.sporhund.domain.DialogmeldingId
+import no.nav.helse.sporhund.domain.HprNummer
 import no.nav.helse.sporhund.domain.Identitetsnummer
+import no.nav.helse.sporhund.domain.Organisasjonsnummer
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import java.time.ZoneId
 import java.util.UUID
 
 fun KafkaConsumer.håndterSvarFraBehandler(
     transactionProvider: TransactionProvider,
     record: ConsumerRecord<String, String>,
 ) {
-    val json = objectMapper.readTree(record.value())
-    if (!json["conversationRef"].isMissingOrNull() && !json["conversationRef"].erUuid()) {
-        loggInfo("conversationRef er ikke UUID: ${json["conversationRef"].asText()}. Ignorerer meldingen.")
+    val kafkamelding = objectMapper.readValue<DialogmeldingFraBehandlerKafkaDto>(record.value())
+    if (!kafkamelding.erRelevant()) {
+        loggInfo("conversationRef er ikke UUID: ${kafkamelding.conversationRef}. Ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding))
         return
     }
-    when (val dialogmeldingFraBehandler = json.parseDialogmeldingFraBehandler()) {
-        is SvarFraBehandler.MedConversationRef -> {
-            håndterSvarMedConversationRef(transactionProvider, dialogmeldingFraBehandler.json)
-        }
 
-        is SvarFraBehandler.UtenConversationRef -> {
-            håndterSvarUtenConversationRef(transactionProvider, dialogmeldingFraBehandler.json)
-        }
-    }
-}
-
-private fun JsonNode.parseDialogmeldingFraBehandler(): SvarFraBehandler {
-    val behandlerRef = BehandlerRef(this["personIdentBehandler"].asText())
-    val identitetsnummer = Identitetsnummer.fraString(this["personIdentPasient"].asText())
-
-    return if (this["conversationRef"].isMissingOrNull()) {
-        SvarFraBehandler.UtenConversationRef(
-            behandlerRef = behandlerRef,
-            identitetsnummer = identitetsnummer,
-            json = this,
-        )
+    if (kafkamelding.conversationRef != null) {
+        val svarFraBehandler = kafkamelding.svarFraBehandlerMedConversationRef()
+        svarFraBehandler.håndterSvarMedConversationRef(transactionProvider)
+        loggInfo("conversationRef er uuid, forsøker å knytte meldingen til dialog", "melding" to objectMapper.writeValueAsString(kafkamelding))
     } else {
-        SvarFraBehandler.MedConversationRef(
-            conversationRef = ConversationRef(UUID.fromString(this["conversationRef"].asText())),
-            behandlerRef = behandlerRef,
-            identitetsnummer = identitetsnummer,
-            json = this,
-        )
+        loggInfo("conversationRef er null, ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding))
     }
 }
 
-private fun JsonNode.erUuid(): Boolean =
+private fun String.erUuid(): Boolean =
     runCatching {
-        UUID.fromString(this.asText())
+        UUID.fromString(this)
     }.isSuccess
 
-private fun håndterSvarUtenConversationRef(
+private fun SvarFraBehandler.MedConversationRef.håndterSvarMedConversationRef(
     transactionProvider: TransactionProvider,
-    json: JsonNode,
 ) {
-    println("Svar uten conversationRef: ${json.toPrettyString()}")
+    transactionProvider.transaction {
+        val dialog = dialogRepository.finnDialog(conversationRef) ?: return@transaction
+        dialog.nyMelding(
+            Dialogmelding.FraBehandler(
+                id = DialogmeldingId(UUID.randomUUID()),
+                tidspunkt = tidspunktMottattNav,
+                melding = tekst,
+                behandler = behandler,
+                antallVedlegg = antallVedlegg,
+            ),
+        )
+        dialogRepository.lagre(dialog)
+        loggInfo("Knytter meldingen til dialog")
+    }
 }
 
-private fun håndterSvarMedConversationRef(
-    transactionProvider: TransactionProvider,
-    json: JsonNode,
-) {
-    println("Svar med conversationRef: ${json.toPrettyString()}")
+private fun DialogmeldingFraBehandlerKafkaDto.erRelevant(): Boolean = this.conversationRef == null || this.conversationRef.erUuid()
+
+private fun DialogmeldingFraBehandlerKafkaDto.svarFraBehandlerMedConversationRef(): SvarFraBehandler.MedConversationRef {
+    val forespørselssvar = checkNotNull(this.dialogmelding.foresporselFraSaksbehandlerForesporselSvar)
+    return SvarFraBehandler.MedConversationRef(
+        conversationRef = ConversationRef(UUID.fromString(checkNotNull(this.conversationRef))),
+        hprNummer = HprNummer(checkNotNull(this.legehpr)),
+        identitetsnummerSykmeldt = Identitetsnummer.fraString(this.personIdentPasient),
+        behandler = this.tilBehandler(),
+        tekst = forespørselssvar.tekstNotatInnhold,
+        antallVedlegg = this.antallVedlegg,
+        tidspunktMottattNav = this.mottattTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toInstant(),
+    )
 }
+
+private fun DialogmeldingFraBehandlerKafkaDto.tilBehandler(): Behandler =
+    Behandler(
+        hprNummer = HprNummer(checkNotNull(this.legehpr)),
+        navn = this.dialogmelding.navnHelsepersonell,
+        kontor = this.legekontorOrgName,
+        kontorOrganisasjonsnummer = Organisasjonsnummer(checkNotNull(this.legekontorOrgNr)),
+    )

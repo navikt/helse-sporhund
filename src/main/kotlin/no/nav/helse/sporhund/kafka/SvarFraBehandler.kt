@@ -1,25 +1,35 @@
 package no.nav.helse.sporhund.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.sporhund.domain.BehandlerRef
+import no.nav.helse.sporhund.domain.Behandler
 import no.nav.helse.sporhund.domain.ConversationRef
+import no.nav.helse.sporhund.domain.HprNummer
 import no.nav.helse.sporhund.domain.Identitetsnummer
+import java.time.Instant
 
 sealed interface SvarFraBehandler {
-    val behandlerRef: BehandlerRef
-    val identitetsnummer: Identitetsnummer
-    val json: JsonNode
+    val hprNummer: HprNummer
+    val identitetsnummerSykmeldt: Identitetsnummer
+    val behandler: Behandler
+    val tekst: String
+    val antallVedlegg: Int
+    val tidspunktMottattNav: Instant
 
     class MedConversationRef(
         val conversationRef: ConversationRef,
-        override val behandlerRef: BehandlerRef,
-        override val identitetsnummer: Identitetsnummer,
-        override val json: JsonNode,
+        override val hprNummer: HprNummer,
+        override val identitetsnummerSykmeldt: Identitetsnummer,
+        override val behandler: Behandler,
+        override val tekst: String,
+        override val antallVedlegg: Int,
+        override val tidspunktMottattNav: Instant,
     ) : SvarFraBehandler
 
     class UtenConversationRef(
-        override val behandlerRef: BehandlerRef,
-        override val identitetsnummer: Identitetsnummer,
-        override val json: JsonNode,
+        override val hprNummer: HprNummer,
+        override val identitetsnummerSykmeldt: Identitetsnummer,
+        override val behandler: Behandler,
+        override val tekst: String,
+        override val antallVedlegg: Int,
+        override val tidspunktMottattNav: Instant,
     ) : SvarFraBehandler
 }
