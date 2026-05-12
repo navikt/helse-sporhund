@@ -44,6 +44,20 @@ fun lagDialogmeldingFraBehandlerKafkaDto(
         fellesformatXML = fellesformatXML,
     )
 
+fun lagDialogmeldingUtenForesporselssvar(
+    id: String = UUID.randomUUID().toString(),
+    navnHelsepersonell: String = "Ola Testlege",
+    signaturDato: LocalDateTime = LocalDateTime.now(),
+): Dialogmelding =
+    Dialogmelding(
+        id = id,
+        innkallingMoterespons = null,
+        foresporselFraSaksbehandlerForesporselSvar = null,
+        henvendelseFraLegeHenvendelse = null,
+        navnHelsepersonell = navnHelsepersonell,
+        signaturDato = signaturDato,
+    )
+
 fun lagDialogmelding(
     id: String = UUID.randomUUID().toString(),
     tekstNotatInnhold: String = "Dette er en testmelding",

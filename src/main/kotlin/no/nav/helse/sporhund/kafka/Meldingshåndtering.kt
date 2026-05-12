@@ -21,7 +21,7 @@ fun KafkaConsumer.håndterSvarFraBehandler(
 ) {
     val kafkamelding = objectMapper.readValue<DialogmeldingFraBehandlerKafkaDto>(record.value())
     if (!kafkamelding.erRelevant()) {
-        loggInfo("conversationRef er ikke UUID: ${kafkamelding.conversationRef}. Ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding))
+        loggInfo("Meldingen er ikke relevant. Ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding))
         return
     }
 
@@ -33,11 +33,6 @@ fun KafkaConsumer.håndterSvarFraBehandler(
         loggInfo("conversationRef er null, ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding))
     }
 }
-
-private fun String.erUuid(): Boolean =
-    runCatching {
-        UUID.fromString(this)
-    }.isSuccess
 
 private fun SvarFraBehandler.MedConversationRef.håndterSvarMedConversationRef(
     transactionProvider: TransactionProvider,
@@ -57,8 +52,6 @@ private fun SvarFraBehandler.MedConversationRef.håndterSvarMedConversationRef(
         loggInfo("Knytter meldingen til dialog")
     }
 }
-
-private fun DialogmeldingFraBehandlerKafkaDto.erRelevant(): Boolean = this.conversationRef == null || this.conversationRef.erUuid()
 
 private fun DialogmeldingFraBehandlerKafkaDto.svarFraBehandlerMedConversationRef(): SvarFraBehandler.MedConversationRef {
     val forespørselssvar = checkNotNull(this.dialogmelding.foresporselFraSaksbehandlerForesporselSvar)
