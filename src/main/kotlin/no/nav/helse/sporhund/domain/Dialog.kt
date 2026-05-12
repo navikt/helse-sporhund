@@ -4,17 +4,11 @@ import java.time.Instant
 import java.util.UUID
 
 @JvmInline
-value class DialogId(
-    val value: UUID,
-)
-
-@JvmInline
 value class ConversationRef(
     val value: UUID,
 )
 
 class Dialog private constructor(
-    val id: DialogId,
     val conversationRef: ConversationRef,
     val identitetsnummer: Identitetsnummer,
     meldinger: List<Dialogmelding>,
@@ -47,18 +41,16 @@ class Dialog private constructor(
             melding: Dialogmelding.FraNav,
         ): Dialog =
             Dialog(
-                id = DialogId(UUID.randomUUID()),
                 conversationRef = ConversationRef(UUID.randomUUID()),
                 identitetsnummer = identitetsnummer,
                 meldinger = emptyList(),
             ).also { it.nyMelding(melding) }
 
         fun fraLagring(
-            id: DialogId,
             conversationRef: ConversationRef,
             identitetsnummer: Identitetsnummer,
             meldinger: List<Dialogmelding>,
-        ): Dialog = Dialog(id, conversationRef, identitetsnummer, meldinger)
+        ): Dialog = Dialog(conversationRef, identitetsnummer, meldinger)
     }
 }
 
