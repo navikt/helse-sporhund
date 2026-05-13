@@ -13,13 +13,7 @@ import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.OutboxMeldingId
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.clients.personpseudoid.ValkeyPersonPseudoIdProvider
-import no.nav.helse.sporhund.domain.Behandler
-import no.nav.helse.sporhund.domain.BehandlerRef
-import no.nav.helse.sporhund.domain.Dialog
-import no.nav.helse.sporhund.domain.Dialogmelding
-import no.nav.helse.sporhund.domain.HprNummer
-import no.nav.helse.sporhund.domain.Organisasjonsnummer
-import no.nav.helse.sporhund.domain.Telefonnummer
+import no.nav.helse.sporhund.domain.*
 import java.util.*
 
 fun Routing.appRoutes(
@@ -35,6 +29,19 @@ fun Routing.appRoutes(
         }
 
         authenticate("oidc") {
+            get("/dialogmelding-oppgaver", {
+                operationId = "getDialogmeldingOppgaver"
+                description = "Hent dialogmelding-oppgaver"
+                response {
+                    HttpStatusCode.OK to {
+                        description = "Liste over dialogmelding-oppgaver"
+                        body<List<ApiDialogmeldingOppgave>>()
+                    }
+                }
+            }) {
+                call.respond(MockStore.hentOppgaver())
+            }
+
             get("/personer/{pseudoId}/dialogmeldinger", {
                 operationId = "getDialogmeldinger"
                 description = "Hent oversikt over alle dialoger"
@@ -109,9 +116,9 @@ fun Routing.appRoutes(
             }) {
                 val pseudoId = call.personPseudoId()
                 val saksbehandler = call.saksbehandler()
+                // TODO: Kommenterte ut elvisen pga mocken
                 val identitetsnummer =
-                    personPseudoIdProvider.hentIdentitetsnummer(pseudoId)
-                        ?: error("Fant ikke identitetsnummer for pseudoId $pseudoId")
+                    personPseudoIdProvider.hentIdentitetsnummer(pseudoId) // ?: error("Fant ikke identitetsnummer for pseudoId $pseudoId")
                 val apiDialogmelding = call.receive<ApiNyDialogmelding>()
                 // TODO: Ta vare på adresse for behandler
                 val behandler =
@@ -129,25 +136,28 @@ fun Routing.appRoutes(
                                 null
                             },
                     )
-                transactionProvider.transaction {
-                    val dialog =
-                        Dialog.ny(
-                            identitetsnummer,
-                            Dialogmelding.FraNav.ny(
-                                saksbehandler.ident,
-                                behandler,
-                                behandlerRef = BehandlerRef(apiDialogmelding.behandler.id),
-                                apiDialogmelding.melding,
-                            ),
-                        )
-                    dialogRepository.lagre(dialog)
-                    val events = dialog.events()
-                    events.forEach {
-                        outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
+                // TODO: Kan fjerne if-en når elvisen over kommenteres inn igjen
+                if (identitetsnummer != null) {
+                    transactionProvider.transaction {
+                        val dialog =
+                            Dialog.ny(
+                                identitetsnummer,
+                                Dialogmelding.FraNav.ny(
+                                    saksbehandler.ident,
+                                    behandler,
+                                    behandlerRef = BehandlerRef(apiDialogmelding.behandler.id),
+                                    apiDialogmelding.melding,
+                                ),
+                            )
+                        dialogRepository.lagre(dialog)
+                        val events = dialog.events()
+                        events.forEach {
+                            outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
+                        }
                     }
                 }
 
-                val opprettet = MockStore.leggTilMelding(apiDialogmelding)
+                val opprettet = MockStore.leggTilMelding(apiDialogmelding, pseudoId.value.toString())
                 call.respond(HttpStatusCode.Created, opprettet)
             }
 

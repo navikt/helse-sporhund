@@ -77,6 +77,24 @@ data class ApiDialogOppsummering(
     val antallVedlegg: Int,
 )
 
+enum class ApiDialogmeldingStatus {
+    SENDT,
+    PURRING_SENDT,
+    MOTTATT,
+    FERDIGSTILT,
+}
+
+data class ApiDialogmeldingOppgave(
+    val id: String,
+    val personPseudoId: String,
+    val dato: String,
+    val frist: String,
+    val fagomrade: ApiFagomrade,
+    val soker: String,
+    val meldingstype: String,
+    val status: ApiDialogmeldingStatus,
+)
+
 // === Request type ===
 
 enum class ApiFagomrade(
@@ -104,7 +122,10 @@ data class ApiSvarPaDialog(
 
 private data class InternalDialog(
     val id: String,
+    val identitetsnummer: String,
     val behandler: ApiBehandler,
+    val fagomrade: ApiFagomrade,
+    val status: ApiDialogmeldingStatus,
     val tittel: String,
     val tid: String,
     val dialogmeldinger: List<ApiDialogmelding>,
@@ -115,13 +136,21 @@ object MockStore {
 
     fun hentOversikt(): List<ApiDialogOppsummering> = data.map { it.tilOversikt() }
 
+    fun hentOppgaver(): List<ApiDialogmeldingOppgave> = data.map { it.tilOppgave() }
+
     fun hentDialog(dialogId: String): ApiDialogDetails? = data.find { it.id == dialogId }?.tilDialogDetails()
 
-    fun leggTilMelding(ny: ApiNyDialogmelding): ApiDialogDetails {
+    fun leggTilMelding(
+        ny: ApiNyDialogmelding,
+        identitetsnummer: String,
+    ): ApiDialogDetails {
         val nyInternalDialog =
             InternalDialog(
                 id = UUID.randomUUID().toString(),
+                identitetsnummer = identitetsnummer,
                 behandler = ny.behandler,
+                fagomrade = ny.fagomrade,
+                status = ApiDialogmeldingStatus.SENDT,
                 tittel = ny.fagomrade.tittel,
                 tid = LocalDateTime.now().toString(),
                 dialogmeldinger =
@@ -175,6 +204,23 @@ object MockStore {
             tittel = tittel,
             tid = tid,
             dialogmeldinger = dialogmeldinger,
+        )
+
+    private fun InternalDialog.tilOppgave() =
+        ApiDialogmeldingOppgave(
+            id = id,
+            personPseudoId = identitetsnummer,
+            dato = tid.substringBefore("T"),
+            frist =
+                LocalDateTime
+                    .parse(tid)
+                    .toLocalDate()
+                    .plusDays(21)
+                    .toString(),
+            fagomrade = fagomrade,
+            soker = "Ukjent soker",
+            meldingstype = "",
+            status = status,
         )
 }
 
@@ -233,7 +279,10 @@ private fun initialMockData(): List<InternalDialog> =
     listOf(
         InternalDialog(
             id = "dialogId-1",
+            identitetsnummer = "13066612345",
             behandler = BEHANDLER_LINUS,
+            fagomrade = ApiFagomrade.TILBAKEDATERING,
+            status = ApiDialogmeldingStatus.SENDT,
             tittel = "Forespørsel om dokumentasjon",
             tid = "2026-04-24T14:36:00",
             dialogmeldinger =
@@ -268,7 +317,10 @@ private fun initialMockData(): List<InternalDialog> =
         ),
         InternalDialog(
             id = "dialogId-2",
+            identitetsnummer = "13066612345",
             behandler = BEHANDLER_LINUS,
+            fagomrade = ApiFagomrade.ENKELTSTAENDE_BEHANDLINGSDAGER,
+            status = ApiDialogmeldingStatus.MOTTATT,
             tittel = "Oppfølging etter sykmelding",
             tid = "2026-04-20T08:30:00",
             dialogmeldinger =
@@ -284,7 +336,10 @@ private fun initialMockData(): List<InternalDialog> =
         ),
         InternalDialog(
             id = "dialogId-3",
+            identitetsnummer = "07089912345",
             behandler = BEHANDLER_SOLVEIG,
+            fagomrade = ApiFagomrade.YRKESSKADE,
+            status = ApiDialogmeldingStatus.MOTTATT,
             tittel = "Forespørsel om dokumentasjon",
             tid = "2026-04-24T14:36:00",
             dialogmeldinger =
@@ -307,7 +362,10 @@ private fun initialMockData(): List<InternalDialog> =
         ),
         InternalDialog(
             id = "dialogId-4",
+            identitetsnummer = "25057812345",
             behandler = BEHANDLER_CHRISTIAN,
+            fagomrade = ApiFagomrade.BESTRIDELSE,
+            status = ApiDialogmeldingStatus.PURRING_SENDT,
             tittel = "Sykmeldingsopplysninger",
             tid = "2026-04-10T09:00:00",
             dialogmeldinger =
@@ -330,7 +388,10 @@ private fun initialMockData(): List<InternalDialog> =
         ),
         InternalDialog(
             id = "dialogId-5",
+            identitetsnummer = "25057812345",
             behandler = BEHANDLER_CHRISTIAN,
+            fagomrade = ApiFagomrade.BESTRIDELSE,
+            status = ApiDialogmeldingStatus.FERDIGSTILT,
             tittel = "Vurdering av arbeidsevne",
             tid = "2026-04-05T11:00:00",
             dialogmeldinger =
@@ -353,7 +414,10 @@ private fun initialMockData(): List<InternalDialog> =
         ),
         InternalDialog(
             id = "dialogId-6",
+            identitetsnummer = "25057812345",
             behandler = BEHANDLER_CHRISTIAN,
+            fagomrade = ApiFagomrade.TILBAKEDATERING,
+            status = ApiDialogmeldingStatus.SENDT,
             tittel = "Bekreftelse på behandlingsplan",
             tid = "2026-03-28T14:00:00",
             dialogmeldinger =
