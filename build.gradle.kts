@@ -14,6 +14,7 @@ dependencies {
     implementation(platform(libs.ktor.bom))
     implementation(libs.tbd.naisful.app)
     implementation(libs.tbd.kafka)
+    implementation(libs.tbd.personpseudoid)
     implementation(libs.bundles.smiley4.ktor.openapi.tools)
     implementation(libs.bundles.db)
     implementation(libs.bundles.jackson)

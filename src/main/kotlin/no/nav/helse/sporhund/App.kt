@@ -19,6 +19,8 @@ import no.nav.helse.sporhund.api.auth.AzureAdConfig
 import no.nav.helse.sporhund.api.auth.configureJwtAuthentication
 import no.nav.helse.sporhund.api.configureOpenApiPlugin
 import no.nav.helse.sporhund.application.logg.loggError
+import no.nav.helse.sporhund.clients.personpseudoid.PersonPseudoIdConfig
+import no.nav.helse.sporhund.clients.personpseudoid.ValkeyPersonPseudoIdProvider
 import no.nav.helse.sporhund.db.DataSourceBuilder
 import no.nav.helse.sporhund.db.DbConfig
 import no.nav.helse.sporhund.db.PgTransactionProvider
@@ -61,10 +63,17 @@ fun main() {
             issuerUrl = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
             jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
         )
+    val personPseudoIdConfig =
+        PersonPseudoIdConfig(
+            valkeyBrukernavn = env.getValue("VALKEY_USERNAME_PERSONPSEUDOID"),
+            valkeyPassord = env.getValue("VALKEY_PASSWORD_PERSONPSEUDOID"),
+            valkeyConnectionString = env.getValue("VALKEY_URI_PERSONPSEUDOID"),
+        )
     app(
         kafkaConfig = kafkaConfig,
         dbConfig = dbConfig,
         azureAdConfig = azureAdConfig,
+        personPseudoIdConfig = personPseudoIdConfig,
     )
 }
 
@@ -72,6 +81,7 @@ fun app(
     kafkaConfig: KafkaConfig,
     dbConfig: DbConfig,
     azureAdConfig: AzureAdConfig,
+    personPseudoIdConfig: PersonPseudoIdConfig,
     port: Int = 8080,
     additionalRoutes: Routing.() -> Unit = { },
 ) {
@@ -81,6 +91,7 @@ fun app(
     val dataSourceBuilder = DataSourceBuilder(dbConfig)
 
     val transactionProvider = PgTransactionProvider(dataSourceBuilder.build())
+    val personPseudoIdProvider = ValkeyPersonPseudoIdProvider(personPseudoIdConfig)
     val kafkaConsumer =
         KafkaConsumer(
             topics = kafkaConfig.readTopics,
@@ -137,7 +148,7 @@ fun app(
 
             routing {
                 additionalRoutes()
-                appRoutes()
+                appRoutes(personPseudoIdProvider)
             }
         },
     ).start(wait = true)

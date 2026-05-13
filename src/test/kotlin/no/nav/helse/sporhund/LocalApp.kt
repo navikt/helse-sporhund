@@ -3,6 +3,7 @@ package no.nav.helse.sporhund
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.helse.sporhund.api.auth.AzureAdConfig
+import no.nav.helse.sporhund.clients.personpseudoid.testhelpers.TestcontainersValkey
 import no.nav.helse.sporhund.db.testhelpers.TestcontainersDatabase
 import no.nav.helse.sporhund.domain.testhelpers.lagSaksbehandler
 import no.nav.helse.sporhund.kafka.KafkaConfig
@@ -16,6 +17,7 @@ fun main() {
     val mockOAuth2Server = MockOAuth2Server().also { it.start() }
     val kafka = TestcontainersKafka("local-app")
     val postgres = TestcontainersDatabase("local-app")
+    val valkey = TestcontainersValkey("local-app")
 
     val saksbehandler = lagSaksbehandler()
 
@@ -72,6 +74,7 @@ fun main() {
             ),
         dbConfig = postgres.dbConfig,
         azureAdConfig = azureAdConfig,
+        personPseudoIdConfig = valkey.personPseudoIdConfig,
         additionalRoutes = { addAdditionalRoutings(this) },
         port = 8282,
     )

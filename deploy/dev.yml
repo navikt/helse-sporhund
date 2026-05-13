@@ -79,6 +79,9 @@ spec:
         databases:
           - name: sporhund
             envVarPrefix: DATABASE
+  valkey:
+    - instance: personpseudoid
+      access: readwrite
   env:
     - name: KAFKA_CONSUMER_GROUP_ID
       value: tbd-sporhund-v1
