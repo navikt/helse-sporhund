@@ -1,5 +1,5 @@
 [versions]
-tbd-libs = "20260429.1019"
+tbd-libs = "20260512.2035"
 smiley4KtorOpenapiTools = "5.7.0"
 smiley4SchemaKenerator = "2.7.2"
 ktor = "3.4.3"
