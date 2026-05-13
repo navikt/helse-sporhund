@@ -9,9 +9,22 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import no.nav.helse.sporhund.application.OutboxMelding
+import no.nav.helse.sporhund.application.OutboxMeldingId
+import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.clients.personpseudoid.ValkeyPersonPseudoIdProvider
+import no.nav.helse.sporhund.domain.Behandler
+import no.nav.helse.sporhund.domain.BehandlerRef
+import no.nav.helse.sporhund.domain.Dialog
+import no.nav.helse.sporhund.domain.Dialogmelding
+import no.nav.helse.sporhund.domain.HprNummer
+import no.nav.helse.sporhund.domain.Organisasjonsnummer
+import java.util.UUID
 
-fun Routing.appRoutes(personPseudoIdProvider: ValkeyPersonPseudoIdProvider) {
+fun Routing.appRoutes(
+    personPseudoIdProvider: ValkeyPersonPseudoIdProvider,
+    transactionProvider: TransactionProvider,
+) {
     route("/api") {
         route("/openapi.json") {
             openApi()
@@ -93,8 +106,26 @@ fun Routing.appRoutes(personPseudoIdProvider: ValkeyPersonPseudoIdProvider) {
                     }
                 }
             }) {
-//                        val pseudoId = call.parameters["pseudoId"]
-//                        veksle pseudoId med fødselsnummer her
+                val pseudoId = call.personPseudoId()
+                val saksbehandler = call.saksbehandler()
+                val identitetsnummer = personPseudoIdProvider.hentIdentitetsnummer(pseudoId) ?: error("Fant ikke identitetsnummer for pseudoId $pseudoId")
+                val apiDialogmelding = call.receive<ApiNyDialogmelding>()
+                // TODO: Ta vare på telefonnummer og adresse for behandler
+                val behandler =
+                    Behandler(
+                        HprNummer(apiDialogmelding.behandler.id),
+                        navn = apiDialogmelding.behandler.navn.fornavn + " " + apiDialogmelding.behandler.navn.mellomnavn + " " + apiDialogmelding.behandler.navn.etternavn, // TODO: håndtere at mellomnavn kan være null
+                        kontor = apiDialogmelding.behandler.legekontor.kontor!!, // TODO: Burde forvente at denne ikke kan være null fra Speil
+                        kontorOrganisasjonsnummer = Organisasjonsnummer(apiDialogmelding.behandler.legekontor.orgnummer!!), // TODO: Burde forvente at denne ikke kan være null fra Speil
+                    )
+                transactionProvider.transaction {
+                    val dialog = Dialog.ny(identitetsnummer, Dialogmelding.FraNav.ny(saksbehandler.ident, behandler, behandlerRef = BehandlerRef(apiDialogmelding.behandler.id), apiDialogmelding.melding))
+                    dialogRepository.lagre(dialog)
+                    val events = dialog.events()
+                    events.forEach {
+                        outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
+                    }
+                }
                 val ny = call.receive<ApiNyDialogmelding>()
                 val opprettet = MockStore.leggTilMelding(ny)
                 call.respond(HttpStatusCode.Created, opprettet)

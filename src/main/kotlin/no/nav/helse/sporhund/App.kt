@@ -148,7 +148,7 @@ fun app(
 
             routing {
                 additionalRoutes()
-                appRoutes(personPseudoIdProvider)
+                appRoutes(personPseudoIdProvider, transactionProvider)
             }
         },
     ).start(wait = true)
