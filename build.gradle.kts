@@ -21,9 +21,14 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.logstash.logback.encoder)
 
+    implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.server.auth.jwt)
+    implementation(libs.auth0.jwt)
+
     testImplementation(kotlin("test"))
     testImplementation(libs.testcontainers.kafka)
     testImplementation(libs.testcontainers.postgres)
+    testImplementation(libs.mockOauth2Server)
 }
 
 kotlin {

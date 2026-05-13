@@ -5,6 +5,8 @@ import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.naisful.naisApp
 import io.github.smiley4.ktoropenapi.OpenApi
 import io.ktor.server.application.*
+import io.ktor.server.auth.authentication
+import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.routing.*
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
@@ -15,6 +17,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.api.appRoutes
 import no.nav.helse.sporhund.api.configureOpenApiPlugin
 import no.nav.helse.sporhund.application.logg.loggError
+import no.nav.helse.sporhund.auth.AzureAdConfig
+import no.nav.helse.sporhund.auth.configureJwtAuthentication
 import no.nav.helse.sporhund.db.DataSourceBuilder
 import no.nav.helse.sporhund.db.DbConfig
 import no.nav.helse.sporhund.db.PgTransactionProvider
@@ -51,16 +55,25 @@ fun main() {
             username = env.getValue("DATABASE_USERNAME"),
             password = env.getValue("DATABASE_PASSWORD"),
         )
+    val azureAdConfig =
+        AzureAdConfig(
+            clientId = env.getValue("AZURE_APP_CLIENT_ID"),
+            issuerUrl = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
+            jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
+        )
     app(
         kafkaConfig = kafkaConfig,
         dbConfig = dbConfig,
+        azureAdConfig = azureAdConfig,
     )
 }
 
 fun app(
     kafkaConfig: KafkaConfig,
     dbConfig: DbConfig,
+    azureAdConfig: AzureAdConfig,
     port: Int = 8080,
+    additionalRoutes: Routing.() -> Unit = { },
 ) {
     val factory = ConsumerProducerFactory(kafkaConfig.aivenConfig)
     val running = AtomicBoolean(false)
@@ -115,8 +128,15 @@ fun app(
             }
 
             install(OpenApi) { configureOpenApiPlugin() }
-            // TODO auth???
+
+            authentication {
+                jwt("oidc") {
+                    configureJwtAuthentication(azureAdConfig)
+                }
+            }
+
             routing {
+                additionalRoutes()
                 appRoutes()
             }
         },
