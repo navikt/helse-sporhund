@@ -2,7 +2,7 @@ package no.nav.helse.sporhund
 
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import no.nav.helse.sporhund.auth.AzureAdConfig
+import no.nav.helse.sporhund.api.auth.AzureAdConfig
 import no.nav.helse.sporhund.db.testhelpers.TestcontainersDatabase
 import no.nav.helse.sporhund.domain.testhelpers.lagSaksbehandler
 import no.nav.helse.sporhund.kafka.KafkaConfig

@@ -1,4 +1,4 @@
-package no.nav.helse.sporhund.auth
+package no.nav.helse.sporhund.api.auth
 
 import com.auth0.jwk.JwkProviderBuilder
 import io.ktor.server.auth.jwt.JWTAuthenticationProvider

@@ -1,4 +1,4 @@
-package no.nav.helse.sporhund.auth
+package no.nav.helse.sporhund.api.auth
 
 import no.nav.helse.sporhund.domain.Saksbehandler
 

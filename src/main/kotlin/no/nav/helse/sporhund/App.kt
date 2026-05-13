@@ -15,10 +15,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.api.appRoutes
+import no.nav.helse.sporhund.api.auth.AzureAdConfig
+import no.nav.helse.sporhund.api.auth.configureJwtAuthentication
 import no.nav.helse.sporhund.api.configureOpenApiPlugin
 import no.nav.helse.sporhund.application.logg.loggError
-import no.nav.helse.sporhund.auth.AzureAdConfig
-import no.nav.helse.sporhund.auth.configureJwtAuthentication
 import no.nav.helse.sporhund.db.DataSourceBuilder
 import no.nav.helse.sporhund.db.DbConfig
 import no.nav.helse.sporhund.db.PgTransactionProvider
