@@ -6,6 +6,6 @@ import no.nav.helse.sporhund.api.auth.SaksbehandlerPrincipal
 import no.nav.helse.sporhund.application.PersonPseudoId
 import java.util.UUID
 
-fun ApplicationCall.personPseudoId() = PersonPseudoId(UUID.fromString(requireNotNull(this.parameters["person-pseudoId"])))
+fun ApplicationCall.personPseudoId() = PersonPseudoId(UUID.fromString(requireNotNull(this.parameters["pseudoId"])))
 
 fun ApplicationCall.saksbehandler() = requireNotNull(principal<SaksbehandlerPrincipal>()).saksbehandler
