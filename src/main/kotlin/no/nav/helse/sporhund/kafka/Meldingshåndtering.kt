@@ -72,4 +72,5 @@ private fun DialogmeldingFraBehandlerKafkaDto.tilBehandler(): Behandler =
         navn = this.dialogmelding.navnHelsepersonell,
         kontor = this.legekontorOrgName,
         kontorOrganisasjonsnummer = Organisasjonsnummer(checkNotNull(this.legekontorOrgNr)),
+        telefonnummer = null,
     )

@@ -15,8 +15,9 @@ import no.nav.helse.sporhund.domain.HprNummer
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.domain.NavIdent
 import no.nav.helse.sporhund.domain.Organisasjonsnummer
+import no.nav.helse.sporhund.domain.Telefonnummer
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 class PgDialogRepository(
     private val session: Session,
@@ -182,6 +183,7 @@ class PgDialogRepository(
         val navn: String,
         val kontor: String,
         val kontorOrganisasjonsnummer: String,
+        val telefonnummer: String?,
     ) {
         fun tilDomene(): Behandler =
             Behandler(
@@ -189,6 +191,7 @@ class PgDialogRepository(
                 navn = navn,
                 kontor = kontor,
                 kontorOrganisasjonsnummer = Organisasjonsnummer(kontorOrganisasjonsnummer),
+                telefonnummer = if (telefonnummer != null) Telefonnummer(telefonnummer) else null,
             )
 
         companion object {
@@ -198,6 +201,7 @@ class PgDialogRepository(
                     navn = behandler.navn,
                     kontor = behandler.kontor,
                     kontorOrganisasjonsnummer = behandler.kontorOrganisasjonsnummer.value,
+                    telefonnummer = behandler.telefonnummer?.value,
                 )
         }
     }

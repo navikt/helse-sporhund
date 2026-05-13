@@ -4,6 +4,7 @@ import no.nav.helse.sporhund.domain.Behandler
 import no.nav.helse.sporhund.domain.BehandlerRef
 import no.nav.helse.sporhund.domain.HprNummer
 import no.nav.helse.sporhund.domain.Organisasjonsnummer
+import no.nav.helse.sporhund.domain.Telefonnummer
 import java.util.UUID
 import kotlin.random.Random
 
@@ -13,6 +14,8 @@ fun lagHprNummer() = HprNummer(Random.nextInt(1_000_000, 9_999_999).toString())
 
 fun lagOrganisasjonsnummer() = Organisasjonsnummer(Random.nextInt(100_000_000, 999_999_999).toString())
 
+fun lagTelefonnummer() = Telefonnummer(Random.nextInt(100_000_000, 999_999_999).toString())
+
 fun lagBehandler(): Behandler {
     val hprNummer = lagHprNummer()
     return Behandler(
@@ -20,5 +23,6 @@ fun lagBehandler(): Behandler {
         navn = "Behandler ${hprNummer.value}",
         kontor = "Kontor ${hprNummer.value}",
         kontorOrganisasjonsnummer = lagOrganisasjonsnummer(),
+        telefonnummer = lagTelefonnummer(),
     )
 }

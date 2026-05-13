@@ -5,4 +5,5 @@ data class Behandler(
     val navn: String,
     val kontor: String,
     val kontorOrganisasjonsnummer: Organisasjonsnummer,
+    val telefonnummer: Telefonnummer?,
 )

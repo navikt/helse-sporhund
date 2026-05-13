@@ -19,7 +19,8 @@ import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.domain.HprNummer
 import no.nav.helse.sporhund.domain.Organisasjonsnummer
-import java.util.UUID
+import no.nav.helse.sporhund.domain.Telefonnummer
+import java.util.*
 
 fun Routing.appRoutes(
     personPseudoIdProvider: ValkeyPersonPseudoIdProvider,
@@ -108,26 +109,45 @@ fun Routing.appRoutes(
             }) {
                 val pseudoId = call.personPseudoId()
                 val saksbehandler = call.saksbehandler()
-                val identitetsnummer = personPseudoIdProvider.hentIdentitetsnummer(pseudoId) ?: error("Fant ikke identitetsnummer for pseudoId $pseudoId")
+                val identitetsnummer =
+                    personPseudoIdProvider.hentIdentitetsnummer(pseudoId)
+                        ?: error("Fant ikke identitetsnummer for pseudoId $pseudoId")
                 val apiDialogmelding = call.receive<ApiNyDialogmelding>()
-                // TODO: Ta vare på telefonnummer og adresse for behandler
+                // TODO: Ta vare på adresse for behandler
                 val behandler =
                     Behandler(
                         HprNummer(apiDialogmelding.behandler.id),
                         navn = apiDialogmelding.behandler.navn.fornavn + " " + apiDialogmelding.behandler.navn.mellomnavn + " " + apiDialogmelding.behandler.navn.etternavn, // TODO: håndtere at mellomnavn kan være null
                         kontor = apiDialogmelding.behandler.legekontor.kontor!!, // TODO: Burde forvente at denne ikke kan være null fra Speil
                         kontorOrganisasjonsnummer = Organisasjonsnummer(apiDialogmelding.behandler.legekontor.orgnummer!!), // TODO: Burde forvente at denne ikke kan være null fra Speil
+                        telefonnummer =
+                            if (apiDialogmelding.behandler.telefonnummer != null) {
+                                Telefonnummer(
+                                    apiDialogmelding.behandler.telefonnummer,
+                                )
+                            } else {
+                                null
+                            },
                     )
                 transactionProvider.transaction {
-                    val dialog = Dialog.ny(identitetsnummer, Dialogmelding.FraNav.ny(saksbehandler.ident, behandler, behandlerRef = BehandlerRef(apiDialogmelding.behandler.id), apiDialogmelding.melding))
+                    val dialog =
+                        Dialog.ny(
+                            identitetsnummer,
+                            Dialogmelding.FraNav.ny(
+                                saksbehandler.ident,
+                                behandler,
+                                behandlerRef = BehandlerRef(apiDialogmelding.behandler.id),
+                                apiDialogmelding.melding,
+                            ),
+                        )
                     dialogRepository.lagre(dialog)
                     val events = dialog.events()
                     events.forEach {
                         outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
                     }
                 }
-                val ny = call.receive<ApiNyDialogmelding>()
-                val opprettet = MockStore.leggTilMelding(ny)
+
+                val opprettet = MockStore.leggTilMelding(apiDialogmelding)
                 call.respond(HttpStatusCode.Created, opprettet)
             }
 
