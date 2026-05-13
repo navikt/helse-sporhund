@@ -55,7 +55,7 @@ fun Routing.appRoutes(
                 call.respond(MockStore.hentOversikt())
             }
 
-            get("/personer/{pseudoId}/dialogmeldinger/{dialogId}", {
+            get("/personer/{pseudoId}/dialogmeldinger/{conversationRef}", {
                 operationId = "getDialogmelding"
                 description = "Hent en enkelt dialog med alle meldinger"
                 request {
@@ -63,7 +63,7 @@ fun Routing.appRoutes(
                         description = "Pseudonymisert person-ID"
                         required = true
                     }
-                    pathParameter<String>("dialogId") {
+                    pathParameter<String>("conversationRef") {
                         description = "ID til dialogen"
                         required = true
                     }
@@ -80,8 +80,8 @@ fun Routing.appRoutes(
             }) {
 //                        val pseudoId = call.parameters["pseudoId"]
 //                        veksle pseudoId med fødselsnummer her
-                val dialogId = call.parameters["dialogId"]!!
-                val dialog = MockStore.hentDialog(dialogId)
+                val conversationRef = call.parameters["conversationRef"]!!
+                val dialog = MockStore.hentDialog(conversationRef)
                 if (dialog != null) {
                     call.respond(dialog)
                 } else {
@@ -131,7 +131,7 @@ fun Routing.appRoutes(
                 call.respond(HttpStatusCode.Created, opprettet)
             }
 
-            post("/personer/{pseudoId}/dialogmeldinger/{dialogId}/svar", {
+            post("/personer/{pseudoId}/dialogmeldinger/{conversationRef}/svar", {
                 operationId = "postSvarPaDialog"
                 description = "Svar på en eksisterende dialog"
                 request {
@@ -139,7 +139,7 @@ fun Routing.appRoutes(
                         description = "Pseudonymisert person-ID"
                         required = true
                     }
-                    pathParameter<String>("dialogId") {
+                    pathParameter<String>("conversationRef") {
                         description = "ID til dialogen"
                         required = true
                     }
@@ -157,9 +157,9 @@ fun Routing.appRoutes(
             }) {
 //                        val pseudoId = call.parameters["pseudoId"]
 //                        veksle pseudoId med fødselsnummer her
-                val dialogId = call.parameters["dialogId"]!!
+                val conversationRef = call.parameters["conversationRef"]!!
                 val svar = call.receive<ApiSvarPaDialog>()
-                val oppdatert = MockStore.svarPåDialog(dialogId, svar)
+                val oppdatert = MockStore.svarPåDialog(conversationRef, svar)
                 if (oppdatert != null) {
                     call.respond(HttpStatusCode.Created, oppdatert)
                 } else {
