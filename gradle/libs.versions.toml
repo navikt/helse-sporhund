@@ -42,7 +42,7 @@ jackson-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr
 jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 
 auth0-jwt = { module = "com.auth0:java-jwt", version.ref = "auth0" }
-mockOauth2Server = "no.nav.security:mock-oauth2-server:3.0.1"
+mockOauth2Server = "no.nav.security:mock-oauth2-server:3.0.3"
 
 [bundles]
 db = ["flyway-core", "flyway-postgres", "hikari", "kotliquery", "postgresJdbcDriver"]
