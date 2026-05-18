@@ -13,7 +13,9 @@ import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.OutboxMeldingId
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.clients.personpseudoid.ValkeyPersonPseudoIdProvider
-import no.nav.helse.sporhund.domain.*
+import no.nav.helse.sporhund.domain.BehandlerRef
+import no.nav.helse.sporhund.domain.Dialog
+import no.nav.helse.sporhund.domain.Dialogmelding
 import java.util.*
 
 fun Routing.appRoutes(
@@ -128,22 +130,6 @@ fun Routing.appRoutes(
                 val identitetsnummer =
                     personPseudoIdProvider.hentIdentitetsnummer(pseudoId) // ?: error("Fant ikke identitetsnummer for pseudoId $pseudoId")
                 val apiDialogmelding = call.receive<ApiNyDialogmelding>()
-                // TODO: Ta vare på adresse for behandler
-                val behandler =
-                    Behandler(
-                        HprNummer(apiDialogmelding.behandler.id),
-                        navn = apiDialogmelding.behandler.navn.fornavn + " " + apiDialogmelding.behandler.navn.mellomnavn + " " + apiDialogmelding.behandler.navn.etternavn, // TODO: håndtere at mellomnavn kan være null
-                        kontor = apiDialogmelding.behandler.legekontor.kontor!!, // TODO: Burde forvente at denne ikke kan være null fra Speil
-                        kontorOrganisasjonsnummer = Organisasjonsnummer(apiDialogmelding.behandler.legekontor.orgnummer!!), // TODO: Burde forvente at denne ikke kan være null fra Speil
-                        telefonnummer =
-                            if (apiDialogmelding.behandler.telefonnummer != null) {
-                                Telefonnummer(
-                                    apiDialogmelding.behandler.telefonnummer,
-                                )
-                            } else {
-                                null
-                            },
-                    )
                 // TODO: Kan fjerne if-en når elvisen over kommenteres inn igjen
                 if (identitetsnummer != null) {
                     transactionProvider.transaction {
@@ -152,7 +138,8 @@ fun Routing.appRoutes(
                                 identitetsnummer,
                                 Dialogmelding.FraNav.ny(
                                     saksbehandler.ident,
-                                    behandler,
+                                    // TODO: Ta vare på adresse for behandler
+                                    apiDialogmelding.tilBehandler(),
                                     behandlerRef = BehandlerRef(apiDialogmelding.behandler.id),
                                     apiDialogmelding.melding,
                                 ),
