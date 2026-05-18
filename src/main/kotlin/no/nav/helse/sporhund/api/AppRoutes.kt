@@ -58,9 +58,17 @@ fun Routing.appRoutes(
                     }
                 }
             }) {
-//                        val pseudoId = call.parameters["pseudoId"]
-//                        veksle pseudoId med fødselsnummer her
-                call.respond(MockStore.hentOversikt())
+                val pseudoId = call.personPseudoId()
+                val identitetsnummer = personPseudoIdProvider.hentIdentitetsnummer(pseudoId)
+                if (identitetsnummer == null) {
+                    call.respond(emptyList<ApiDialogOppsummering>())
+                    return@get
+                }
+                val dialoger =
+                    transactionProvider.transaction {
+                        dialogRepository.hentDialogmeldingerOversikt(identitetsnummer)
+                    }
+                call.respond(dialoger.map { it.tilApiDialogmeldingerOversikt() })
             }
 
             get("/personer/{pseudoId}/dialogmeldinger/{conversationRef}", {
