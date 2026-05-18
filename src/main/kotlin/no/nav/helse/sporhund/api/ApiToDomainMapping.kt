@@ -1,25 +1,36 @@
 package no.nav.helse.sporhund.api
 
+import no.nav.helse.sporhund.domain.Adresse
 import no.nav.helse.sporhund.domain.Behandler
 import no.nav.helse.sporhund.domain.HprNummer
+import no.nav.helse.sporhund.domain.Kontor
+import no.nav.helse.sporhund.domain.Navn
 import no.nav.helse.sporhund.domain.Organisasjonsnummer
 import no.nav.helse.sporhund.domain.Telefonnummer
 
 fun ApiNyDialogmelding.tilBehandler(): Behandler {
-    val behandler =
-        Behandler(
-            HprNummer(this.behandler.id),
-            navn = this.behandler.navn.fornavn + " " + this.behandler.navn.mellomnavn + " " + this.behandler.navn.etternavn, // TODO: håndtere at mellomnavn kan være null
-            kontor = this.behandler.legekontor.kontor!!, // TODO: Burde forvente at denne ikke kan være null fra Speil
-            kontorOrganisasjonsnummer = Organisasjonsnummer(this.behandler.legekontor.orgnummer!!), // TODO: Burde forvente at denne ikke kan være null fra Speil
-            telefonnummer =
-                if (this.behandler.telefonnummer != null) {
-                    Telefonnummer(
-                        this.behandler.telefonnummer,
-                    )
-                } else {
-                    null
-                },
-        )
-    return behandler
+    val legekontor = this.behandler.legekontor
+    return Behandler(
+        HprNummer(behandler.id),
+        navn =
+            Navn(
+                fornavn = this.behandler.navn.fornavn,
+                mellomnavn = this.behandler.navn.mellomnavn,
+                etternavn = this.behandler.navn.etternavn,
+            ),
+        kontor =
+            Kontor(
+                navn = legekontor.kontor,
+                organisasjonsnummer = legekontor.orgnummer?.let { Organisasjonsnummer(it) },
+                adresse =
+                    legekontor.adresse?.let {
+                        Adresse(
+                            veiadresse = it,
+                            postnummer = requireNotNull(legekontor.postnummer),
+                            poststed = requireNotNull(legekontor.poststed),
+                        )
+                    },
+            ),
+        telefonnummer = behandler.telefonnummer?.let { Telefonnummer(it) },
+    )
 }

@@ -4,32 +4,31 @@ import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 
 fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
-    val forsteFraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().firstOrNull()
-    val behandler = forsteFraNav?.behandler
-    val behandlerRef = forsteFraNav?.behandlerRef
-    val navnDeler = behandler?.navn?.split(" ") ?: emptyList()
+    val forsteFraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().first()
+    val behandler = forsteFraNav.behandler
+    val behandlerRef = forsteFraNav.behandlerRef
     return ApiDialogOppsummering(
         id = conversationRef.value.toString(),
         behandler =
             ApiBehandler(
-                id = behandlerRef?.value ?: "",
+                id = behandlerRef.value,
                 navn =
                     ApiBehandlerNavn(
-                        fornavn = navnDeler.firstOrNull() ?: "",
-                        mellomnavn = if (navnDeler.size > 2) navnDeler.drop(1).dropLast(1).joinToString(" ") else null,
-                        etternavn = if (navnDeler.size > 1) navnDeler.last() else "",
+                        fornavn = behandler.navn.fornavn,
+                        mellomnavn = behandler.navn.mellomnavn,
+                        etternavn = behandler.navn.etternavn,
                     ),
                 type = null,
                 kategori = ApiBehandlerKategori.LEGE,
                 legekontor =
                     ApiLegekontor(
-                        kontor = behandler?.kontor,
-                        orgnummer = behandler?.kontorOrganisasjonsnummer?.value,
-                        adresse = null,
-                        postnummer = null,
-                        poststed = null,
+                        kontor = behandler.kontor.navn,
+                        orgnummer = behandler.kontor.organisasjonsnummer?.value,
+                        adresse = behandler.kontor.adresse?.veiadresse,
+                        postnummer = behandler.kontor.adresse?.postnummer,
+                        poststed = behandler.kontor.adresse?.poststed,
                     ),
-                telefonnummer = behandler?.telefonnummer?.value,
+                telefonnummer = behandler.telefonnummer?.value,
             ),
         tittel = meldinger.firstOrNull()?.melding?.take(60) ?: "Tittel", // Venter på liste under fagområdekategoriene for å lage tittel
         tid = meldinger.firstOrNull()?.tidspunkt?.toString() ?: "",

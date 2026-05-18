@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.sporhund.application.DialogRepository
+import no.nav.helse.sporhund.domain.Adresse
 import no.nav.helse.sporhund.domain.Behandler
 import no.nav.helse.sporhund.domain.BehandlerRef
 import no.nav.helse.sporhund.domain.ConversationRef
@@ -13,7 +14,9 @@ import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.domain.DialogmeldingId
 import no.nav.helse.sporhund.domain.HprNummer
 import no.nav.helse.sporhund.domain.Identitetsnummer
+import no.nav.helse.sporhund.domain.Kontor
 import no.nav.helse.sporhund.domain.NavIdent
+import no.nav.helse.sporhund.domain.Navn
 import no.nav.helse.sporhund.domain.Organisasjonsnummer
 import no.nav.helse.sporhund.domain.Telefonnummer
 import java.time.Instant
@@ -190,27 +193,66 @@ class PgDialogRepository(
 
     private data class BehandlerDto(
         val hprNummer: String,
-        val navn: String,
-        val kontor: String,
-        val kontorOrganisasjonsnummer: String,
+        val navn: NavnDto,
+        val kontor: KontorDto,
         val telefonnummer: String?,
     ) {
         fun tilDomene(): Behandler =
             Behandler(
                 hprNummer = HprNummer(hprNummer),
-                navn = navn,
-                kontor = kontor,
-                kontorOrganisasjonsnummer = Organisasjonsnummer(kontorOrganisasjonsnummer),
+                navn = navn.tilDomene(),
+                kontor = kontor.tilDomene(),
                 telefonnummer = if (telefonnummer != null) Telefonnummer(telefonnummer) else null,
             )
+
+        data class NavnDto(
+            val fornavn: String,
+            val mellomnavn: String?,
+            val etternavn: String,
+        ) {
+            fun tilDomene() = Navn(fornavn = fornavn, mellomnavn = mellomnavn, etternavn = etternavn)
+        }
+
+        data class KontorDto(
+            val navn: String?,
+            val organisasjonsnummer: String?,
+            val adresse: AdresseDto?,
+        ) {
+            fun tilDomene() =
+                Kontor(
+                    navn = navn,
+                    organisasjonsnummer = organisasjonsnummer?.let { Organisasjonsnummer(it) },
+                    adresse = adresse?.tilDomene(),
+                )
+        }
+
+        data class AdresseDto(
+            val veiadresse: String,
+            val postnummer: String,
+            val poststed: String,
+        ) {
+            fun tilDomene() = Adresse(veiadresse = veiadresse, postnummer = postnummer, poststed = poststed)
+        }
 
         companion object {
             fun fraBehandler(behandler: Behandler): BehandlerDto =
                 BehandlerDto(
                     hprNummer = behandler.hprNummer.value,
-                    navn = behandler.navn,
-                    kontor = behandler.kontor,
-                    kontorOrganisasjonsnummer = behandler.kontorOrganisasjonsnummer.value,
+                    navn =
+                        NavnDto(
+                            fornavn = behandler.navn.fornavn,
+                            mellomnavn = behandler.navn.mellomnavn,
+                            etternavn = behandler.navn.etternavn,
+                        ),
+                    kontor =
+                        KontorDto(
+                            navn = behandler.kontor.navn,
+                            organisasjonsnummer = behandler.kontor.organisasjonsnummer?.value,
+                            adresse =
+                                behandler.kontor.adresse?.let {
+                                    AdresseDto(veiadresse = it.veiadresse, postnummer = it.postnummer, poststed = it.poststed)
+                                },
+                        ),
                     telefonnummer = behandler.telefonnummer?.value,
                 )
         }

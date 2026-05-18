@@ -10,6 +10,8 @@ import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.domain.DialogmeldingId
 import no.nav.helse.sporhund.domain.HprNummer
 import no.nav.helse.sporhund.domain.Identitetsnummer
+import no.nav.helse.sporhund.domain.Kontor
+import no.nav.helse.sporhund.domain.Navn
 import no.nav.helse.sporhund.domain.Organisasjonsnummer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.time.ZoneId
@@ -66,11 +68,24 @@ private fun DialogmeldingFraBehandlerKafkaDto.svarFraBehandlerMedConversationRef
     )
 }
 
+private fun String.tilNavn(): Navn {
+    val deler = this.trim().split(" ").filter { it.isNotEmpty() }
+    return Navn(
+        fornavn = deler.first(),
+        mellomnavn = if (deler.size > 2) deler.drop(1).dropLast(1).joinToString(" ") else null,
+        etternavn = deler.last(),
+    )
+}
+
 private fun DialogmeldingFraBehandlerKafkaDto.tilBehandler(): Behandler =
     Behandler(
         hprNummer = HprNummer(checkNotNull(this.legehpr)),
-        navn = this.dialogmelding.navnHelsepersonell,
-        kontor = this.legekontorOrgName,
-        kontorOrganisasjonsnummer = Organisasjonsnummer(checkNotNull(this.legekontorOrgNr)),
+        navn = this.dialogmelding.navnHelsepersonell.tilNavn(),
+        kontor =
+            Kontor(
+                this.legekontorOrgName,
+                Organisasjonsnummer(checkNotNull(this.legekontorOrgNr)),
+                adresse = null,
+            ),
         telefonnummer = null,
     )
