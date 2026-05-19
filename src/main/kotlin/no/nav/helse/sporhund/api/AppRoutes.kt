@@ -14,6 +14,7 @@ import no.nav.helse.sporhund.application.OutboxMeldingId
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.clients.personpseudoid.ValkeyPersonPseudoIdProvider
 import no.nav.helse.sporhund.domain.BehandlerRef
+import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 import java.util.*
@@ -96,12 +97,18 @@ fun Routing.appRoutes(
                     }
                 }
             }) {
-//                        val pseudoId = call.parameters["pseudoId"]
-//                        veksle pseudoId med fødselsnummer her
+                val pseudoId = call.personPseudoId()
+                val identitetsnummer = personPseudoIdProvider.hentIdentitetsnummer(pseudoId)
+                if (identitetsnummer == null) {
+                    call.respond(HttpStatusCode.NotFound)
+                    return@get
+                }
                 val conversationRef = call.parameters["conversationRef"]!!
-                val dialog = MockStore.hentDialog(conversationRef)
+                val dialog = transactionProvider.transaction {
+                    dialogRepository.finnDialog(ConversationRef(UUID.fromString(conversationRef)))
+                }
                 if (dialog != null) {
-                    call.respond(dialog)
+                    call.respond(dialog.tilApiDialogDetails())
                 } else {
                     call.respond(HttpStatusCode.NotFound)
                 }
