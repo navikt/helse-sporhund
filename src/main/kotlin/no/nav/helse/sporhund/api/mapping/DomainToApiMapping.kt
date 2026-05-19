@@ -1,5 +1,12 @@
-package no.nav.helse.sporhund.api
+package no.nav.helse.sporhund.api.mapping
 
+import no.nav.helse.sporhund.api.ApiBehandler
+import no.nav.helse.sporhund.api.ApiBehandlerKategori
+import no.nav.helse.sporhund.api.ApiBehandlerNavn
+import no.nav.helse.sporhund.api.ApiDialogDetails
+import no.nav.helse.sporhund.api.ApiDialogOppsummering
+import no.nav.helse.sporhund.api.ApiDialogmelding
+import no.nav.helse.sporhund.api.ApiLegekontor
 import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 
@@ -30,7 +37,10 @@ fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
                     ),
                 telefonnummer = behandler.telefonnummer?.value,
             ),
-        tittel = meldinger.firstOrNull()?.melding?.take(60) ?: "Tittel", // Venter på liste under fagområdekategoriene for å lage tittel
+        tittel =
+            meldinger.firstOrNull()?.melding?.take(60)
+                ?: "Tittel",
+        // Venter på liste under fagområdekategoriene for å lage tittel
         tid = meldinger.firstOrNull()?.tidspunkt?.toString() ?: "",
         antallMeldinger = meldinger.size,
         antallVedlegg = meldinger.filterIsInstance<Dialogmelding.FraBehandler>().sumOf { it.antallVedlegg },

@@ -1,5 +1,6 @@
-package no.nav.helse.sporhund.api
+package no.nav.helse.sporhund.api.mapping
 
+import no.nav.helse.sporhund.api.ApiNyDialogmelding
 import no.nav.helse.sporhund.domain.Adresse
 import no.nav.helse.sporhund.domain.Behandler
 import no.nav.helse.sporhund.domain.HprNummer

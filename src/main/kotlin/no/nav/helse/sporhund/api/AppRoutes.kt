@@ -1,23 +1,16 @@
 package no.nav.helse.sporhund.api
 
-import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.openApi
-import io.github.smiley4.ktoropenapi.post
 import io.github.smiley4.ktorswaggerui.swaggerUI
-import io.ktor.http.*
 import io.ktor.server.auth.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import no.nav.helse.sporhund.application.OutboxMelding
-import no.nav.helse.sporhund.application.OutboxMeldingId
+import no.nav.helse.sporhund.api.endepunkter.getDialogmeldingOppgaverRoute
+import no.nav.helse.sporhund.api.endepunkter.getDialogmeldingRoute
+import no.nav.helse.sporhund.api.endepunkter.getDialogmeldingerRoute
+import no.nav.helse.sporhund.api.endepunkter.postDialogmeldingRoute
+import no.nav.helse.sporhund.api.endepunkter.postSvarPaDialogRoute
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.clients.personpseudoid.ValkeyPersonPseudoIdProvider
-import no.nav.helse.sporhund.domain.BehandlerRef
-import no.nav.helse.sporhund.domain.ConversationRef
-import no.nav.helse.sporhund.domain.Dialog
-import no.nav.helse.sporhund.domain.Dialogmelding
-import java.util.*
 
 fun Routing.appRoutes(
     personPseudoIdProvider: ValkeyPersonPseudoIdProvider,
@@ -32,198 +25,11 @@ fun Routing.appRoutes(
         }
 
         authenticate("oidc") {
-            get("/dialogmelding-oppgaver", {
-                operationId = "getDialogmeldingOppgaver"
-                description = "Hent dialogmelding-oppgaver"
-                response {
-                    HttpStatusCode.OK to {
-                        description = "Liste over dialogmelding-oppgaver"
-                        body<List<ApiDialogmeldingOppgave>>()
-                    }
-                }
-            }) {
-                call.respond(MockStore.hentOppgaver())
-            }
-
-            get("/personer/{pseudoId}/dialogmeldinger", {
-                operationId = "getDialogmeldinger"
-                description = "Hent oversikt over alle dialoger"
-                request {
-                    pathParameter<String>("pseudoId") {
-                        description = "Pseudonymisert person-ID"
-                        required = true
-                    }
-                }
-                response {
-                    HttpStatusCode.OK to {
-                        description = "Liste over dialoger"
-                        body<List<ApiDialogOppsummering>>()
-                    }
-                }
-            }) {
-                val pseudoId = call.personPseudoId()
-                val identitetsnummer = personPseudoIdProvider.hentIdentitetsnummer(pseudoId)
-                if (identitetsnummer == null) {
-                    call.respond(emptyList<ApiDialogOppsummering>())
-                    return@get
-                }
-                val dialoger =
-                    transactionProvider.transaction {
-                        dialogRepository.hentDialogmeldingerOversikt(identitetsnummer)
-                    }
-                call.respond(dialoger.map { it.tilApiDialogmeldingerOversikt() })
-            }
-
-            get("/personer/{pseudoId}/dialogmeldinger/{conversationRef}", {
-                operationId = "getDialogmelding"
-                description = "Hent en enkelt dialog med alle meldinger"
-                request {
-                    pathParameter<String>("pseudoId") {
-                        description = "Pseudonymisert person-ID"
-                        required = true
-                    }
-                    pathParameter<String>("conversationRef") {
-                        description = "ID til dialogen"
-                        required = true
-                    }
-                }
-                response {
-                    HttpStatusCode.OK to {
-                        description = "Full dialog med alle meldinger"
-                        body<ApiDialogDetails>()
-                    }
-                    HttpStatusCode.NotFound to {
-                        description = "Dialog ikke funnet"
-                    }
-                }
-            }) {
-                val pseudoId = call.personPseudoId()
-                val identitetsnummer = personPseudoIdProvider.hentIdentitetsnummer(pseudoId)
-                if (identitetsnummer == null) {
-                    call.respond(HttpStatusCode.NotFound)
-                    return@get
-                }
-                val conversationRef = call.parameters["conversationRef"]!!
-                val dialog =
-                    transactionProvider.transaction {
-                        dialogRepository.finnDialog(ConversationRef(UUID.fromString(conversationRef)))
-                    }
-                if (dialog != null) {
-                    call.respond(dialog.tilApiDialogDetails())
-                } else {
-                    call.respond(HttpStatusCode.NotFound)
-                }
-            }
-
-            post("/personer/{pseudoId}/dialogmelding", {
-                operationId = "postDialogmelding"
-                description = "Send ny dialogmelding"
-                request {
-                    pathParameter<String>("pseudoId") {
-                        description = "Pseudonymisert person-ID"
-                        required = true
-                    }
-                    body<ApiNyDialogmelding>()
-                }
-                response {
-                    HttpStatusCode.Created to {
-                        description = "Dialogmelding opprettet"
-                        body<ApiDialogDetails>()
-                    }
-                }
-            }) {
-                val pseudoId = call.personPseudoId()
-                val saksbehandler = call.saksbehandler()
-                // TODO: Kommenterte ut elvisen pga mocken
-                val identitetsnummer =
-                    personPseudoIdProvider.hentIdentitetsnummer(pseudoId) // ?: error("Fant ikke identitetsnummer for pseudoId $pseudoId")
-                val apiDialogmelding = call.receive<ApiNyDialogmelding>()
-                // TODO: Kan fjerne if-en når elvisen over kommenteres inn igjen
-                if (identitetsnummer != null) {
-                    transactionProvider.transaction {
-                        val dialog =
-                            Dialog.ny(
-                                identitetsnummer,
-                                Dialogmelding.FraNav.ny(
-                                    saksbehandler.ident,
-                                    // TODO: Ta vare på adresse for behandler
-                                    apiDialogmelding.tilBehandler(),
-                                    behandlerRef = BehandlerRef(apiDialogmelding.behandler.id),
-                                    apiDialogmelding.melding,
-                                ),
-                            )
-                        dialogRepository.lagre(dialog)
-                        val events = dialog.events()
-                        events.forEach {
-                            outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
-                        }
-                    }
-                }
-
-                val opprettet = MockStore.leggTilMelding(apiDialogmelding, pseudoId.value.toString())
-                call.respond(HttpStatusCode.Created, opprettet)
-            }
-
-            post("/personer/{pseudoId}/dialogmeldinger/{conversationRef}/svar", {
-                operationId = "postSvarPaDialog"
-                description = "Svar på en eksisterende dialog"
-                request {
-                    pathParameter<String>("pseudoId") {
-                        description = "Pseudonymisert person-ID"
-                        required = true
-                    }
-                    pathParameter<String>("conversationRef") {
-                        description = "ID til dialogen"
-                        required = true
-                    }
-                    body<ApiSvarPaDialog>()
-                }
-                response {
-                    HttpStatusCode.Created to {
-                        description = "Svar lagt til i dialogen"
-                        body<ApiDialogDetails>()
-                    }
-                    HttpStatusCode.NotFound to {
-                        description = "Dialog ikke funnet"
-                    }
-                }
-            }) {
-                val pseudoId = call.personPseudoId()
-                val identitetsnummer = personPseudoIdProvider.hentIdentitetsnummer(pseudoId)
-                if (identitetsnummer == null) {
-                    call.respond(HttpStatusCode.NotFound)
-                    return@post
-                }
-                val saksbehandler = call.saksbehandler()
-                val conversationRef = ConversationRef(UUID.fromString(call.parameters["conversationRef"]!!))
-                val svar = call.receive<ApiSvarPaDialog>()
-                val oppdatertDialog =
-                    transactionProvider.transaction {
-                        val dialog =
-                            dialogRepository.finnDialog(conversationRef)
-                                ?: return@transaction null
-                        val forsteFraNav = dialog.meldinger.filterIsInstance<Dialogmelding.FraNav>().first()
-                        dialog.nyMelding(
-                            Dialogmelding.FraNav.ny(
-                                saksbehandler.ident,
-                                forsteFraNav.behandler,
-                                forsteFraNav.behandlerRef,
-                                svar.melding,
-                            ),
-                        )
-                        dialogRepository.lagre(dialog)
-                        val events = dialog.events()
-                        events.forEach {
-                            outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
-                        }
-                        dialog
-                    }
-                if (oppdatertDialog != null) {
-                    call.respond(HttpStatusCode.Created, oppdatertDialog.tilApiDialogDetails())
-                } else {
-                    call.respond(HttpStatusCode.NotFound)
-                }
-            }
+            getDialogmeldingOppgaverRoute()
+            getDialogmeldingerRoute(personPseudoIdProvider, transactionProvider)
+            getDialogmeldingRoute(personPseudoIdProvider, transactionProvider)
+            postDialogmeldingRoute(personPseudoIdProvider, transactionProvider)
+            postSvarPaDialogRoute(personPseudoIdProvider, transactionProvider)
         }
     }
 }
