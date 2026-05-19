@@ -1,7 +1,7 @@
 package no.nav.helse.sporhund.api
 
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 // === Behandler types ===
 
@@ -51,7 +51,8 @@ data class ApiVedlegg(
 )
 
 data class ApiDialogmelding(
-    val tittel: String,
+    val fagomrade: ApiFagomrade,
+    val meldingstype: ApiDialogmeldingType,
     val melding: String,
     val tid: String,
     val fraNav: Boolean,
@@ -61,7 +62,6 @@ data class ApiDialogmelding(
 data class ApiDialogDetails(
     val id: String,
     val behandler: ApiBehandler,
-    val tittel: String,
     val tid: String,
     val dialogmeldinger: List<ApiDialogmelding>,
 )
@@ -71,7 +71,8 @@ data class ApiDialogDetails(
 data class ApiDialogOppsummering(
     val id: String,
     val behandler: ApiBehandler,
-    val tittel: String,
+    val fagomrade: ApiFagomrade,
+    val meldingstype: ApiDialogmeldingType,
     val tid: String,
     val antallMeldinger: Int,
     val antallVedlegg: Int,
@@ -91,7 +92,7 @@ data class ApiDialogmeldingOppgave(
     val frist: String,
     val fagomrade: ApiFagomrade,
     val soker: String,
-    val meldingstype: String,
+    val meldingstype: ApiDialogmeldingType,
     val status: ApiDialogmeldingStatus,
 )
 
@@ -103,14 +104,19 @@ enum class ApiFagomrade(
     ENKELTSTAENDE_BEHANDLINGSDAGER("Enkeltstående behandlingsdager"),
     TILBAKEDATERING("Tilbakedatering"),
     YRKESSKADE("Yrkesskade"),
-    BESTRIDELSE(
-        "Bestridelse",
-    ),
+    BESTRIDELSE("Bestridelse"),
+}
+
+enum class ApiDialogmeldingType {
+    TILLEGGSOPPLYSNINGER,
+    SPESIALISTERKLAERING,
+    GJELDER_PASIENT,
 }
 
 data class ApiNyDialogmelding(
     val behandler: ApiBehandler,
     val fagomrade: ApiFagomrade,
+    val meldingstype: ApiDialogmeldingType,
     val melding: String,
 )
 
@@ -125,6 +131,7 @@ private data class InternalDialog(
     val identitetsnummer: String,
     val behandler: ApiBehandler,
     val fagomrade: ApiFagomrade,
+    val meldingstype: ApiDialogmeldingType,
     val status: ApiDialogmeldingStatus,
     val tittel: String,
     val tid: String,
@@ -150,13 +157,15 @@ object MockStore {
                 identitetsnummer = identitetsnummer,
                 behandler = ny.behandler,
                 fagomrade = ny.fagomrade,
+                meldingstype = ny.meldingstype,
                 status = ApiDialogmeldingStatus.SENDT,
                 tittel = ny.fagomrade.tittel,
                 tid = LocalDateTime.now().toString(),
                 dialogmeldinger =
                     listOf(
                         ApiDialogmelding(
-                            tittel = ny.fagomrade.tittel,
+                            fagomrade = ny.fagomrade,
+                            meldingstype = ny.meldingstype,
                             melding = ny.melding,
                             tid = LocalDateTime.now().toString(),
                             fraNav = true,
@@ -177,7 +186,8 @@ object MockStore {
         val dialog = data[index]
         val nyMelding =
             ApiDialogmelding(
-                tittel = dialog.tittel,
+                fagomrade = dialog.fagomrade,
+                meldingstype = dialog.meldingstype,
                 melding = svar.melding,
                 tid = LocalDateTime.now().toString(),
                 fraNav = true,
@@ -191,7 +201,8 @@ object MockStore {
         ApiDialogOppsummering(
             id = id,
             behandler = behandler,
-            tittel = tittel,
+            fagomrade = fagomrade,
+            meldingstype = meldingstype,
             tid = tid,
             antallMeldinger = dialogmeldinger.size,
             antallVedlegg = dialogmeldinger.sumOf { it.vedlegg.size },
@@ -201,7 +212,6 @@ object MockStore {
         ApiDialogDetails(
             id = id,
             behandler = behandler,
-            tittel = tittel,
             tid = tid,
             dialogmeldinger = dialogmeldinger,
         )
@@ -219,7 +229,7 @@ object MockStore {
                     .toString(),
             fagomrade = fagomrade,
             soker = "Ukjent soker",
-            meldingstype = "",
+            meldingstype = meldingstype,
             status = status,
         )
 }
@@ -282,20 +292,23 @@ private fun initialMockData(): List<InternalDialog> =
             identitetsnummer = "13066612345",
             behandler = BEHANDLER_LINUS,
             fagomrade = ApiFagomrade.TILBAKEDATERING,
+            meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
             status = ApiDialogmeldingStatus.SENDT,
             tittel = "Forespørsel om dokumentasjon",
             tid = "2026-04-24T14:36:00",
             dialogmeldinger =
                 listOf(
                     ApiDialogmelding(
-                        tittel = "Forespørsel om dokumentasjon",
+                        fagomrade = ApiFagomrade.TILBAKEDATERING,
+                        meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
                         melding = "Takk for tilsendt dokumentasjon. Vi trenger noen tilleggsopplysninger om " + "pasientens funksjonsnivå og eventuelle tilretteleggingsmuligheter på " + "arbeidsplassen. Kan dere gi en nærmere vurdering av dette?",
                         tid = "2026-04-24T14:36:00",
                         fraNav = true,
                         vedlegg = emptyList(),
                     ),
                     ApiDialogmelding(
-                        tittel = "Svar på forespørsel",
+                        fagomrade = ApiFagomrade.TILBAKEDATERING,
+                        meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
                         melding = "Hei, vedlagt finner dere den forespurte dokumentasjonen. Jeg har lagt ved " + "relevant journaldokumentasjon og vurdering av pasientens tilstand. " + "Ta gjerne kontakt dersom dere trenger ytterligere opplysninger.",
                         tid = "2026-04-22T07:21:00",
                         fraNav = false,
@@ -307,7 +320,8 @@ private fun initialMockData(): List<InternalDialog> =
                             ),
                     ),
                     ApiDialogmelding(
-                        tittel = "Ytterligere dokumentasjon",
+                        fagomrade = ApiFagomrade.TILBAKEDATERING,
+                        meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
                         melding = "Hei, vi behandler saken til Mia Cathrine Svendsen og trenger ytterligere " + "dokumentasjon for å kunne fatte et vedtak. Kan dere sende over relevant " + "dokumentasjon som belyser pasientens tilstand og arbeidsevne?",
                         tid = "2026-04-20T09:15:00",
                         fraNav = true,
@@ -320,13 +334,15 @@ private fun initialMockData(): List<InternalDialog> =
             identitetsnummer = "13066612345",
             behandler = BEHANDLER_LINUS,
             fagomrade = ApiFagomrade.ENKELTSTAENDE_BEHANDLINGSDAGER,
+            meldingstype = ApiDialogmeldingType.SPESIALISTERKLAERING,
             status = ApiDialogmeldingStatus.MOTTATT,
             tittel = "Oppfølging etter sykmelding",
             tid = "2026-04-20T08:30:00",
             dialogmeldinger =
                 listOf(
                     ApiDialogmelding(
-                        tittel = "Oppfølging etter sykmelding",
+                        fagomrade = ApiFagomrade.ENKELTSTAENDE_BEHANDLINGSDAGER,
+                        meldingstype = ApiDialogmeldingType.SPESIALISTERKLAERING,
                         melding = "Vi ønsker en oppdatering på pasientens tilstand og forventet varighet på sykmeldingen.",
                         tid = "2026-04-20T08:30:00",
                         fraNav = true,
@@ -339,20 +355,23 @@ private fun initialMockData(): List<InternalDialog> =
             identitetsnummer = "07089912345",
             behandler = BEHANDLER_SOLVEIG,
             fagomrade = ApiFagomrade.YRKESSKADE,
+            meldingstype = ApiDialogmeldingType.GJELDER_PASIENT,
             status = ApiDialogmeldingStatus.MOTTATT,
             tittel = "Forespørsel om dokumentasjon",
             tid = "2026-04-24T14:36:00",
             dialogmeldinger =
                 listOf(
                     ApiDialogmelding(
-                        tittel = "Forespørsel om dokumentasjon",
+                        fagomrade = ApiFagomrade.YRKESSKADE,
+                        meldingstype = ApiDialogmeldingType.GJELDER_PASIENT,
                         melding = "Vi ber om dokumentasjon knyttet til pasientens diagnose og behandlingsplan.",
                         tid = "2026-04-24T14:36:00",
                         fraNav = true,
                         vedlegg = emptyList(),
                     ),
                     ApiDialogmelding(
-                        tittel = "Svar med vedlegg",
+                        fagomrade = ApiFagomrade.YRKESSKADE,
+                        meldingstype = ApiDialogmeldingType.GJELDER_PASIENT,
                         melding = "Vedlagt sender jeg etterspurt dokumentasjon.",
                         tid = "2026-04-23T10:49:00",
                         fraNav = false,
@@ -365,20 +384,23 @@ private fun initialMockData(): List<InternalDialog> =
             identitetsnummer = "25057812345",
             behandler = BEHANDLER_CHRISTIAN,
             fagomrade = ApiFagomrade.BESTRIDELSE,
+            meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
             status = ApiDialogmeldingStatus.PURRING_SENDT,
             tittel = "Sykmeldingsopplysninger",
             tid = "2026-04-10T09:00:00",
             dialogmeldinger =
                 listOf(
                     ApiDialogmelding(
-                        tittel = "Sykmeldingsopplysninger",
+                        fagomrade = ApiFagomrade.BESTRIDELSE,
+                        meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
                         melding = "Vi ønsker mer informasjon om diagnosen og prognosen for tilbakekomst til arbeid.",
                         tid = "2026-04-10T09:00:00",
                         fraNav = true,
                         vedlegg = emptyList(),
                     ),
                     ApiDialogmelding(
-                        tittel = "Svar",
+                        fagomrade = ApiFagomrade.BESTRIDELSE,
+                        meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
                         melding = "Pasienten er sykmeldt grunnet rygglidelse. Prognosen er god, forventet tilbakekomst om 6–8 uker.",
                         tid = "2026-04-08T13:15:00",
                         fraNav = false,
@@ -391,20 +413,23 @@ private fun initialMockData(): List<InternalDialog> =
             identitetsnummer = "25057812345",
             behandler = BEHANDLER_CHRISTIAN,
             fagomrade = ApiFagomrade.BESTRIDELSE,
+            meldingstype = ApiDialogmeldingType.SPESIALISTERKLAERING,
             status = ApiDialogmeldingStatus.FERDIGSTILT,
             tittel = "Vurdering av arbeidsevne",
             tid = "2026-04-05T11:00:00",
             dialogmeldinger =
                 listOf(
                     ApiDialogmelding(
-                        tittel = "Vurdering av arbeidsevne",
+                        fagomrade = ApiFagomrade.BESTRIDELSE,
+                        meldingstype = ApiDialogmeldingType.SPESIALISTERKLAERING,
                         melding = "Kan dere gi en vurdering av pasientens nåværende arbeidsevne og muligheter for gradert sykmelding?",
                         tid = "2026-04-05T11:00:00",
                         fraNav = true,
                         vedlegg = emptyList(),
                     ),
                     ApiDialogmelding(
-                        tittel = "Svar på vurdering",
+                        fagomrade = ApiFagomrade.BESTRIDELSE,
+                        meldingstype = ApiDialogmeldingType.SPESIALISTERKLAERING,
                         melding = "Pasienten kan på det nåværende tidspunkt ikke benytte seg av gradert sykmelding, " + "men vi vil revurdere dette om 2 uker.",
                         tid = "2026-04-04T10:00:00",
                         fraNav = false,
@@ -417,13 +442,15 @@ private fun initialMockData(): List<InternalDialog> =
             identitetsnummer = "25057812345",
             behandler = BEHANDLER_CHRISTIAN,
             fagomrade = ApiFagomrade.TILBAKEDATERING,
+            meldingstype = ApiDialogmeldingType.GJELDER_PASIENT,
             status = ApiDialogmeldingStatus.SENDT,
             tittel = "Bekreftelse på behandlingsplan",
             tid = "2026-03-28T14:00:00",
             dialogmeldinger =
                 listOf(
                     ApiDialogmelding(
-                        tittel = "Bekreftelse på behandlingsplan",
+                        fagomrade = ApiFagomrade.TILBAKEDATERING,
+                        meldingstype = ApiDialogmeldingType.GJELDER_PASIENT,
                         melding = "Vi ber om bekreftelse på at behandlingsplanen er iverksatt.",
                         tid = "2026-03-28T14:00:00",
                         fraNav = true,

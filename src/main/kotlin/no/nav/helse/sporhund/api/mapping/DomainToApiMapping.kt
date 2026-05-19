@@ -1,12 +1,6 @@
 package no.nav.helse.sporhund.api.mapping
 
-import no.nav.helse.sporhund.api.ApiBehandler
-import no.nav.helse.sporhund.api.ApiBehandlerKategori
-import no.nav.helse.sporhund.api.ApiBehandlerNavn
-import no.nav.helse.sporhund.api.ApiDialogDetails
-import no.nav.helse.sporhund.api.ApiDialogOppsummering
-import no.nav.helse.sporhund.api.ApiDialogmelding
-import no.nav.helse.sporhund.api.ApiLegekontor
+import no.nav.helse.sporhund.api.*
 import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 
@@ -37,10 +31,8 @@ fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
                     ),
                 telefonnummer = behandler.telefonnummer?.value,
             ),
-        tittel =
-            meldinger.firstOrNull()?.melding?.take(60)
-                ?: "Tittel",
-        // Venter på liste under fagområdekategoriene for å lage tittel
+        fagomrade = ApiFagomrade.TILBAKEDATERING,
+        meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
         tid = meldinger.firstOrNull()?.tidspunkt?.toString() ?: "",
         antallMeldinger = meldinger.size,
         antallVedlegg = meldinger.filterIsInstance<Dialogmelding.FraBehandler>().sumOf { it.antallVedlegg },
@@ -74,12 +66,12 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
                     ),
                 telefonnummer = behandler.telefonnummer?.value,
             ),
-        tittel = meldinger.firstOrNull()?.melding?.take(60) ?: "Tittel",
         tid = meldinger.firstOrNull()?.tidspunkt?.toString() ?: "",
         dialogmeldinger =
             meldinger.map { dialogmelding ->
                 ApiDialogmelding(
-                    tittel = dialogmelding.melding.take(60),
+                    fagomrade = ApiFagomrade.TILBAKEDATERING,
+                    meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
                     melding = dialogmelding.melding,
                     tid = dialogmelding.tidspunkt.toString(),
                     fraNav = dialogmelding is Dialogmelding.FraNav,
