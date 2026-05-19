@@ -18,11 +18,11 @@ import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.Dialogmelding
 import java.util.*
 
-fun Route.postSvarPaDialogRoute(
+fun Route.postSvarPåDialogRoute(
     personPseudoIdProvider: ValkeyPersonPseudoIdProvider,
     transactionProvider: TransactionProvider,
 ) {
-    post("/personer/{pseudoId}/dialogmeldinger/{conversationRef}/svar", {
+    post("/personer/{pseudoId}/dialogmeldinger/{conversationRef}", {
         operationId = "postSvarPaDialog"
         description = "Svar på en eksisterende dialog"
         request {
