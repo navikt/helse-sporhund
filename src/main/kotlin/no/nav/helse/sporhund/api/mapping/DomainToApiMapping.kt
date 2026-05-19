@@ -1,6 +1,8 @@
 package no.nav.helse.sporhund.api.mapping
 
 import no.nav.helse.sporhund.api.*
+import no.nav.helse.sporhund.domain.Behandler
+import no.nav.helse.sporhund.domain.BehandlerRef
 import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 
@@ -11,26 +13,7 @@ fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
     return ApiDialogOppsummering(
         id = conversationRef.value.toString(),
         behandler =
-            ApiBehandler(
-                id = behandlerRef.value,
-                navn =
-                    ApiBehandlerNavn(
-                        fornavn = behandler.navn.fornavn,
-                        mellomnavn = behandler.navn.mellomnavn,
-                        etternavn = behandler.navn.etternavn,
-                    ),
-                type = null,
-                kategori = ApiBehandlerKategori.LEGE,
-                legekontor =
-                    ApiLegekontor(
-                        kontor = behandler.kontor.navn,
-                        orgnummer = behandler.kontor.organisasjonsnummer?.value,
-                        adresse = behandler.kontor.adresse?.veiadresse,
-                        postnummer = behandler.kontor.adresse?.postnummer,
-                        poststed = behandler.kontor.adresse?.poststed,
-                    ),
-                telefonnummer = behandler.telefonnummer?.value,
-            ),
+            behandler.tilApiBehandler(behandlerRef),
         fagomrade = ApiFagomrade.TILBAKEDATERING,
         meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
         tid = meldinger.firstOrNull()?.tidspunkt?.toString() ?: "",
@@ -46,26 +29,7 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
     return ApiDialogDetails(
         id = conversationRef.value.toString(),
         behandler =
-            ApiBehandler(
-                id = behandlerRef.value,
-                navn =
-                    ApiBehandlerNavn(
-                        fornavn = behandler.navn.fornavn,
-                        mellomnavn = behandler.navn.mellomnavn,
-                        etternavn = behandler.navn.etternavn,
-                    ),
-                type = null,
-                kategori = ApiBehandlerKategori.LEGE,
-                legekontor =
-                    ApiLegekontor(
-                        kontor = behandler.kontor.navn,
-                        orgnummer = behandler.kontor.organisasjonsnummer?.value,
-                        adresse = behandler.kontor.adresse?.veiadresse,
-                        postnummer = behandler.kontor.adresse?.postnummer,
-                        poststed = behandler.kontor.adresse?.poststed,
-                    ),
-                telefonnummer = behandler.telefonnummer?.value,
-            ),
+            behandler.tilApiBehandler(behandlerRef),
         tid = meldinger.firstOrNull()?.tidspunkt?.toString() ?: "",
         dialogmeldinger =
             meldinger.map { dialogmelding ->
@@ -80,3 +44,27 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
             },
     )
 }
+
+private fun Behandler.tilApiBehandler(
+    behandlerRef: BehandlerRef,
+): ApiBehandler =
+    ApiBehandler(
+        id = behandlerRef.value,
+        navn =
+            ApiBehandlerNavn(
+                fornavn = navn.fornavn,
+                mellomnavn = navn.mellomnavn,
+                etternavn = navn.etternavn,
+            ),
+        type = null,
+        kategori = ApiBehandlerKategori.LEGE,
+        legekontor =
+            ApiLegekontor(
+                kontor = kontor.navn,
+                orgnummer = kontor.organisasjonsnummer?.value,
+                adresse = kontor.adresse?.veiadresse,
+                postnummer = kontor.adresse?.postnummer,
+                poststed = kontor.adresse?.poststed,
+            ),
+        telefonnummer = telefonnummer?.value,
+    )
