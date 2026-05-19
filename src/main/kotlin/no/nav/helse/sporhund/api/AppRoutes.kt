@@ -197,25 +197,27 @@ fun Routing.appRoutes(
                 val saksbehandler = call.saksbehandler()
                 val conversationRef = ConversationRef(UUID.fromString(call.parameters["conversationRef"]!!))
                 val svar = call.receive<ApiSvarPaDialog>()
-                val oppdatertDialog = transactionProvider.transaction {
-                    val dialog = dialogRepository.finnDialog(conversationRef)
-                        ?: return@transaction null
-                    val forsteFraNav = dialog.meldinger.filterIsInstance<Dialogmelding.FraNav>().first()
-                    dialog.nyMelding(
-                        Dialogmelding.FraNav.ny(
-                            saksbehandler.ident,
-                            forsteFraNav.behandler,
-                            forsteFraNav.behandlerRef,
-                            svar.melding,
+                val oppdatertDialog =
+                    transactionProvider.transaction {
+                        val dialog =
+                            dialogRepository.finnDialog(conversationRef)
+                                ?: return@transaction null
+                        val forsteFraNav = dialog.meldinger.filterIsInstance<Dialogmelding.FraNav>().first()
+                        dialog.nyMelding(
+                            Dialogmelding.FraNav.ny(
+                                saksbehandler.ident,
+                                forsteFraNav.behandler,
+                                forsteFraNav.behandlerRef,
+                                svar.melding,
+                            ),
                         )
-                    )
-                    dialogRepository.lagre(dialog)
-                    val events = dialog.events()
-                    events.forEach {
-                        outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
+                        dialogRepository.lagre(dialog)
+                        val events = dialog.events()
+                        events.forEach {
+                            outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
+                        }
+                        dialog
                     }
-                    dialog
-                }
                 if (oppdatertDialog != null) {
                     call.respond(HttpStatusCode.Created, oppdatertDialog.tilApiDialogDetails())
                 } else {
