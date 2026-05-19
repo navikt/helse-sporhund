@@ -227,9 +227,9 @@ class PgDialogRepository(
         }
 
         data class AdresseDto(
-            val veiadresse: String,
-            val postnummer: String,
-            val poststed: String,
+            val veiadresse: String?,
+            val postnummer: String?,
+            val poststed: String?,
         ) {
             fun tilDomene() = Adresse(veiadresse = veiadresse, postnummer = postnummer, poststed = poststed)
         }

@@ -26,8 +26,8 @@ fun ApiNyDialogmelding.tilBehandler(): Behandler {
                     legekontor.adresse?.let {
                         Adresse(
                             veiadresse = it,
-                            postnummer = requireNotNull(legekontor.postnummer),
-                            poststed = requireNotNull(legekontor.poststed),
+                            postnummer = legekontor.postnummer,
+                            poststed = legekontor.poststed,
                         )
                     },
             ),

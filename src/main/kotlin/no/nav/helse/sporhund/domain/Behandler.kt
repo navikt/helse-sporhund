@@ -20,7 +20,7 @@ data class Kontor(
 )
 
 data class Adresse(
-    val veiadresse: String,
-    val postnummer: String,
-    val poststed: String,
+    val veiadresse: String?,
+    val postnummer: String?,
+    val poststed: String?,
 )
