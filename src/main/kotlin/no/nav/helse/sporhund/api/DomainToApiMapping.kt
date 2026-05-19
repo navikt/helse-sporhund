@@ -43,34 +43,38 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
     val behandlerRef = forsteFraNav.behandlerRef
     return ApiDialogDetails(
         id = conversationRef.value.toString(),
-        behandler = ApiBehandler(
-            id = behandlerRef.value,
-            navn = ApiBehandlerNavn(
-                fornavn = behandler.navn.fornavn,
-                mellomnavn = behandler.navn.mellomnavn,
-                etternavn = behandler.navn.etternavn,
+        behandler =
+            ApiBehandler(
+                id = behandlerRef.value,
+                navn =
+                    ApiBehandlerNavn(
+                        fornavn = behandler.navn.fornavn,
+                        mellomnavn = behandler.navn.mellomnavn,
+                        etternavn = behandler.navn.etternavn,
+                    ),
+                type = null,
+                kategori = ApiBehandlerKategori.LEGE,
+                legekontor =
+                    ApiLegekontor(
+                        kontor = behandler.kontor.navn,
+                        orgnummer = behandler.kontor.organisasjonsnummer?.value,
+                        adresse = behandler.kontor.adresse?.veiadresse,
+                        postnummer = behandler.kontor.adresse?.postnummer,
+                        poststed = behandler.kontor.adresse?.poststed,
+                    ),
+                telefonnummer = behandler.telefonnummer?.value,
             ),
-            type = null,
-            kategori = ApiBehandlerKategori.LEGE,
-            legekontor = ApiLegekontor(
-                kontor = behandler.kontor.navn,
-                orgnummer = behandler.kontor.organisasjonsnummer?.value,
-                adresse = behandler.kontor.adresse?.veiadresse,
-                postnummer = behandler.kontor.adresse?.postnummer,
-                poststed = behandler.kontor.adresse?.poststed,
-            ),
-            telefonnummer = behandler.telefonnummer?.value,
-        ),
         tittel = meldinger.firstOrNull()?.melding?.take(60) ?: "Tittel",
         tid = meldinger.firstOrNull()?.tidspunkt?.toString() ?: "",
-        dialogmeldinger = meldinger.map { dialogmelding ->
-            ApiDialogmelding(
-                tittel = dialogmelding.melding.take(60),
-                melding = dialogmelding.melding,
-                tid = dialogmelding.tidspunkt.toString(),
-                fraNav = dialogmelding is Dialogmelding.FraNav,
-                vedlegg = emptyList(),
-            )
-        },
+        dialogmeldinger =
+            meldinger.map { dialogmelding ->
+                ApiDialogmelding(
+                    tittel = dialogmelding.melding.take(60),
+                    melding = dialogmelding.melding,
+                    tid = dialogmelding.tidspunkt.toString(),
+                    fraNav = dialogmelding is Dialogmelding.FraNav,
+                    vedlegg = emptyList(),
+                )
+            },
     )
 }

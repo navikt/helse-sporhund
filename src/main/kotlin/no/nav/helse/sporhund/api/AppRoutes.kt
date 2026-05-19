@@ -104,9 +104,10 @@ fun Routing.appRoutes(
                     return@get
                 }
                 val conversationRef = call.parameters["conversationRef"]!!
-                val dialog = transactionProvider.transaction {
-                    dialogRepository.finnDialog(ConversationRef(UUID.fromString(conversationRef)))
-                }
+                val dialog =
+                    transactionProvider.transaction {
+                        dialogRepository.finnDialog(ConversationRef(UUID.fromString(conversationRef)))
+                    }
                 if (dialog != null) {
                     call.respond(dialog.tilApiDialogDetails())
                 } else {
