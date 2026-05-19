@@ -1,7 +1,6 @@
 package no.nav.helse.sporhund.api
 
 import java.time.LocalDateTime
-import java.util.*
 
 // === Behandler types ===
 
@@ -141,80 +140,7 @@ private data class InternalDialog(
 object MockStore {
     private val data: MutableList<InternalDialog> = initialMockData().toMutableList()
 
-    fun hentOversikt(): List<ApiDialogOppsummering> = data.map { it.tilOversikt() }
-
     fun hentOppgaver(): List<ApiDialogmeldingOppgave> = data.map { it.tilOppgave() }
-
-    fun hentDialog(dialogId: String): ApiDialogDetails? = data.find { it.id == dialogId }?.tilDialogDetails()
-
-    fun leggTilMelding(
-        ny: ApiNyDialogmelding,
-        identitetsnummer: String,
-    ): ApiDialogDetails {
-        val nyInternalDialog =
-            InternalDialog(
-                id = UUID.randomUUID().toString(),
-                identitetsnummer = identitetsnummer,
-                behandler = ny.behandler,
-                fagomrade = ny.fagomrade,
-                meldingstype = ny.meldingstype,
-                status = ApiDialogmeldingStatus.SENDT,
-                tittel = ny.fagomrade.tittel,
-                tid = LocalDateTime.now().toString(),
-                dialogmeldinger =
-                    listOf(
-                        ApiDialogmelding(
-                            fagomrade = ny.fagomrade,
-                            meldingstype = ny.meldingstype,
-                            melding = ny.melding,
-                            tid = LocalDateTime.now().toString(),
-                            fraNav = true,
-                            vedlegg = emptyList(),
-                        ),
-                    ),
-            )
-        data.add(nyInternalDialog)
-        return nyInternalDialog.tilDialogDetails()
-    }
-
-    fun svarPåDialog(
-        dialogId: String,
-        svar: ApiSvarPaDialog,
-    ): ApiDialogDetails? {
-        val index = data.indexOfFirst { it.id == dialogId }
-        if (index < 0) return null
-        val dialog = data[index]
-        val nyMelding =
-            ApiDialogmelding(
-                fagomrade = dialog.fagomrade,
-                meldingstype = dialog.meldingstype,
-                melding = svar.melding,
-                tid = LocalDateTime.now().toString(),
-                fraNav = true,
-                vedlegg = emptyList(),
-            )
-        data[index] = dialog.copy(dialogmeldinger = dialog.dialogmeldinger + nyMelding)
-        return data[index].tilDialogDetails()
-    }
-
-    private fun InternalDialog.tilOversikt() =
-        ApiDialogOppsummering(
-            id = id,
-            behandler = behandler,
-            fagomrade = fagomrade,
-            meldingstype = meldingstype,
-            tid = tid,
-            antallMeldinger = dialogmeldinger.size,
-            antallVedlegg = dialogmeldinger.sumOf { it.vedlegg.size },
-        )
-
-    private fun InternalDialog.tilDialogDetails() =
-        ApiDialogDetails(
-            id = id,
-            behandler = behandler,
-            tid = tid,
-            dialogmeldinger = dialogmeldinger,
-        )
 
     private fun InternalDialog.tilOppgave() =
         ApiDialogmeldingOppgave(
