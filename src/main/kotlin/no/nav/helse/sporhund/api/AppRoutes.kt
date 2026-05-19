@@ -188,13 +188,36 @@ fun Routing.appRoutes(
                     }
                 }
             }) {
-//                        val pseudoId = call.parameters["pseudoId"]
-//                        veksle pseudoId med fødselsnummer her
-                val conversationRef = call.parameters["conversationRef"]!!
+                val pseudoId = call.personPseudoId()
+                val identitetsnummer = personPseudoIdProvider.hentIdentitetsnummer(pseudoId)
+                if (identitetsnummer == null) {
+                    call.respond(HttpStatusCode.NotFound)
+                    return@post
+                }
+                val saksbehandler = call.saksbehandler()
+                val conversationRef = ConversationRef(UUID.fromString(call.parameters["conversationRef"]!!))
                 val svar = call.receive<ApiSvarPaDialog>()
-                val oppdatert = MockStore.svarPåDialog(conversationRef, svar)
-                if (oppdatert != null) {
-                    call.respond(HttpStatusCode.Created, oppdatert)
+                val oppdatertDialog = transactionProvider.transaction {
+                    val dialog = dialogRepository.finnDialog(conversationRef)
+                        ?: return@transaction null
+                    val forsteFraNav = dialog.meldinger.filterIsInstance<Dialogmelding.FraNav>().first()
+                    dialog.nyMelding(
+                        Dialogmelding.FraNav.ny(
+                            saksbehandler.ident,
+                            forsteFraNav.behandler,
+                            forsteFraNav.behandlerRef,
+                            svar.melding,
+                        )
+                    )
+                    dialogRepository.lagre(dialog)
+                    val events = dialog.events()
+                    events.forEach {
+                        outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
+                    }
+                    dialog
+                }
+                if (oppdatertDialog != null) {
+                    call.respond(HttpStatusCode.Created, oppdatertDialog.tilApiDialogDetails())
                 } else {
                     call.respond(HttpStatusCode.NotFound)
                 }
