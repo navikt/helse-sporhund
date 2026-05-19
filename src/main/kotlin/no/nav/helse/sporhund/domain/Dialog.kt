@@ -8,9 +8,17 @@ value class ConversationRef(
     val value: UUID,
 )
 
+enum class Dialogstatus {
+    ForespørselSendt,
+    SvarMottatt,
+    PurringSendt,
+    DialogLukket,
+}
+
 class Dialog private constructor(
     val conversationRef: ConversationRef,
     val identitetsnummer: Identitetsnummer,
+    val status: Dialogstatus,
     meldinger: List<Dialogmelding>,
 ) {
     private val _meldinger = meldinger.toMutableList()
@@ -44,13 +52,15 @@ class Dialog private constructor(
                 conversationRef = ConversationRef(UUID.randomUUID()),
                 identitetsnummer = identitetsnummer,
                 meldinger = emptyList(),
+                status = Dialogstatus.ForespørselSendt,
             ).also { it.nyMelding(melding) }
 
         fun fraLagring(
             conversationRef: ConversationRef,
             identitetsnummer: Identitetsnummer,
             meldinger: List<Dialogmelding>,
-        ): Dialog = Dialog(conversationRef, identitetsnummer, meldinger)
+            status: Dialogstatus,
+        ): Dialog = Dialog(conversationRef, identitetsnummer, status, meldinger)
     }
 }
 

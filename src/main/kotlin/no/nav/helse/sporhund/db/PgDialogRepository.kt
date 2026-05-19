@@ -12,6 +12,7 @@ import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.domain.DialogmeldingId
+import no.nav.helse.sporhund.domain.Dialogstatus
 import no.nav.helse.sporhund.domain.HprNummer
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.domain.Kontor
@@ -63,12 +64,14 @@ class PgDialogRepository(
         val conversationRef: UUID,
         val identitetsnummer: IdentitetsnummerDto,
         val meldinger: List<DialogmeldingDto>,
+        val status: DialogstatusDto,
     ) {
         fun tilDomene(): Dialog =
             Dialog.fraLagring(
                 conversationRef = ConversationRef(conversationRef),
                 identitetsnummer = identitetsnummer.tilDomene(),
                 meldinger = meldinger.map { it.tilDomene() },
+                status = status.tilDomene(),
             )
 
         companion object {
@@ -77,6 +80,7 @@ class PgDialogRepository(
                     conversationRef = dialog.conversationRef.value,
                     identitetsnummer = IdentitetsnummerDto.fraIdentitetsnummer(dialog.identitetsnummer),
                     meldinger = dialog.meldinger.map { DialogmeldingDto.fraDialogmelding(it) },
+                    status = DialogstatusDto.fraDialogstatus(dialog.status),
                 )
         }
     }
@@ -112,6 +116,31 @@ class PgDialogRepository(
                 when (identitetsnummer) {
                     is no.nav.helse.sporhund.domain.Fødselsnummer -> Fødselsnummer(identitetsnummer.value)
                     is no.nav.helse.sporhund.domain.DNummer -> DNummer(identitetsnummer.value)
+                }
+        }
+    }
+
+    private enum class DialogstatusDto {
+        ForespørselSendt,
+        SvarMottatt,
+        PurringSendt,
+        DialogLukket, ;
+
+        fun tilDomene(): Dialogstatus =
+            when (this) {
+                ForespørselSendt -> Dialogstatus.ForespørselSendt
+                SvarMottatt -> Dialogstatus.SvarMottatt
+                PurringSendt -> Dialogstatus.PurringSendt
+                DialogLukket -> Dialogstatus.DialogLukket
+            }
+
+        companion object {
+            fun fraDialogstatus(dialogstatus: Dialogstatus): DialogstatusDto =
+                when (dialogstatus) {
+                    Dialogstatus.ForespørselSendt -> ForespørselSendt
+                    Dialogstatus.SvarMottatt -> SvarMottatt
+                    Dialogstatus.PurringSendt -> PurringSendt
+                    Dialogstatus.DialogLukket -> DialogLukket
                 }
         }
     }
