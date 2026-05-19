@@ -13,15 +13,15 @@ import no.nav.helse.sporhund.api.personPseudoId
 import no.nav.helse.sporhund.api.saksbehandler
 import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.OutboxMeldingId
+import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
-import no.nav.helse.sporhund.clients.personpseudoid.ValkeyPersonPseudoIdProvider
 import no.nav.helse.sporhund.domain.BehandlerRef
 import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 import java.util.*
 
 fun Route.postNyDialogmeldingRoute(
-    personPseudoIdProvider: ValkeyPersonPseudoIdProvider,
+    personPseudoIdProvider: PersonPseudoIdProvider,
     transactionProvider: TransactionProvider,
 ) {
     post("/personer/{pseudoId}/dialogmelding", {

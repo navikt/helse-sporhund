@@ -7,13 +7,13 @@ import io.ktor.server.routing.*
 import no.nav.helse.sporhund.api.ApiDialogDetails
 import no.nav.helse.sporhund.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.api.personPseudoId
+import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
-import no.nav.helse.sporhund.clients.personpseudoid.ValkeyPersonPseudoIdProvider
 import no.nav.helse.sporhund.domain.ConversationRef
 import java.util.*
 
 fun Route.getDialogmeldingRoute(
-    personPseudoIdProvider: ValkeyPersonPseudoIdProvider,
+    personPseudoIdProvider: PersonPseudoIdProvider,
     transactionProvider: TransactionProvider,
 ) {
     get("/personer/{pseudoId}/dialogmeldinger/{conversationRef}", {

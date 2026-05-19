@@ -27,6 +27,10 @@ dependencies {
     implementation(libs.auth0.jwt)
 
     testImplementation(kotlin("test"))
+    testImplementation(libs.ktor.server.test.host)
+    testImplementation(libs.ktor.server.content.negotiation)
+    testImplementation(libs.ktor.client.content.negotiation)
+    testImplementation(libs.ktor.serialization.jackson)
     testImplementation(libs.testcontainers.kafka)
     testImplementation(libs.testcontainers.postgres)
     testImplementation(libs.mockOauth2Server)

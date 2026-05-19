@@ -9,11 +9,11 @@ import no.nav.helse.sporhund.api.endepunkter.getDialogmeldingRoute
 import no.nav.helse.sporhund.api.endepunkter.getDialogmeldingerRoute
 import no.nav.helse.sporhund.api.endepunkter.postNyDialogmeldingRoute
 import no.nav.helse.sporhund.api.endepunkter.postSvarPåDialogRoute
+import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
-import no.nav.helse.sporhund.clients.personpseudoid.ValkeyPersonPseudoIdProvider
 
 fun Routing.appRoutes(
-    personPseudoIdProvider: ValkeyPersonPseudoIdProvider,
+    personPseudoIdProvider: PersonPseudoIdProvider,
     transactionProvider: TransactionProvider,
 ) {
     route("/api") {
