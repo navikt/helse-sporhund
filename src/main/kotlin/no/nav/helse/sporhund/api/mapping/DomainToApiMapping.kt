@@ -11,7 +11,7 @@ fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
     val behandler = forsteFraNav.behandler
     val behandlerRef = forsteFraNav.behandlerRef
     return ApiDialogOppsummering(
-        id = conversationRef.value.toString(),
+        conversationRef = conversationRef.value,
         behandler =
             behandler.tilApiBehandler(behandlerRef),
         fagomrade = ApiFagomrade.TILBAKEDATERING,
@@ -27,7 +27,7 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
     val behandler = forsteFraNav.behandler
     val behandlerRef = forsteFraNav.behandlerRef
     return ApiDialogDetails(
-        id = conversationRef.value.toString(),
+        conversationRef = conversationRef.value,
         behandler =
             behandler.tilApiBehandler(behandlerRef),
         tid = meldinger.firstOrNull()?.tidspunkt?.toString() ?: "",

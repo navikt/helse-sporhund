@@ -5,7 +5,6 @@ import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.helse.sporhund.api.ApiDialogmeldingOppgave
-import no.nav.helse.sporhund.api.MockStore
 
 fun Route.getDialogmeldingOppgaverRoute() {
     get("/dialogmelding-oppgaver", {
@@ -18,6 +17,6 @@ fun Route.getDialogmeldingOppgaverRoute() {
             }
         }
     }) {
-        call.respond(MockStore.hentOppgaver())
+        call.respond(emptyList<ApiDialogmeldingOppgave>())
     }
 }
