@@ -7,7 +7,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.helse.sporhund.api.ApiDialogDetails
 import no.nav.helse.sporhund.api.ApiNyDialogmelding
-import no.nav.helse.sporhund.api.MockStore
+import no.nav.helse.sporhund.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.api.mapping.tilBehandler
 import no.nav.helse.sporhund.api.personPseudoId
 import no.nav.helse.sporhund.api.saksbehandler
@@ -20,12 +20,12 @@ import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 import java.util.*
 
-fun Route.postDialogmeldingRoute(
+fun Route.postNyDialogmeldingRoute(
     personPseudoIdProvider: ValkeyPersonPseudoIdProvider,
     transactionProvider: TransactionProvider,
 ) {
     post("/personer/{pseudoId}/dialogmelding", {
-        operationId = "postDialogmelding"
+        operationId = "postNyDialogmelding"
         description = "Send ny dialogmelding"
         request {
             pathParameter<String>("pseudoId") {
@@ -43,22 +43,19 @@ fun Route.postDialogmeldingRoute(
     }) {
         val pseudoId = call.personPseudoId()
         val saksbehandler = call.saksbehandler()
-        // TODO: Kommenterte ut elvisen pga mocken
         val identitetsnummer =
-            personPseudoIdProvider.hentIdentitetsnummer(pseudoId) // ?: error("Fant ikke identitetsnummer for pseudoId $pseudoId")
+            personPseudoIdProvider.hentIdentitetsnummer(pseudoId) ?: error("Fant ikke identitetsnummer for pseudoId $pseudoId")
         val apiDialogmelding = call.receive<ApiNyDialogmelding>()
-        // TODO: Kan fjerne if-en når elvisen over kommenteres inn igjen
-        if (identitetsnummer != null) {
+        val dialog =
             transactionProvider.transaction {
                 val dialog =
                     Dialog.ny(
                         identitetsnummer,
                         Dialogmelding.FraNav.ny(
-                            saksbehandler.ident,
-                            // TODO: Ta vare på adresse for behandler
-                            apiDialogmelding.tilBehandler(),
+                            saksbehandler = saksbehandler.ident,
+                            behandler = apiDialogmelding.tilBehandler(),
                             behandlerRef = BehandlerRef(apiDialogmelding.behandler.id),
-                            apiDialogmelding.melding,
+                            melding = apiDialogmelding.melding,
                         ),
                     )
                 dialogRepository.lagre(dialog)
@@ -66,10 +63,9 @@ fun Route.postDialogmeldingRoute(
                 events.forEach {
                     outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
                 }
+                return@transaction dialog
             }
-        }
 
-        val opprettet = MockStore.leggTilMelding(apiDialogmelding, pseudoId.value.toString())
-        call.respond(HttpStatusCode.Created, opprettet)
+        call.respond(HttpStatusCode.Created, dialog.tilApiDialogDetails())
     }
 }
