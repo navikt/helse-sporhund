@@ -96,4 +96,22 @@ class DialogTest {
 
         assertEquals(purringTidspunkt + Duration.ofDays(21), dialog.frist())
     }
+
+    @Test
+    fun `ferdigstill setter status til lukket`() {
+        val dialog = lagDialog(status = Dialogstatus.ForespørselSendt)
+
+        dialog.ferdigstill()
+
+        assertEquals(Dialogstatus.DialogLukket, dialog.status)
+    }
+
+    @Test
+    fun `gjenåpne setter status til foresporsel sendt`() {
+        val dialog = lagDialog(status = Dialogstatus.DialogLukket)
+
+        dialog.gjenåpne()
+
+        assertEquals(Dialogstatus.ForespørselSendt, dialog.status)
+    }
 }

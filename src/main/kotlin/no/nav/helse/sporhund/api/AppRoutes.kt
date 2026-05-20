@@ -7,6 +7,7 @@ import io.ktor.server.routing.*
 import no.nav.helse.sporhund.api.endepunkter.getDialogmeldingOppgaverRoute
 import no.nav.helse.sporhund.api.endepunkter.getDialogmeldingRoute
 import no.nav.helse.sporhund.api.endepunkter.getDialogmeldingerRoute
+import no.nav.helse.sporhund.api.endepunkter.patchDialogstatusRoute
 import no.nav.helse.sporhund.api.endepunkter.postNyDialogmeldingRoute
 import no.nav.helse.sporhund.api.endepunkter.postSvarPåDialogRoute
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
@@ -30,6 +31,7 @@ fun Routing.appRoutes(
             getDialogmeldingRoute(personPseudoIdProvider, transactionProvider)
             postNyDialogmeldingRoute(personPseudoIdProvider, transactionProvider)
             postSvarPåDialogRoute(personPseudoIdProvider, transactionProvider)
+            patchDialogstatusRoute(personPseudoIdProvider, transactionProvider)
         }
     }
 }

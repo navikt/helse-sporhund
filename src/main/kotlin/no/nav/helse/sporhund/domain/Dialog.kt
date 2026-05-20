@@ -35,11 +35,14 @@ class Dialog private constructor(
     val conversationRef: ConversationRef,
     val identitetsnummer: Identitetsnummer,
     val søkernavn: Navn,
-    val status: Dialogstatus,
+    status: Dialogstatus,
     val fagområde: Fagområde,
     val dialogtype: Dialogtype,
     meldinger: List<Dialogmelding>,
 ) {
+    private var _status: Dialogstatus = status
+    val status get() = _status
+
     private val _meldinger = meldinger.toMutableList()
     val meldinger get() = _meldinger.toList()
 
@@ -48,6 +51,14 @@ class Dialog private constructor(
     fun events() = events.toList().also { events.clear() }
 
     fun nyesteMelding() = meldinger.last()
+
+    fun ferdigstill() {
+        _status = Dialogstatus.DialogLukket
+    }
+
+    fun gjenåpne() {
+        _status = Dialogstatus.SvarMottatt // TODO: Her må vi gjøre noe smartere vel
+    }
 
     private fun førsteMelding() = meldinger.first()
 

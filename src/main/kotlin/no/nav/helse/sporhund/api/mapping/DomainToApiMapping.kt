@@ -26,13 +26,7 @@ fun Dialog.tilApiDialogmeldingOppgave(personPseudoId: PersonPseudoId): ApiDialog
         fagomrade = this.tilApiFagomrade(),
         meldingstype = this.tilApiDialogmeldingType(),
         soker = this.søkernavn.tilApiNavn(),
-        status =
-            when (status) {
-                Dialogstatus.ForespørselSendt -> ApiDialogmeldingStatus.SENDT
-                Dialogstatus.PurringSendt -> ApiDialogmeldingStatus.PURRING_SENDT
-                Dialogstatus.SvarMottatt -> ApiDialogmeldingStatus.MOTTATT
-                Dialogstatus.DialogLukket -> ApiDialogmeldingStatus.FERDIGSTILT
-            },
+        status = status.tilApiDialogmeldingStatus(),
     )
 
 fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
@@ -42,6 +36,7 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
         behandler =
             opprinneligBehandler.tilApiBehandler(opprinneligBehandlerRef),
         opprettetTidspunkt = this.opprettetTidspunkt(),
+        status = status.tilApiDialogmeldingStatus(),
         dialogmeldinger =
             meldinger.map { dialogmelding ->
                 ApiDialogmelding(
@@ -55,6 +50,14 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
             },
     )
 }
+
+private fun Dialogstatus.tilApiDialogmeldingStatus(): ApiDialogmeldingStatus =
+    when (this) {
+        Dialogstatus.ForespørselSendt -> ApiDialogmeldingStatus.SENDT
+        Dialogstatus.PurringSendt -> ApiDialogmeldingStatus.PURRING_SENDT
+        Dialogstatus.SvarMottatt -> ApiDialogmeldingStatus.MOTTATT
+        Dialogstatus.DialogLukket -> ApiDialogmeldingStatus.FERDIGSTILT
+    }
 
 private fun Dialog.tilApiFagomrade(): ApiFagomrade =
     when (this.fagområde) {

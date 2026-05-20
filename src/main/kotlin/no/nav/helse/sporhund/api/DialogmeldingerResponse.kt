@@ -63,6 +63,7 @@ data class ApiDialogDetails(
     val conversationRef: UUID,
     val behandler: ApiBehandler,
     val opprettetTidspunkt: Instant,
+    val status: ApiDialogmeldingStatus,
     val dialogmeldinger: List<ApiDialogmelding>,
 )
 
@@ -123,4 +124,8 @@ data class ApiNyDialogmelding(
 
 data class ApiSvarPaDialog(
     val melding: String,
+)
+
+data class ApiOppdaterDialogStatus(
+    val ferdigstilt: Boolean,
 )
