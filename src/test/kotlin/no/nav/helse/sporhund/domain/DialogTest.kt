@@ -2,6 +2,8 @@ package no.nav.helse.sporhund.domain
 
 import no.nav.helse.sporhund.domain.testhelpers.lagBehandler
 import no.nav.helse.sporhund.domain.testhelpers.lagBehandlerRef
+import no.nav.helse.sporhund.domain.testhelpers.lagDialog
+import no.nav.helse.sporhund.domain.testhelpers.lagFraNavMelding
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.domain.testhelpers.lagNavIdent
 import java.time.Duration
@@ -35,8 +37,8 @@ class DialogTest {
 
     @Test
     fun `nyesteMelding returnerer den eneste meldingen i en ny dialog`() {
-        val fraNavMelding = nyFraNavMelding()
-        val dialog = Dialog.ny(identitetsnummer = lagIdentitetsnummer(), melding = fraNavMelding)
+        val fraNavMelding = lagFraNavMelding()
+        val dialog = lagDialog(melding = fraNavMelding)
 
         val nyest = dialog.nyesteMelding()
 
@@ -46,8 +48,8 @@ class DialogTest {
 
     @Test
     fun `nyesteMelding returnerer FraBehandler etter at behandler har svart`() {
-        val dialog = Dialog.ny(identitetsnummer = lagIdentitetsnummer(), melding = nyFraNavMelding())
-        val fraBehandlerMelding = nyFraBehandlerMelding()
+        val dialog = lagDialog()
+        val fraBehandlerMelding = lagFraBehandlerMelding()
         dialog.nyMelding(fraBehandlerMelding)
 
         val nyest = dialog.nyesteMelding()
@@ -58,9 +60,9 @@ class DialogTest {
 
     @Test
     fun `nyesteMelding returnerer siste FraNav etter purring`() {
-        val dialog = Dialog.ny(identitetsnummer = lagIdentitetsnummer(), melding = nyFraNavMelding())
-        dialog.nyMelding(nyFraBehandlerMelding())
-        val purring = nyFraNavMelding()
+        val dialog = lagDialog()
+        dialog.nyMelding(lagFraBehandlerMelding())
+        val purring = lagFraNavMelding()
         dialog.nyMelding(purring)
 
         val nyest = dialog.nyesteMelding()
@@ -73,7 +75,7 @@ class DialogTest {
     fun `frist er 21 dager etter den opprinnelige FraNav-meldingen`() {
         val tidspunkt = Instant.parse("2026-05-01T10:00:00Z")
         val fraNavMelding = fraNavMeldingMedTidspunkt(tidspunkt)
-        val dialog = Dialog.ny(identitetsnummer = lagIdentitetsnummer(), melding = fraNavMelding)
+        val dialog = lagDialog(melding = fraNavMelding)
 
         assertEquals(tidspunkt + Duration.ofDays(21), dialog.frist())
     }
@@ -81,8 +83,8 @@ class DialogTest {
     @Test
     fun `frist endres ikke når behandler svarer`() {
         val tidspunkt = Instant.parse("2026-05-01T10:00:00Z")
-        val dialog = Dialog.ny(identitetsnummer = lagIdentitetsnummer(), melding = fraNavMeldingMedTidspunkt(tidspunkt))
-        dialog.nyMelding(nyFraBehandlerMelding())
+        val dialog = lagDialog(melding = fraNavMeldingMedTidspunkt(tidspunkt))
+        dialog.nyMelding(lagFraBehandlerMelding())
 
         assertEquals(tidspunkt + Duration.ofDays(21), dialog.frist())
     }
@@ -91,20 +93,12 @@ class DialogTest {
     fun `frist oppdateres til 21 dager etter purring`() {
         val opprinnelig = Instant.parse("2026-05-01T10:00:00Z")
         val purringTidspunkt = Instant.parse("2026-05-15T10:00:00Z")
-        val dialog = Dialog.ny(identitetsnummer = lagIdentitetsnummer(), melding = fraNavMeldingMedTidspunkt(opprinnelig))
-        dialog.nyMelding(nyFraBehandlerMelding())
+        val dialog = lagDialog(melding = fraNavMeldingMedTidspunkt(opprinnelig))
+        dialog.nyMelding(lagFraBehandlerMelding())
         dialog.nyMelding(fraNavMeldingMedTidspunkt(purringTidspunkt))
 
         assertEquals(purringTidspunkt + Duration.ofDays(21), dialog.frist())
     }
-
-    private fun nyFraNavMelding(): Dialogmelding.FraNav =
-        Dialogmelding.FraNav.ny(
-            saksbehandler = lagNavIdent(),
-            behandler = lagBehandler(),
-            behandlerRef = lagBehandlerRef(),
-            melding = "En melding",
-        )
 
     private fun fraNavMeldingMedTidspunkt(tidspunkt: Instant): Dialogmelding.FraNav =
         Dialogmelding.FraNav.fraLagring(
@@ -116,7 +110,7 @@ class DialogTest {
             behandlerRef = lagBehandlerRef(),
         )
 
-    private fun nyFraBehandlerMelding(): Dialogmelding.FraBehandler =
+    private fun lagFraBehandlerMelding(): Dialogmelding.FraBehandler =
         Dialogmelding.FraBehandler(
             id = DialogmeldingId(UUID.randomUUID()),
             tidspunkt = Instant.now(),

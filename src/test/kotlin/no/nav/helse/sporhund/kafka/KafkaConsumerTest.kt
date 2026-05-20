@@ -11,12 +11,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import no.nav.helse.sporhund.application.InMemoryTransactionProvider
 import no.nav.helse.sporhund.db.objectMapper
-import no.nav.helse.sporhund.domain.Dialog
-import no.nav.helse.sporhund.domain.Dialogmelding
-import no.nav.helse.sporhund.domain.testhelpers.lagBehandler
-import no.nav.helse.sporhund.domain.testhelpers.lagBehandlerRef
-import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
-import no.nav.helse.sporhund.domain.testhelpers.lagNavIdent
+import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.kafka.testhelpers.TestcontainersKafka
 import no.nav.helse.sporhund.kafka.testhelpers.lagDialogmeldingFraBehandlerKafkaDto
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -51,16 +46,7 @@ class KafkaConsumerTest {
     @Test
     fun `knytter gyldig innkommende melding til dialog`() {
         // given
-        val dialog =
-            Dialog.ny(
-                lagIdentitetsnummer(),
-                Dialogmelding.FraNav.ny(
-                    saksbehandler = lagNavIdent(),
-                    behandler = lagBehandler(),
-                    behandlerRef = lagBehandlerRef(),
-                    melding = "En melding fra saksbehandler",
-                ),
-            )
+        val dialog = lagDialog()
         transactionProvider.dialogRepository.lagre(dialog)
 
         // when

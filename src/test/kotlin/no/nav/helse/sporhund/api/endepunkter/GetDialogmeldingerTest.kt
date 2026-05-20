@@ -8,12 +8,8 @@ import io.ktor.server.testing.testApplication
 import no.nav.helse.sporhund.api.ApiDialogOppsummering
 import no.nav.helse.sporhund.api.testhelpers.jsonClient
 import no.nav.helse.sporhund.api.testhelpers.utstedToken
-import no.nav.helse.sporhund.domain.Dialog
-import no.nav.helse.sporhund.domain.Dialogmelding
-import no.nav.helse.sporhund.domain.testhelpers.lagBehandler
-import no.nav.helse.sporhund.domain.testhelpers.lagBehandlerRef
+import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
-import no.nav.helse.sporhund.domain.testhelpers.lagNavIdent
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,11 +22,7 @@ class GetDialogmeldingerTest : EndepunktTest() {
             val identitetsnummer = lagIdentitetsnummer()
             val pseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer)
 
-            val dialog =
-                Dialog.ny(
-                    identitetsnummer,
-                    Dialogmelding.FraNav.ny(lagNavIdent(), lagBehandler(), lagBehandlerRef(), "Hei behandler"),
-                )
+            val dialog = lagDialog(identitetsnummer = identitetsnummer)
             transactionProvider.dialogRepository.lagre(dialog)
 
             setupDefaultTestApp()

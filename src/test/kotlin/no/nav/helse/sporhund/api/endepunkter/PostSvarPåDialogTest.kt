@@ -12,12 +12,8 @@ import no.nav.helse.sporhund.api.ApiDialogDetails
 import no.nav.helse.sporhund.api.ApiSvarPaDialog
 import no.nav.helse.sporhund.api.testhelpers.jsonClient
 import no.nav.helse.sporhund.api.testhelpers.utstedToken
-import no.nav.helse.sporhund.domain.Dialog
-import no.nav.helse.sporhund.domain.Dialogmelding
-import no.nav.helse.sporhund.domain.testhelpers.lagBehandler
-import no.nav.helse.sporhund.domain.testhelpers.lagBehandlerRef
+import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
-import no.nav.helse.sporhund.domain.testhelpers.lagNavIdent
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,11 +25,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
             val identitetsnummer = lagIdentitetsnummer()
             val pseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer)
 
-            val dialog =
-                Dialog.ny(
-                    identitetsnummer,
-                    Dialogmelding.FraNav.ny(lagNavIdent(), lagBehandler(), lagBehandlerRef(), "Første melding"),
-                )
+            val dialog = lagDialog(identitetsnummer = identitetsnummer)
             transactionProvider.dialogRepository.lagre(dialog)
 
             setupDefaultTestApp()

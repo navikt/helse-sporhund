@@ -2,14 +2,12 @@ package no.nav.helse.sporhund.db
 
 import no.nav.helse.sporhund.db.testhelpers.DbTest
 import no.nav.helse.sporhund.domain.ConversationRef
-import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.domain.DialogmeldingId
 import no.nav.helse.sporhund.domain.Dialogstatus
 import no.nav.helse.sporhund.domain.testhelpers.lagBehandler
-import no.nav.helse.sporhund.domain.testhelpers.lagBehandlerRef
-import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
-import no.nav.helse.sporhund.domain.testhelpers.lagNavIdent
+import no.nav.helse.sporhund.domain.testhelpers.lagDialog
+import no.nav.helse.sporhund.domain.testhelpers.lagFraNavMelding
 import org.junit.jupiter.api.AfterEach
 import java.time.Instant
 import java.util.UUID
@@ -30,7 +28,7 @@ class PgDialogRepositoryTest : DbTest() {
     fun `kan lagre og hente dialog med FraNav-melding`() {
         // given
         val repository = sessionContext.dialogRepository
-        val dialog = nyDialogMedFraNavMelding()
+        val dialog = lagDialog()
 
         // when
         repository.lagre(dialog)
@@ -56,7 +54,7 @@ class PgDialogRepositoryTest : DbTest() {
     fun `kan lagre og hente dialog med FraBehandler-melding`() {
         // given
         val repository = sessionContext.dialogRepository
-        val dialog = nyDialogMedFraNavMelding()
+        val dialog = lagDialog()
         val fraBehandlerMelding =
             Dialogmelding.FraBehandler(
                 id = DialogmeldingId(UUID.randomUUID()),
@@ -98,11 +96,11 @@ class PgDialogRepositoryTest : DbTest() {
     fun `oppdaterer eksisterende dialog ved ny lagring (upsert)`() {
         // given
         val repository = sessionContext.dialogRepository
-        val dialog = nyDialogMedFraNavMelding()
+        val dialog = lagDialog()
         repository.lagre(dialog)
 
         // when
-        dialog.nyMelding(nyFraNavMelding())
+        dialog.nyMelding(lagFraNavMelding())
         repository.lagre(dialog)
         val funnet = repository.finnDialog(dialog.conversationRef)
 
@@ -127,7 +125,7 @@ class PgDialogRepositoryTest : DbTest() {
     fun `finnIkkeLukkedeDialoger returnerer dialog som ikke er lukket`() {
         // given
         val repository = sessionContext.dialogRepository
-        val dialog = nyDialogMedFraNavMelding()
+        val dialog = lagDialog()
         repository.lagre(dialog)
 
         // when
@@ -142,13 +140,7 @@ class PgDialogRepositoryTest : DbTest() {
     fun `finnIkkeLukkedeDialoger returnerer ikke dialog med status DialogLukket`() {
         // given
         val repository = sessionContext.dialogRepository
-        val lukketDialog =
-            Dialog.fraLagring(
-                conversationRef = ConversationRef(UUID.randomUUID()),
-                identitetsnummer = lagIdentitetsnummer(),
-                meldinger = listOf(nyFraNavMelding()),
-                status = Dialogstatus.DialogLukket,
-            )
+        val lukketDialog = lagDialog(status = Dialogstatus.DialogLukket)
         repository.lagre(lukketDialog)
 
         // when
@@ -162,14 +154,8 @@ class PgDialogRepositoryTest : DbTest() {
     fun `finnIkkeLukkedeDialoger returnerer kun ikke-lukkede dialoger`() {
         // given
         val repository = sessionContext.dialogRepository
-        val åpenDialog = nyDialogMedFraNavMelding()
-        val lukketDialog =
-            Dialog.fraLagring(
-                conversationRef = ConversationRef(UUID.randomUUID()),
-                identitetsnummer = lagIdentitetsnummer(),
-                meldinger = listOf(nyFraNavMelding()),
-                status = Dialogstatus.DialogLukket,
-            )
+        val åpenDialog = lagDialog()
+        val lukketDialog = lagDialog(status = Dialogstatus.DialogLukket)
         repository.lagre(åpenDialog)
         repository.lagre(lukketDialog)
 
@@ -193,13 +179,7 @@ class PgDialogRepositoryTest : DbTest() {
             )
         val dialoger =
             statuser.map { status ->
-                Dialog
-                    .fraLagring(
-                        conversationRef = ConversationRef(UUID.randomUUID()),
-                        identitetsnummer = lagIdentitetsnummer(),
-                        meldinger = listOf(nyFraNavMelding()),
-                        status = status,
-                    ).also { repository.lagre(it) }
+                lagDialog(status = status).also { repository.lagre(it) }
             }
 
         // when
@@ -212,18 +192,4 @@ class PgDialogRepositoryTest : DbTest() {
             assertTrue(dialog.conversationRef in funnedeRefs)
         }
     }
-
-    private fun nyDialogMedFraNavMelding(): Dialog =
-        Dialog.ny(
-            identitetsnummer = lagIdentitetsnummer(),
-            melding = nyFraNavMelding(),
-        )
-
-    private fun nyFraNavMelding(): Dialogmelding.FraNav =
-        Dialogmelding.FraNav.ny(
-            saksbehandler = lagNavIdent(),
-            behandler = lagBehandler(),
-            behandlerRef = lagBehandlerRef(),
-            melding = "En melding til behandler",
-        )
 }
