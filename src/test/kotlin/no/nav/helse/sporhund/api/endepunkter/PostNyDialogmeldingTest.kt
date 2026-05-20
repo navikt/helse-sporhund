@@ -62,7 +62,7 @@ class PostNyDialogmeldingTest : EndepunktTest() {
                         ),
                     fagomrade = ApiFagomrade.TILBAKEDATERING,
                     melding = "Jeg trenger informasjon om pasienten",
-                    meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
+                    meldingstype = ApiDialogmeldingType.JOURNALNOTAT,
                 )
 
             val response =

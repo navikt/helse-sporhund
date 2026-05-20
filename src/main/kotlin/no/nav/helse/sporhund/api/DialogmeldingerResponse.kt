@@ -105,9 +105,11 @@ enum class ApiFagomrade {
 }
 
 enum class ApiDialogmeldingType {
-    TILLEGGSOPPLYSNINGER,
+    JOURNALNOTAT,
+    MEDISINSKE_OPPLYSNINGER,
+    EKSTRA_UTTALELSER_FRA_LEGE,
     SPESIALISTERKLAERING,
-    GJELDER_PASIENT,
+    UTVIDET_SPESIALISTERKLAERING,
 }
 
 data class ApiNyDialogmelding(

@@ -15,7 +15,7 @@ fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
         behandler =
             behandler.tilApiBehandler(behandlerRef),
         fagomrade = ApiFagomrade.TILBAKEDATERING,
-        meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
+        meldingstype = ApiDialogmeldingType.JOURNALNOTAT,
         tid = meldinger.firstOrNull()?.tidspunkt?.toString() ?: "",
         antallMeldinger = meldinger.size,
         antallVedlegg = meldinger.filterIsInstance<Dialogmelding.FraBehandler>().sumOf { it.antallVedlegg },
@@ -35,7 +35,7 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
             meldinger.map { dialogmelding ->
                 ApiDialogmelding(
                     fagomrade = ApiFagomrade.TILBAKEDATERING,
-                    meldingstype = ApiDialogmeldingType.TILLEGGSOPPLYSNINGER,
+                    meldingstype = ApiDialogmeldingType.JOURNALNOTAT,
                     melding = dialogmelding.melding,
                     tid = dialogmelding.tidspunkt.toString(),
                     fraNav = dialogmelding is Dialogmelding.FraNav,
