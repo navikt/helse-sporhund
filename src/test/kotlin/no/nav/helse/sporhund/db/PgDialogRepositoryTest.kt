@@ -3,13 +3,12 @@ package no.nav.helse.sporhund.db
 import no.nav.helse.sporhund.db.testhelpers.DbTest
 import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.Dialogmelding
-import no.nav.helse.sporhund.domain.DialogmeldingId
 import no.nav.helse.sporhund.domain.Dialogstatus
 import no.nav.helse.sporhund.domain.testhelpers.lagBehandler
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
+import no.nav.helse.sporhund.domain.testhelpers.lagFraBehandlerMelding
 import no.nav.helse.sporhund.domain.testhelpers.lagFraNavMelding
 import org.junit.jupiter.api.AfterEach
-import java.time.Instant
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -56,9 +55,7 @@ class PgDialogRepositoryTest : DbTest() {
         val repository = sessionContext.dialogRepository
         val dialog = lagDialog()
         val fraBehandlerMelding =
-            Dialogmelding.FraBehandler(
-                id = DialogmeldingId(UUID.randomUUID()),
-                tidspunkt = Instant.now(),
+            lagFraBehandlerMelding(
                 melding = "Svar fra behandler",
                 behandler = lagBehandler(),
                 antallVedlegg = 2,

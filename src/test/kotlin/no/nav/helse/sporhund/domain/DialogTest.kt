@@ -3,12 +3,12 @@ package no.nav.helse.sporhund.domain
 import no.nav.helse.sporhund.domain.testhelpers.lagBehandler
 import no.nav.helse.sporhund.domain.testhelpers.lagBehandlerRef
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
+import no.nav.helse.sporhund.domain.testhelpers.lagFraBehandlerMelding
 import no.nav.helse.sporhund.domain.testhelpers.lagFraNavMelding
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.domain.testhelpers.lagNavIdent
 import java.time.Duration
 import java.time.Instant
-import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -21,8 +21,8 @@ class DialogTest {
             Dialog.ny(
                 identitetsnummer = lagIdentitetsnummer(),
                 melding =
-                    Dialogmelding.FraNav.ny(
-                        saksbehandler = lagNavIdent(),
+                    lagFraNavMelding(
+                        ident = lagNavIdent(),
                         behandler = lagBehandler(),
                         behandlerRef = behandlerRef,
                         melding = "En melding",
@@ -74,7 +74,7 @@ class DialogTest {
     @Test
     fun `frist er 21 dager etter den opprinnelige FraNav-meldingen`() {
         val tidspunkt = Instant.parse("2026-05-01T10:00:00Z")
-        val fraNavMelding = fraNavMeldingMedTidspunkt(tidspunkt)
+        val fraNavMelding = lagFraNavMelding(opprettet = tidspunkt)
         val dialog = lagDialog(melding = fraNavMelding)
 
         assertEquals(tidspunkt + Duration.ofDays(21), dialog.frist())
@@ -83,7 +83,7 @@ class DialogTest {
     @Test
     fun `frist endres ikke når behandler svarer`() {
         val tidspunkt = Instant.parse("2026-05-01T10:00:00Z")
-        val dialog = lagDialog(melding = fraNavMeldingMedTidspunkt(tidspunkt))
+        val dialog = lagDialog(melding = lagFraNavMelding(opprettet = tidspunkt))
         dialog.nyMelding(lagFraBehandlerMelding())
 
         assertEquals(tidspunkt + Duration.ofDays(21), dialog.frist())
@@ -93,29 +93,10 @@ class DialogTest {
     fun `frist oppdateres til 21 dager etter purring`() {
         val opprinnelig = Instant.parse("2026-05-01T10:00:00Z")
         val purringTidspunkt = Instant.parse("2026-05-15T10:00:00Z")
-        val dialog = lagDialog(melding = fraNavMeldingMedTidspunkt(opprinnelig))
+        val dialog = lagDialog(melding = lagFraNavMelding(opprettet = opprinnelig))
         dialog.nyMelding(lagFraBehandlerMelding())
-        dialog.nyMelding(fraNavMeldingMedTidspunkt(purringTidspunkt))
+        dialog.nyMelding(lagFraNavMelding(opprettet = purringTidspunkt))
 
         assertEquals(purringTidspunkt + Duration.ofDays(21), dialog.frist())
     }
-
-    private fun fraNavMeldingMedTidspunkt(tidspunkt: Instant): Dialogmelding.FraNav =
-        Dialogmelding.FraNav.fraLagring(
-            id = DialogmeldingId(UUID.randomUUID()),
-            tidspunkt = tidspunkt,
-            melding = "En melding",
-            saksbehandler = lagNavIdent(),
-            behandler = lagBehandler(),
-            behandlerRef = lagBehandlerRef(),
-        )
-
-    private fun lagFraBehandlerMelding(): Dialogmelding.FraBehandler =
-        Dialogmelding.FraBehandler(
-            id = DialogmeldingId(UUID.randomUUID()),
-            tidspunkt = Instant.now(),
-            melding = "Svar fra behandler",
-            behandler = lagBehandler(),
-            antallVedlegg = 0,
-        )
 }
