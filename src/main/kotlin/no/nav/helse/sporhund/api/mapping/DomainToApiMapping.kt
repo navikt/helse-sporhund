@@ -79,7 +79,7 @@ private fun Behandler.tilApiBehandler(
     ApiBehandler(
         id = behandlerRef.value,
         navn =
-            ApiBehandlerNavn(
+            ApiNavn(
                 fornavn = navn.fornavn,
                 mellomnavn = navn.mellomnavn,
                 etternavn = navn.etternavn,

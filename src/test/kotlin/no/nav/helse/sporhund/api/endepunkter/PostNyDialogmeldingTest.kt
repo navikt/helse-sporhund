@@ -10,12 +10,12 @@ import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import no.nav.helse.sporhund.api.ApiBehandler
 import no.nav.helse.sporhund.api.ApiBehandlerKategori
-import no.nav.helse.sporhund.api.ApiBehandlerNavn
 import no.nav.helse.sporhund.api.ApiBehandlerType
 import no.nav.helse.sporhund.api.ApiDialogDetails
 import no.nav.helse.sporhund.api.ApiDialogmeldingType
 import no.nav.helse.sporhund.api.ApiFagomrade
 import no.nav.helse.sporhund.api.ApiLegekontor
+import no.nav.helse.sporhund.api.ApiNavn
 import no.nav.helse.sporhund.api.ApiNyDialogmelding
 import no.nav.helse.sporhund.api.testhelpers.jsonClient
 import no.nav.helse.sporhund.api.testhelpers.utstedToken
@@ -39,10 +39,11 @@ class PostNyDialogmeldingTest : EndepunktTest() {
 
             val nyDialogmelding =
                 ApiNyDialogmelding(
+                    sokernavn = ApiNavn(fornavn = "Slapp", mellomnavn = null, etternavn = "Appelsin"),
                     behandler =
                         ApiBehandler(
                             id = "behandler-123",
-                            navn = ApiBehandlerNavn(fornavn = "Ola", mellomnavn = null, etternavn = "Lege"),
+                            navn = ApiNavn(fornavn = "Ola", mellomnavn = null, etternavn = "Lege"),
                             type = ApiBehandlerType.FASTLEGE,
                             kategori = ApiBehandlerKategori.LEGE,
                             legekontor =

@@ -20,7 +20,7 @@ enum class ApiBehandlerKategori {
     PSYKOLOG,
 }
 
-data class ApiBehandlerNavn(
+data class ApiNavn(
     val fornavn: String,
     val mellomnavn: String?,
     val etternavn: String,
@@ -36,7 +36,7 @@ data class ApiLegekontor(
 
 data class ApiBehandler(
     val id: String,
-    val navn: ApiBehandlerNavn,
+    val navn: ApiNavn,
     val type: ApiBehandlerType?,
     val kategori: ApiBehandlerKategori,
     val legekontor: ApiLegekontor,
@@ -115,6 +115,7 @@ enum class ApiDialogmeldingType {
 
 data class ApiNyDialogmelding(
     val behandler: ApiBehandler,
+    val sokernavn: ApiNavn,
     val fagomrade: ApiFagomrade,
     val meldingstype: ApiDialogmeldingType,
     val melding: String,
