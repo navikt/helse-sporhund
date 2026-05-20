@@ -22,7 +22,7 @@ fun Route.postSvarPåDialogRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
     transactionProvider: TransactionProvider,
 ) {
-    post("/personer/{pseudoId}/dialogmeldinger/{conversationRef}/svar", {
+    post("/personer/{pseudoId}/dialogmeldinger/{conversationRef}", {
         operationId = "postSvarPaDialog"
         description = "Svar på en eksisterende dialog"
         request {

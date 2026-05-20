@@ -45,7 +45,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
 
             val response =
                 client.post(
-                    "/api/personer/${pseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}/svar",
+                    "/api/personer/${pseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}",
                 ) {
                     bearerAuth(token)
                     contentType(ContentType.Application.Json)
@@ -68,7 +68,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
 
             val response =
                 client.post(
-                    "/api/personer/${UUID.randomUUID()}/dialogmeldinger/${UUID.randomUUID()}/svar",
+                    "/api/personer/${UUID.randomUUID()}/dialogmeldinger/${UUID.randomUUID()}",
                 ) {
                     bearerAuth(token)
                     contentType(ContentType.Application.Json)
@@ -91,7 +91,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
 
             val response =
                 client.post(
-                    "/api/personer/${pseudoId.value}/dialogmeldinger/${UUID.randomUUID()}/svar",
+                    "/api/personer/${pseudoId.value}/dialogmeldinger/${UUID.randomUUID()}",
                 ) {
                     bearerAuth(token)
                     contentType(ContentType.Application.Json)
@@ -108,7 +108,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
 
             val response =
                 client.post(
-                    "/api/personer/${UUID.randomUUID()}/dialogmeldinger/${UUID.randomUUID()}/svar",
+                    "/api/personer/${UUID.randomUUID()}/dialogmeldinger/${UUID.randomUUID()}",
                 ) {
                     contentType(ContentType.Application.Json)
                     setBody("{}")
