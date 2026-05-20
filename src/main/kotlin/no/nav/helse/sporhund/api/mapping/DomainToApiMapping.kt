@@ -5,18 +5,15 @@ import no.nav.helse.sporhund.application.PersonPseudoId
 import no.nav.helse.sporhund.domain.*
 
 fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
-    val forsteFraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().first()
-    val behandler = forsteFraNav.behandler
-    val behandlerRef = forsteFraNav.behandlerRef
+    val (opprinneligBehandler, opprinneligBehandlerRef) = this.opprinneligBehandler()
     return ApiDialogOppsummering(
         conversationRef = conversationRef.value,
-        behandler =
-            behandler.tilApiBehandler(behandlerRef),
+        behandler = opprinneligBehandler.tilApiBehandler(opprinneligBehandlerRef),
         fagomrade = ApiFagomrade.TILBAKEDATERING,
         meldingstype = ApiDialogmeldingType.JOURNALNOTAT,
-        tid = meldinger.firstOrNull()?.tidspunkt?.toString() ?: "",
+        opprettetTidspunkt = this.opprettetTidspunkt(),
         antallMeldinger = meldinger.size,
-        antallVedlegg = meldinger.filterIsInstance<Dialogmelding.FraBehandler>().sumOf { it.antallVedlegg },
+        antallVedlegg = this.antallVedleggTotalt(),
     )
 }
 
@@ -39,21 +36,19 @@ fun Dialog.tilApiDialogmeldingOppgave(personPseudoId: PersonPseudoId): ApiDialog
     )
 
 fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
-    val forsteFraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().first()
-    val behandler = forsteFraNav.behandler
-    val behandlerRef = forsteFraNav.behandlerRef
+    val (opprinneligBehandler, opprinneligBehandlerRef) = this.opprinneligBehandler()
     return ApiDialogDetails(
         conversationRef = conversationRef.value,
         behandler =
-            behandler.tilApiBehandler(behandlerRef),
-        tid = meldinger.firstOrNull()?.tidspunkt?.toString() ?: "",
+            opprinneligBehandler.tilApiBehandler(opprinneligBehandlerRef),
+        opprettetTidspunkt = this.opprettetTidspunkt(),
         dialogmeldinger =
             meldinger.map { dialogmelding ->
                 ApiDialogmelding(
                     fagomrade = ApiFagomrade.TILBAKEDATERING,
                     meldingstype = ApiDialogmeldingType.JOURNALNOTAT,
                     melding = dialogmelding.melding,
-                    tid = dialogmelding.tidspunkt.toString(),
+                    sendtTidspunkt = dialogmelding.tidspunkt,
                     fraNav = dialogmelding is Dialogmelding.FraNav,
                     vedlegg = emptyList(),
                 )

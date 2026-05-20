@@ -31,7 +31,15 @@ class Dialog private constructor(
 
     fun nyesteMelding() = meldinger.last()
 
+    private fun førsteMelding() = meldinger.first()
+
     fun frist(): Instant = nyesteMeldingFraNav().tidspunkt + Duration.ofDays(21)
+
+    fun opprettetTidspunkt(): Instant = førsteMelding().tidspunkt
+
+    fun antallVedleggTotalt() = meldinger.filterIsInstance<Dialogmelding.FraBehandler>().sumOf { it.antallVedlegg }
+
+    fun opprinneligBehandler() = førsteMeldingFraNav().behandler to førsteMeldingFraNav().behandlerRef
 
     fun nyMelding(dialogmelding: Dialogmelding) {
         _meldinger.add(dialogmelding)
@@ -49,6 +57,8 @@ class Dialog private constructor(
     }
 
     private fun nyesteMeldingFraNav(): Dialogmelding.FraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().last()
+
+    private fun førsteMeldingFraNav(): Dialogmelding.FraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().first()
 
     companion object {
         fun ny(

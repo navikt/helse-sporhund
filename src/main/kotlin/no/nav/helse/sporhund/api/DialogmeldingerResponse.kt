@@ -54,7 +54,7 @@ data class ApiDialogmelding(
     val fagomrade: ApiFagomrade,
     val meldingstype: ApiDialogmeldingType,
     val melding: String,
-    val tid: String,
+    val sendtTidspunkt: Instant,
     val fraNav: Boolean,
     val vedlegg: List<ApiVedlegg>,
 )
@@ -62,7 +62,7 @@ data class ApiDialogmelding(
 data class ApiDialogDetails(
     val conversationRef: UUID,
     val behandler: ApiBehandler,
-    val tid: String,
+    val opprettetTidspunkt: Instant,
     val dialogmeldinger: List<ApiDialogmelding>,
 )
 
@@ -73,7 +73,7 @@ data class ApiDialogOppsummering(
     val behandler: ApiBehandler,
     val fagomrade: ApiFagomrade,
     val meldingstype: ApiDialogmeldingType,
-    val tid: String,
+    val opprettetTidspunkt: Instant,
     val antallMeldinger: Int,
     val antallVedlegg: Int,
 )
