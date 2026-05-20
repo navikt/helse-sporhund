@@ -9,8 +9,8 @@ fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
     return ApiDialogOppsummering(
         conversationRef = conversationRef.value,
         behandler = opprinneligBehandler.tilApiBehandler(opprinneligBehandlerRef),
-        fagomrade = ApiFagomrade.TILBAKEDATERING,
-        meldingstype = ApiDialogmeldingType.JOURNALNOTAT,
+        fagomrade = this.tilApiFagomrade(),
+        meldingstype = this.tilApiDialogmeldingType(),
         opprettetTidspunkt = this.opprettetTidspunkt(),
         antallMeldinger = meldinger.size,
         antallVedlegg = this.antallVedleggTotalt(),
@@ -23,9 +23,9 @@ fun Dialog.tilApiDialogmeldingOppgave(personPseudoId: PersonPseudoId): ApiDialog
         personPseudoId = personPseudoId.value,
         sisteAktivitetTidspunkt = this.nyesteMelding().tidspunkt,
         fristTidspunkt = this.frist(),
-        fagomrade = ApiFagomrade.TILBAKEDATERING,
+        fagomrade = this.tilApiFagomrade(),
+        meldingstype = this.tilApiDialogmeldingType(),
         soker = identitetsnummer.value, // TODO: Må lagre navn person i Dialog og sende det med her
-        meldingstype = ApiDialogmeldingType.JOURNALNOTAT,
         status =
             when (status) {
                 Dialogstatus.ForespørselSendt -> ApiDialogmeldingStatus.SENDT
@@ -45,8 +45,8 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
         dialogmeldinger =
             meldinger.map { dialogmelding ->
                 ApiDialogmelding(
-                    fagomrade = ApiFagomrade.TILBAKEDATERING,
-                    meldingstype = ApiDialogmeldingType.JOURNALNOTAT,
+                    fagomrade = this.tilApiFagomrade(),
+                    meldingstype = this.tilApiDialogmeldingType(),
                     melding = dialogmelding.melding,
                     sendtTidspunkt = dialogmelding.tidspunkt,
                     fraNav = dialogmelding is Dialogmelding.FraNav,
@@ -55,6 +55,23 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
             },
     )
 }
+
+private fun Dialog.tilApiFagomrade(): ApiFagomrade =
+    when (this.fagområde) {
+        Fagområde.EnkeltståendeBehandlingsdager -> ApiFagomrade.ENKELTSTAENDE_BEHANDLINGSDAGER
+        Fagområde.Tilbakedatering -> ApiFagomrade.TILBAKEDATERING
+        Fagområde.Yrkesskade -> ApiFagomrade.YRKESSKADE
+        Fagområde.Bestridelse -> ApiFagomrade.BESTRIDELSE
+    }
+
+private fun Dialog.tilApiDialogmeldingType(): ApiDialogmeldingType =
+    when (this.dialogtype) {
+        Dialogtype.Journalnotat -> ApiDialogmeldingType.JOURNALNOTAT
+        Dialogtype.MedisinskeOpplysninger -> ApiDialogmeldingType.MEDISINSKE_OPPLYSNINGER
+        Dialogtype.EkstraUttalelserFraLege -> ApiDialogmeldingType.EKSTRA_UTTALELSER_FRA_LEGE
+        Dialogtype.SpesialistErklæring -> ApiDialogmeldingType.SPESIALISTERKLAERING
+        Dialogtype.UtvidetSpesialistErklæring -> ApiDialogmeldingType.UTVIDET_SPESIALISTERKLAERING
+    }
 
 private fun Behandler.tilApiBehandler(
     behandlerRef: BehandlerRef,
