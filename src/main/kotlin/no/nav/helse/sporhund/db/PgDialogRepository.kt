@@ -60,6 +60,15 @@ class PgDialogRepository(
             objectMapper.readValue<DialogDto>(it.string("json")).tilDomene()
         }
 
+    override fun finnIkkeLukkedeDialoger(): List<Dialog> =
+        asSQL(
+            """
+            SELECT json FROM dialog WHERE json -> 'status' != '"DialogLukket"'
+            """.trimIndent(),
+        ).list(session) {
+            objectMapper.readValue<DialogDto>(it.string("json")).tilDomene()
+        }
+
     private data class DialogDto(
         val conversationRef: UUID,
         val identitetsnummer: IdentitetsnummerDto,

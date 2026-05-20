@@ -10,6 +10,8 @@ abstract class DbTest {
     protected val session = sessionOf(dataSource = db.dataSource, returnGeneratedKey = true)
     protected val sessionContext = PgSessionContext(session)
 
+    fun tømDatabase() = db.truncate()
+
     @AfterEach
     fun tearDown() = session.close()
 }
