@@ -22,6 +22,9 @@ import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.domain.Dialogtype
 import no.nav.helse.sporhund.domain.Fagområde
+import no.nav.helse.sporhund.domain.Identitetsnummer
+import no.nav.helse.sporhund.domain.Navn
+import no.nav.helse.sporhund.domain.Saksbehandler
 import java.util.*
 
 fun Route.postNyDialogmeldingRoute(
@@ -52,31 +55,7 @@ fun Route.postNyDialogmeldingRoute(
         val apiDialogmelding = call.receive<ApiNyDialogmelding>()
         val dialog =
             transactionProvider.transaction {
-                val dialog =
-                    Dialog.ny(
-                        identitetsnummer,
-                        Dialogmelding.FraNav.ny(
-                            saksbehandler = saksbehandler.ident,
-                            behandler = apiDialogmelding.tilBehandler(),
-                            behandlerRef = BehandlerRef(apiDialogmelding.behandler.id),
-                            melding = apiDialogmelding.melding,
-                        ),
-                        fagområde =
-                            when (apiDialogmelding.fagomrade) {
-                                ApiFagomrade.ENKELTSTAENDE_BEHANDLINGSDAGER -> Fagområde.EnkeltståendeBehandlingsdager
-                                ApiFagomrade.TILBAKEDATERING -> Fagområde.Tilbakedatering
-                                ApiFagomrade.YRKESSKADE -> Fagområde.Yrkesskade
-                                ApiFagomrade.BESTRIDELSE -> Fagområde.Bestridelse
-                            },
-                        dialogtype =
-                            when (apiDialogmelding.meldingstype) {
-                                ApiDialogmeldingType.JOURNALNOTAT -> Dialogtype.Journalnotat
-                                ApiDialogmeldingType.MEDISINSKE_OPPLYSNINGER -> Dialogtype.MedisinskeOpplysninger
-                                ApiDialogmeldingType.EKSTRA_UTTALELSER_FRA_LEGE -> Dialogtype.EkstraUttalelserFraLege
-                                ApiDialogmeldingType.SPESIALISTERKLAERING -> Dialogtype.SpesialistErklæring
-                                ApiDialogmeldingType.UTVIDET_SPESIALISTERKLAERING -> Dialogtype.UtvidetSpesialistErklæring
-                            },
-                    )
+                val dialog = apiDialogmelding.tilDialog(identitetsnummer, saksbehandler)
                 dialogRepository.lagre(dialog)
                 val events = dialog.events()
                 events.forEach {
@@ -88,3 +67,39 @@ fun Route.postNyDialogmeldingRoute(
         call.respond(HttpStatusCode.Created, dialog.tilApiDialogDetails())
     }
 }
+
+private fun ApiNyDialogmelding.tilDialog(
+    identitetsnummer: Identitetsnummer,
+    saksbehandler: Saksbehandler,
+): Dialog =
+    Dialog.ny(
+        identitetsnummer = identitetsnummer,
+        søkernavn =
+            Navn(
+                fornavn = sokernavn.fornavn,
+                mellomnavn = sokernavn.mellomnavn,
+                etternavn = sokernavn.etternavn,
+            ),
+        melding =
+            Dialogmelding.FraNav.ny(
+                saksbehandler = saksbehandler.ident,
+                behandler = tilBehandler(),
+                behandlerRef = BehandlerRef(behandler.id),
+                melding = melding,
+            ),
+        fagområde =
+            when (fagomrade) {
+                ApiFagomrade.ENKELTSTAENDE_BEHANDLINGSDAGER -> Fagområde.EnkeltståendeBehandlingsdager
+                ApiFagomrade.TILBAKEDATERING -> Fagområde.Tilbakedatering
+                ApiFagomrade.YRKESSKADE -> Fagområde.Yrkesskade
+                ApiFagomrade.BESTRIDELSE -> Fagområde.Bestridelse
+            },
+        dialogtype =
+            when (meldingstype) {
+                ApiDialogmeldingType.JOURNALNOTAT -> Dialogtype.Journalnotat
+                ApiDialogmeldingType.MEDISINSKE_OPPLYSNINGER -> Dialogtype.MedisinskeOpplysninger
+                ApiDialogmeldingType.EKSTRA_UTTALELSER_FRA_LEGE -> Dialogtype.EkstraUttalelserFraLege
+                ApiDialogmeldingType.SPESIALISTERKLAERING -> Dialogtype.SpesialistErklæring
+                ApiDialogmeldingType.UTVIDET_SPESIALISTERKLAERING -> Dialogtype.UtvidetSpesialistErklæring
+            },
+    )

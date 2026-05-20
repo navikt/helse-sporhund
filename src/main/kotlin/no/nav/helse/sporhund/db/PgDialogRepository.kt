@@ -58,6 +58,7 @@ class PgDialogRepository(
     private data class DialogDto(
         val conversationRef: UUID,
         val identitetsnummer: IdentitetsnummerDto,
+        val søkernavn: NavnDto,
         val meldinger: List<DialogmeldingDto>,
         val status: DialogstatusDto,
         val dialogtype: DialogtypeDto,
@@ -71,6 +72,7 @@ class PgDialogRepository(
                 status = status.tilDomene(),
                 dialogtype = dialogtype.tilDomene(),
                 fagområde = fagområde.tilDomene(),
+                søkernavn = søkernavn.tilDomene(),
             )
 
         companion object {
@@ -82,6 +84,7 @@ class PgDialogRepository(
                     status = DialogstatusDto.fraDialogstatus(dialog.status),
                     dialogtype = DialogtypeDto.fraDialogtype(dialog.dialogtype),
                     fagområde = FagområdeDto.fraDialogtype(dialog.fagområde),
+                    søkernavn = NavnDto(fornavn = dialog.søkernavn.fornavn, mellomnavn = dialog.søkernavn.mellomnavn, etternavn = dialog.søkernavn.etternavn),
                 )
         }
     }
@@ -276,6 +279,14 @@ class PgDialogRepository(
         }
     }
 
+    private data class NavnDto(
+        val fornavn: String,
+        val mellomnavn: String?,
+        val etternavn: String,
+    ) {
+        fun tilDomene() = Navn(fornavn = fornavn, mellomnavn = mellomnavn, etternavn = etternavn)
+    }
+
     private data class BehandlerDto(
         val hprNummer: String,
         val navn: NavnDto,
@@ -289,14 +300,6 @@ class PgDialogRepository(
                 kontor = kontor.tilDomene(),
                 telefonnummer = if (telefonnummer != null) Telefonnummer(telefonnummer) else null,
             )
-
-        data class NavnDto(
-            val fornavn: String,
-            val mellomnavn: String?,
-            val etternavn: String,
-        ) {
-            fun tilDomene() = Navn(fornavn = fornavn, mellomnavn = mellomnavn, etternavn = etternavn)
-        }
 
         data class KontorDto(
             val navn: String?,

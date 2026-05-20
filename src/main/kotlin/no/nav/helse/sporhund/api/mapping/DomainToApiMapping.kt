@@ -25,7 +25,7 @@ fun Dialog.tilApiDialogmeldingOppgave(personPseudoId: PersonPseudoId): ApiDialog
         fristTidspunkt = this.frist(),
         fagomrade = this.tilApiFagomrade(),
         meldingstype = this.tilApiDialogmeldingType(),
-        soker = identitetsnummer.value, // TODO: Må lagre navn person i Dialog og sende det med her
+        soker = this.søkernavn.tilApiNavn(),
         status =
             when (status) {
                 Dialogstatus.ForespørselSendt -> ApiDialogmeldingStatus.SENDT
@@ -95,4 +95,11 @@ private fun Behandler.tilApiBehandler(
                 poststed = kontor.adresse?.poststed,
             ),
         telefonnummer = telefonnummer?.value,
+    )
+
+private fun Navn.tilApiNavn(): ApiNavn =
+    ApiNavn(
+        fornavn = this.fornavn,
+        mellomnavn = this.mellomnavn,
+        etternavn = this.etternavn,
     )

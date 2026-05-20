@@ -11,11 +11,13 @@ import no.nav.helse.sporhund.domain.Dialogtype
 import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.domain.NavIdent
+import no.nav.helse.sporhund.domain.Navn
 import java.time.Instant
 import java.util.UUID
 
 fun lagDialog(
     identitetsnummer: Identitetsnummer = lagIdentitetsnummer(),
+    søkernavn: Navn = lagNavn(),
     status: Dialogstatus = Dialogstatus.ForespørselSendt,
     melding: Dialogmelding.FraNav = lagFraNavMelding(),
     dialogtype: Dialogtype = Dialogtype.MedisinskeOpplysninger,
@@ -24,6 +26,7 @@ fun lagDialog(
     Dialog.fraLagring(
         conversationRef = ConversationRef(UUID.randomUUID()),
         identitetsnummer = identitetsnummer,
+        søkernavn = søkernavn,
         meldinger = listOf(melding),
         status = status,
         dialogtype = dialogtype,

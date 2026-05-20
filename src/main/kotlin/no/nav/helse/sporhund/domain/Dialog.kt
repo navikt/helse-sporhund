@@ -34,6 +34,7 @@ enum class Dialogtype {
 class Dialog private constructor(
     val conversationRef: ConversationRef,
     val identitetsnummer: Identitetsnummer,
+    val søkernavn: Navn,
     val status: Dialogstatus,
     val fagområde: Fagområde,
     val dialogtype: Dialogtype,
@@ -80,6 +81,7 @@ class Dialog private constructor(
     companion object {
         fun ny(
             identitetsnummer: Identitetsnummer,
+            søkernavn: Navn,
             melding: Dialogmelding.FraNav,
             fagområde: Fagområde,
             dialogtype: Dialogtype,
@@ -87,6 +89,7 @@ class Dialog private constructor(
             Dialog(
                 conversationRef = ConversationRef(UUID.randomUUID()),
                 identitetsnummer = identitetsnummer,
+                søkernavn = søkernavn,
                 meldinger = emptyList(),
                 status = Dialogstatus.ForespørselSendt,
                 fagområde = fagområde,
@@ -96,11 +99,12 @@ class Dialog private constructor(
         fun fraLagring(
             conversationRef: ConversationRef,
             identitetsnummer: Identitetsnummer,
+            søkernavn: Navn,
             meldinger: List<Dialogmelding>,
             status: Dialogstatus,
             fagområde: Fagområde,
             dialogtype: Dialogtype,
-        ): Dialog = Dialog(conversationRef, identitetsnummer, status, fagområde, dialogtype, meldinger)
+        ): Dialog = Dialog(conversationRef, identitetsnummer, søkernavn, status, fagområde, dialogtype, meldinger)
     }
 }
 

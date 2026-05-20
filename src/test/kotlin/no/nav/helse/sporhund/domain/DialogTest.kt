@@ -14,6 +14,7 @@ class DialogTest {
         val dialog =
             Dialog.ny(
                 identitetsnummer = lagIdentitetsnummer(),
+                søkernavn = lagNavn(),
                 melding =
                     lagFraNavMelding(
                         ident = lagNavIdent(),

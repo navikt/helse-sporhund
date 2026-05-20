@@ -91,7 +91,7 @@ data class ApiDialogmeldingOppgave(
     val sisteAktivitetTidspunkt: Instant,
     val fristTidspunkt: Instant,
     val fagomrade: ApiFagomrade,
-    val soker: String,
+    val soker: ApiNavn,
     val meldingstype: ApiDialogmeldingType,
     val status: ApiDialogmeldingStatus,
 )
