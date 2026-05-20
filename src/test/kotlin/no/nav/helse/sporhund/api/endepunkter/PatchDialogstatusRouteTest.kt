@@ -79,7 +79,7 @@ class PatchDialogstatusRouteTest : EndepunktTest() {
                 transactionProvider.transaction {
                     dialogRepository.finnDialog(dialog.conversationRef)
                 }
-            assertEquals(Dialogstatus.ForespørselSendt, oppdatertDialog?.status)
+            assertEquals(Dialogstatus.SvarMottatt, oppdatertDialog?.status)
         }
 
     @Test

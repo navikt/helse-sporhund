@@ -112,6 +112,6 @@ class DialogTest {
 
         dialog.gjenåpne()
 
-        assertEquals(Dialogstatus.ForespørselSendt, dialog.status)
+        assertEquals(Dialogstatus.SvarMottatt, dialog.status)
     }
 }
