@@ -50,7 +50,7 @@ class PgDialogRepository(
             objectMapper.readValue<DialogDto>(it.string("json")).tilDomene()
         }
 
-    override fun hentDialogmeldingerOversikt(identitetsnummer: Identitetsnummer): List<Dialog> =
+    override fun finnDialoger(identitetsnummer: Identitetsnummer): List<Dialog> =
         asSQL(
             """
                 SELECT json FROM dialog WHERE identitetsnummer = :identitetsnummer

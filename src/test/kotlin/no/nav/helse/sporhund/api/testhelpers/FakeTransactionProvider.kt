@@ -23,7 +23,7 @@ class FakeDialogRepository : DialogRepository {
 
     override fun finnDialog(conversationRef: ConversationRef): Dialog? = dialogs[conversationRef]
 
-    override fun hentDialogmeldingerOversikt(identitetsnummer: Identitetsnummer): List<Dialog> = dialogs.values.filter { it.identitetsnummer == identitetsnummer }
+    override fun finnDialoger(identitetsnummer: Identitetsnummer): List<Dialog> = dialogs.values.filter { it.identitetsnummer == identitetsnummer }
 }
 
 class FakeOutbox : Outbox {

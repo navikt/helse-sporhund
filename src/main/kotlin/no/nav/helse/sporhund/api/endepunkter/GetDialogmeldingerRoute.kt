@@ -38,7 +38,7 @@ fun Route.getDialogmeldingerRoute(
         }
         val dialoger =
             transactionProvider.transaction {
-                dialogRepository.hentDialogmeldingerOversikt(identitetsnummer)
+                dialogRepository.finnDialoger(identitetsnummer)
             }
         call.respond(dialoger.map { it.tilApiDialogmeldingerOversikt() })
     }

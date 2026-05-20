@@ -9,5 +9,5 @@ interface DialogRepository {
 
     fun finnDialog(conversationRef: ConversationRef): Dialog?
 
-    fun hentDialogmeldingerOversikt(identitetsnummer: Identitetsnummer): List<Dialog>
+    fun finnDialoger(identitetsnummer: Identitetsnummer): List<Dialog>
 }
