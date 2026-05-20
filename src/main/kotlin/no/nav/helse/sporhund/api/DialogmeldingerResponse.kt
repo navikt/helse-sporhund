@@ -1,6 +1,7 @@
 package no.nav.helse.sporhund.api
 
-import java.util.UUID
+import java.time.Instant
+import java.util.*
 
 // === Behandler types ===
 
@@ -87,8 +88,8 @@ enum class ApiDialogmeldingStatus {
 data class ApiDialogmeldingOppgave(
     val conversationRef: UUID,
     val personPseudoId: UUID,
-    val dato: String,
-    val frist: String,
+    val sisteAktivitetTidspunkt: Instant,
+    val fristTidspunkt: Instant,
     val fagomrade: ApiFagomrade,
     val soker: String,
     val meldingstype: ApiDialogmeldingType,

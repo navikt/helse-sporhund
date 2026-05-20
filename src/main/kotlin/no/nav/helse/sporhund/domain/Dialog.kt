@@ -1,5 +1,6 @@
 package no.nav.helse.sporhund.domain
 
+import java.time.Duration
 import java.time.Instant
 import java.util.UUID
 
@@ -28,6 +29,10 @@ class Dialog private constructor(
 
     fun events() = events.toList().also { events.clear() }
 
+    fun nyesteMelding() = meldinger.last()
+
+    fun frist(): Instant = nyesteMeldingFraNav().tidspunkt + Duration.ofDays(21)
+
     fun nyMelding(dialogmelding: Dialogmelding) {
         _meldinger.add(dialogmelding)
         if (dialogmelding is Dialogmelding.FraNav) {
@@ -42,6 +47,8 @@ class Dialog private constructor(
             )
         }
     }
+
+    private fun nyesteMeldingFraNav(): Dialogmelding.FraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().last()
 
     companion object {
         fun ny(

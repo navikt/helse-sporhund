@@ -1,10 +1,8 @@
 package no.nav.helse.sporhund.api.mapping
 
 import no.nav.helse.sporhund.api.*
-import no.nav.helse.sporhund.domain.Behandler
-import no.nav.helse.sporhund.domain.BehandlerRef
-import no.nav.helse.sporhund.domain.Dialog
-import no.nav.helse.sporhund.domain.Dialogmelding
+import no.nav.helse.sporhund.application.PersonPseudoId
+import no.nav.helse.sporhund.domain.*
 
 fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
     val forsteFraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().first()
@@ -21,6 +19,24 @@ fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
         antallVedlegg = meldinger.filterIsInstance<Dialogmelding.FraBehandler>().sumOf { it.antallVedlegg },
     )
 }
+
+fun Dialog.tilApiDialogmeldingOppgave(personPseudoId: PersonPseudoId): ApiDialogmeldingOppgave =
+    ApiDialogmeldingOppgave(
+        conversationRef = conversationRef.value,
+        personPseudoId = personPseudoId.value,
+        sisteAktivitetTidspunkt = this.nyesteMelding().tidspunkt,
+        fristTidspunkt = this.frist(),
+        fagomrade = ApiFagomrade.TILBAKEDATERING,
+        soker = identitetsnummer.value, // TODO: Må lagre navn person i Dialog og sende det med her
+        meldingstype = ApiDialogmeldingType.JOURNALNOTAT,
+        status =
+            when (status) {
+                Dialogstatus.ForespørselSendt -> ApiDialogmeldingStatus.SENDT
+                Dialogstatus.PurringSendt -> ApiDialogmeldingStatus.PURRING_SENDT
+                Dialogstatus.SvarMottatt -> ApiDialogmeldingStatus.MOTTATT
+                Dialogstatus.DialogLukket -> ApiDialogmeldingStatus.FERDIGSTILT
+            },
+    )
 
 fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
     val forsteFraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().first()

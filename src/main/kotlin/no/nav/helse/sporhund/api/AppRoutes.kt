@@ -25,7 +25,7 @@ fun Routing.appRoutes(
         }
 
         authenticate("oidc") {
-            getDialogmeldingOppgaverRoute()
+            getDialogmeldingOppgaverRoute(personPseudoIdProvider, transactionProvider)
             getDialogmeldingerRoute(personPseudoIdProvider, transactionProvider)
             getDialogmeldingRoute(personPseudoIdProvider, transactionProvider)
             postNyDialogmeldingRoute(personPseudoIdProvider, transactionProvider)
