@@ -17,10 +17,7 @@ import no.nav.helse.sporhund.api.ApiDialogmeldingType
 import no.nav.helse.sporhund.api.ApiFagomrade
 import no.nav.helse.sporhund.api.ApiLegekontor
 import no.nav.helse.sporhund.api.ApiNyDialogmelding
-import no.nav.helse.sporhund.api.testhelpers.FakePersonPseudoIdProvider
-import no.nav.helse.sporhund.api.testhelpers.FakeTransactionProvider
 import no.nav.helse.sporhund.api.testhelpers.jsonClient
-import no.nav.helse.sporhund.api.testhelpers.setupTestApp
 import no.nav.helse.sporhund.api.testhelpers.utstedToken
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import java.util.UUID
@@ -33,11 +30,9 @@ class PostNyDialogmeldingTest : EndepunktTest() {
     fun `returnerer 201 med ny dialog`() =
         testApplication {
             val identitetsnummer = lagIdentitetsnummer()
-            val personPseudoIdProvider = FakePersonPseudoIdProvider()
-            val pseudoId = personPseudoIdProvider.registrer(identitetsnummer)
-            val transactionProvider = FakeTransactionProvider()
+            val pseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer)
 
-            setupTestApp(personPseudoIdProvider, transactionProvider, mockOAuth2Server)
+            setupDefaultTestApp()
 
             val client = jsonClient()
             val token = mockOAuth2Server.utstedToken(saksbehandler)
@@ -80,7 +75,7 @@ class PostNyDialogmeldingTest : EndepunktTest() {
     @Test
     fun `returnerer 401 uten token`() =
         testApplication {
-            setupTestApp(FakePersonPseudoIdProvider(), FakeTransactionProvider(), mockOAuth2Server)
+            setupDefaultTestApp()
 
             val response =
                 client.post("/api/personer/${UUID.randomUUID()}/dialogmelding") {

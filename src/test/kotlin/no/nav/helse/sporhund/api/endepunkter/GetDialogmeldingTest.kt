@@ -6,10 +6,7 @@ import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import no.nav.helse.sporhund.api.ApiDialogDetails
-import no.nav.helse.sporhund.api.testhelpers.FakePersonPseudoIdProvider
-import no.nav.helse.sporhund.api.testhelpers.FakeTransactionProvider
 import no.nav.helse.sporhund.api.testhelpers.jsonClient
-import no.nav.helse.sporhund.api.testhelpers.setupTestApp
 import no.nav.helse.sporhund.api.testhelpers.utstedToken
 import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
@@ -26,18 +23,16 @@ class GetDialogmeldingTest : EndepunktTest() {
     fun `returnerer 200 med dialog for kjent conversationRef`() =
         testApplication {
             val identitetsnummer = lagIdentitetsnummer()
-            val personPseudoIdProvider = FakePersonPseudoIdProvider()
-            val pseudoId = personPseudoIdProvider.registrer(identitetsnummer)
+            val pseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer)
 
-            val transactionProvider = FakeTransactionProvider()
             val dialog =
                 Dialog.ny(
                     identitetsnummer,
                     Dialogmelding.FraNav.ny(lagNavIdent(), lagBehandler(), lagBehandlerRef(), "Forespørsel"),
                 )
-            transactionProvider.dialogRepository.leggTil(dialog)
+            transactionProvider.dialogRepository.lagre(dialog)
 
-            setupTestApp(personPseudoIdProvider, transactionProvider, mockOAuth2Server)
+            setupDefaultTestApp()
 
             val client = jsonClient()
             val token = mockOAuth2Server.utstedToken(saksbehandler)
@@ -56,7 +51,7 @@ class GetDialogmeldingTest : EndepunktTest() {
     @Test
     fun `returnerer 404 for ukjent pseudoId`() =
         testApplication {
-            setupTestApp(FakePersonPseudoIdProvider(), FakeTransactionProvider(), mockOAuth2Server)
+            setupDefaultTestApp()
 
             val client = jsonClient()
             val token = mockOAuth2Server.utstedToken(saksbehandler)
@@ -73,10 +68,9 @@ class GetDialogmeldingTest : EndepunktTest() {
     fun `returnerer 404 for ukjent conversationRef`() =
         testApplication {
             val identitetsnummer = lagIdentitetsnummer()
-            val personPseudoIdProvider = FakePersonPseudoIdProvider()
-            val pseudoId = personPseudoIdProvider.registrer(identitetsnummer)
+            val pseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer)
 
-            setupTestApp(personPseudoIdProvider, FakeTransactionProvider(), mockOAuth2Server)
+            setupDefaultTestApp()
 
             val client = jsonClient()
             val token = mockOAuth2Server.utstedToken(saksbehandler)
@@ -92,7 +86,7 @@ class GetDialogmeldingTest : EndepunktTest() {
     @Test
     fun `returnerer 401 uten token`() =
         testApplication {
-            setupTestApp(FakePersonPseudoIdProvider(), FakeTransactionProvider(), mockOAuth2Server)
+            setupDefaultTestApp()
 
             val response = client.get("/api/personer/${UUID.randomUUID()}/dialogmeldinger/${UUID.randomUUID()}")
 

@@ -1,6 +1,10 @@
 package no.nav.helse.sporhund.api.endepunkter
 
+import io.ktor.server.testing.ApplicationTestBuilder
 import no.nav.helse.sporhund.api.testhelpers.lagTestSaksbehandler
+import no.nav.helse.sporhund.api.testhelpers.setupTestApp
+import no.nav.helse.sporhund.application.InMemoryPersonPseudoIdProvider
+import no.nav.helse.sporhund.application.InMemoryTransactionProvider
 import no.nav.helse.sporhund.domain.Saksbehandler
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import kotlin.test.AfterTest
@@ -9,6 +13,12 @@ import kotlin.test.BeforeTest
 abstract class EndepunktTest {
     protected val mockOAuth2Server = MockOAuth2Server()
     protected val saksbehandler: Saksbehandler = lagTestSaksbehandler()
+    protected val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
+    protected val transactionProvider = InMemoryTransactionProvider()
+
+    fun ApplicationTestBuilder.setupDefaultTestApp() {
+        setupTestApp(personPseudoIdProvider, transactionProvider, mockOAuth2Server)
+    }
 
     @BeforeTest
     fun setUp() {

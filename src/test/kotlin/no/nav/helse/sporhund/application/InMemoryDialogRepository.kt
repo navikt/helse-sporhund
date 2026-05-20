@@ -13,5 +13,5 @@ class InMemoryDialogRepository : DialogRepository {
 
     override fun finnDialog(conversationRef: ConversationRef): Dialog? = dialoger[conversationRef]
 
-    override fun finnDialoger(identitetsnummer: Identitetsnummer): List<Dialog> = emptyList()
+    override fun finnDialoger(identitetsnummer: Identitetsnummer): List<Dialog> = dialoger.values.filter { it.identitetsnummer == identitetsnummer }
 }
