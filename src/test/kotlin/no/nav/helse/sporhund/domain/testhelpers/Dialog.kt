@@ -7,6 +7,8 @@ import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.domain.DialogmeldingId
 import no.nav.helse.sporhund.domain.Dialogstatus
+import no.nav.helse.sporhund.domain.Dialogtype
+import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.domain.NavIdent
 import java.time.Instant
@@ -16,12 +18,16 @@ fun lagDialog(
     identitetsnummer: Identitetsnummer = lagIdentitetsnummer(),
     status: Dialogstatus = Dialogstatus.ForespørselSendt,
     melding: Dialogmelding.FraNav = lagFraNavMelding(),
+    dialogtype: Dialogtype = Dialogtype.MedisinskeOpplysninger,
+    fagområde: Fagområde = Fagområde.EnkeltståendeBehandlingsdager,
 ): Dialog =
     Dialog.fraLagring(
         conversationRef = ConversationRef(UUID.randomUUID()),
         identitetsnummer = identitetsnummer,
         meldinger = listOf(melding),
         status = status,
+        dialogtype = dialogtype,
+        fagområde = fagområde,
     )
 
 fun lagFraNavMelding(

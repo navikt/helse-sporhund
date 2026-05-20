@@ -5,21 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.sporhund.application.DialogRepository
-import no.nav.helse.sporhund.domain.Adresse
-import no.nav.helse.sporhund.domain.Behandler
-import no.nav.helse.sporhund.domain.BehandlerRef
-import no.nav.helse.sporhund.domain.ConversationRef
-import no.nav.helse.sporhund.domain.Dialog
-import no.nav.helse.sporhund.domain.Dialogmelding
-import no.nav.helse.sporhund.domain.DialogmeldingId
-import no.nav.helse.sporhund.domain.Dialogstatus
-import no.nav.helse.sporhund.domain.HprNummer
-import no.nav.helse.sporhund.domain.Identitetsnummer
-import no.nav.helse.sporhund.domain.Kontor
-import no.nav.helse.sporhund.domain.NavIdent
-import no.nav.helse.sporhund.domain.Navn
-import no.nav.helse.sporhund.domain.Organisasjonsnummer
-import no.nav.helse.sporhund.domain.Telefonnummer
+import no.nav.helse.sporhund.domain.*
 import java.time.Instant
 import java.util.*
 
@@ -74,6 +60,8 @@ class PgDialogRepository(
         val identitetsnummer: IdentitetsnummerDto,
         val meldinger: List<DialogmeldingDto>,
         val status: DialogstatusDto,
+        val dialogtype: DialogtypeDto,
+        val fagområde: FagområdeDto,
     ) {
         fun tilDomene(): Dialog =
             Dialog.fraLagring(
@@ -81,6 +69,8 @@ class PgDialogRepository(
                 identitetsnummer = identitetsnummer.tilDomene(),
                 meldinger = meldinger.map { it.tilDomene() },
                 status = status.tilDomene(),
+                dialogtype = dialogtype.tilDomene(),
+                fagområde = fagområde.tilDomene(),
             )
 
         companion object {
@@ -90,6 +80,8 @@ class PgDialogRepository(
                     identitetsnummer = IdentitetsnummerDto.fraIdentitetsnummer(dialog.identitetsnummer),
                     meldinger = dialog.meldinger.map { DialogmeldingDto.fraDialogmelding(it) },
                     status = DialogstatusDto.fraDialogstatus(dialog.status),
+                    dialogtype = DialogtypeDto.fraDialogtype(dialog.dialogtype),
+                    fagområde = FagområdeDto.fraDialogtype(dialog.fagområde),
                 )
         }
     }
@@ -150,6 +142,61 @@ class PgDialogRepository(
                     Dialogstatus.SvarMottatt -> SvarMottatt
                     Dialogstatus.PurringSendt -> PurringSendt
                     Dialogstatus.DialogLukket -> DialogLukket
+                }
+        }
+    }
+
+    private enum class FagområdeDto {
+        EnkeltståendeBehandlingsdager,
+        Tilbakedatering,
+        Yrkesskade,
+        Bestridelse,
+        ;
+
+        fun tilDomene(): Fagområde =
+            when (this) {
+                EnkeltståendeBehandlingsdager -> Fagområde.EnkeltståendeBehandlingsdager
+                Tilbakedatering -> Fagområde.Tilbakedatering
+                Yrkesskade -> Fagområde.Yrkesskade
+                Bestridelse -> Fagområde.Bestridelse
+            }
+
+        companion object {
+            fun fraDialogtype(fagområde: Fagområde): FagområdeDto =
+                when (fagområde) {
+                    Fagområde.EnkeltståendeBehandlingsdager -> EnkeltståendeBehandlingsdager
+                    Fagområde.Tilbakedatering -> Tilbakedatering
+                    Fagområde.Yrkesskade -> Yrkesskade
+                    Fagområde.Bestridelse -> Bestridelse
+                }
+        }
+    }
+
+    private enum class DialogtypeDto {
+        Journalnotat,
+        MedisinskeOpplysninger,
+        EkstraUttalelserFraLege,
+        SpesialistErklæring,
+        UtvidetSpesialistErklæring,
+        ;
+
+        fun tilDomene(): Dialogtype =
+            when (this) {
+                Journalnotat -> Dialogtype.Journalnotat
+                MedisinskeOpplysninger -> Dialogtype.MedisinskeOpplysninger
+                EkstraUttalelserFraLege -> Dialogtype.EkstraUttalelserFraLege
+                SpesialistErklæring -> Dialogtype.SpesialistErklæring
+                UtvidetSpesialistErklæring -> Dialogtype.UtvidetSpesialistErklæring
+            }
+
+        companion object {
+            fun fraDialogtype(dialogtype: Dialogtype): DialogtypeDto =
+                when (dialogtype) {
+                    Dialogtype.Journalnotat -> Journalnotat
+                    Dialogtype.MedisinskeOpplysninger -> MedisinskeOpplysninger
+                    Dialogtype.EkstraUttalelserFraLege -> EkstraUttalelserFraLege
+                    Dialogtype.SpesialistErklæring -> SpesialistErklæring
+                    Dialogtype.UtvidetSpesialistErklæring -> UtvidetSpesialistErklæring
                 }
         }
     }

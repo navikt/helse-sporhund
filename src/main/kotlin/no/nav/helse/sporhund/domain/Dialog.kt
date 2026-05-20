@@ -16,10 +16,27 @@ enum class Dialogstatus {
     DialogLukket,
 }
 
+enum class Fagområde {
+    EnkeltståendeBehandlingsdager,
+    Tilbakedatering,
+    Yrkesskade,
+    Bestridelse,
+}
+
+enum class Dialogtype {
+    Journalnotat,
+    MedisinskeOpplysninger,
+    EkstraUttalelserFraLege,
+    SpesialistErklæring,
+    UtvidetSpesialistErklæring,
+}
+
 class Dialog private constructor(
     val conversationRef: ConversationRef,
     val identitetsnummer: Identitetsnummer,
     val status: Dialogstatus,
+    val fagområde: Fagområde,
+    val dialogtype: Dialogtype,
     meldinger: List<Dialogmelding>,
 ) {
     private val _meldinger = meldinger.toMutableList()
@@ -64,12 +81,16 @@ class Dialog private constructor(
         fun ny(
             identitetsnummer: Identitetsnummer,
             melding: Dialogmelding.FraNav,
+            fagområde: Fagområde,
+            dialogtype: Dialogtype,
         ): Dialog =
             Dialog(
                 conversationRef = ConversationRef(UUID.randomUUID()),
                 identitetsnummer = identitetsnummer,
                 meldinger = emptyList(),
                 status = Dialogstatus.ForespørselSendt,
+                fagområde = fagområde,
+                dialogtype = dialogtype,
             ).also { it.nyMelding(melding) }
 
         fun fraLagring(
@@ -77,7 +98,9 @@ class Dialog private constructor(
             identitetsnummer: Identitetsnummer,
             meldinger: List<Dialogmelding>,
             status: Dialogstatus,
-        ): Dialog = Dialog(conversationRef, identitetsnummer, status, meldinger)
+            fagområde: Fagområde,
+            dialogtype: Dialogtype,
+        ): Dialog = Dialog(conversationRef, identitetsnummer, status, fagområde, dialogtype, meldinger)
     }
 }
 

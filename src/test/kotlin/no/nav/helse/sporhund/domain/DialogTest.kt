@@ -1,12 +1,6 @@
 package no.nav.helse.sporhund.domain
 
-import no.nav.helse.sporhund.domain.testhelpers.lagBehandler
-import no.nav.helse.sporhund.domain.testhelpers.lagBehandlerRef
-import no.nav.helse.sporhund.domain.testhelpers.lagDialog
-import no.nav.helse.sporhund.domain.testhelpers.lagFraBehandlerMelding
-import no.nav.helse.sporhund.domain.testhelpers.lagFraNavMelding
-import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
-import no.nav.helse.sporhund.domain.testhelpers.lagNavIdent
+import no.nav.helse.sporhund.domain.testhelpers.*
 import java.time.Duration
 import java.time.Instant
 import kotlin.test.Test
@@ -27,6 +21,8 @@ class DialogTest {
                         behandlerRef = behandlerRef,
                         melding = "En melding",
                     ),
+                fagområde = Fagområde.EnkeltståendeBehandlingsdager,
+                dialogtype = Dialogtype.MedisinskeOpplysninger,
             )
         val events = dialog.events()
         assertEquals(1, events.size)
