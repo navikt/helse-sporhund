@@ -210,7 +210,7 @@ class PgDialogRepository(
         JsonSubTypes.Type(value = DialogmeldingDto.FraBehandler::class, name = "FRA_BEHANDLER"),
     )
     private sealed interface DialogmeldingDto {
-        fun tilDomene(): Dialogmelding
+        fun tilDomene(): Dialogmelding<*>
 
         data class FraNav(
             val id: UUID,
@@ -232,14 +232,14 @@ class PgDialogRepository(
         }
 
         data class FraBehandler(
-            val id: UUID,
+            val id: String,
             val tidspunkt: Instant,
             val melding: String,
             val behandler: BehandlerDto,
             val antallVedlegg: Int,
         ) : DialogmeldingDto {
             override fun tilDomene(): Dialogmelding.FraBehandler =
-                Dialogmelding.FraBehandler(
+                Dialogmelding.FraBehandler.fraLagring(
                     id = DialogmeldingId(id),
                     tidspunkt = tidspunkt,
                     melding = melding,
@@ -249,7 +249,7 @@ class PgDialogRepository(
         }
 
         companion object {
-            fun fraDialogmelding(dialogmelding: Dialogmelding): DialogmeldingDto =
+            fun fraDialogmelding(dialogmelding: Dialogmelding<*>): DialogmeldingDto =
                 when (dialogmelding) {
                     is Dialogmelding.FraNav -> {
                         FraNav(
@@ -270,10 +270,6 @@ class PgDialogRepository(
                             behandler = BehandlerDto.fraBehandler(dialogmelding.behandler),
                             antallVedlegg = dialogmelding.antallVedlegg,
                         )
-                    }
-
-                    else -> {
-                        error("Ukjent dialogmeldingstype: ${dialogmelding::class}")
                     }
                 }
         }

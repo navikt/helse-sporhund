@@ -13,6 +13,7 @@ sealed interface SvarFraBehandler {
     val tekst: String
     val antallVedlegg: Int
     val tidspunktMottattNav: Instant
+    val meldingId: String
 
     class MedConversationRef(
         val conversationRef: ConversationRef,
@@ -22,6 +23,7 @@ sealed interface SvarFraBehandler {
         override val tekst: String,
         override val antallVedlegg: Int,
         override val tidspunktMottattNav: Instant,
+        override val meldingId: String,
     ) : SvarFraBehandler
 
     class UtenConversationRef(
@@ -31,5 +33,6 @@ sealed interface SvarFraBehandler {
         override val tekst: String,
         override val antallVedlegg: Int,
         override val tidspunktMottattNav: Instant,
+        override val meldingId: String,
     ) : SvarFraBehandler
 }

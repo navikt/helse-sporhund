@@ -1,19 +1,8 @@
 package no.nav.helse.sporhund.domain.testhelpers
 
-import no.nav.helse.sporhund.domain.Behandler
-import no.nav.helse.sporhund.domain.BehandlerRef
-import no.nav.helse.sporhund.domain.ConversationRef
-import no.nav.helse.sporhund.domain.Dialog
-import no.nav.helse.sporhund.domain.Dialogmelding
-import no.nav.helse.sporhund.domain.DialogmeldingId
-import no.nav.helse.sporhund.domain.Dialogstatus
-import no.nav.helse.sporhund.domain.Dialogtype
-import no.nav.helse.sporhund.domain.Fagområde
-import no.nav.helse.sporhund.domain.Identitetsnummer
-import no.nav.helse.sporhund.domain.NavIdent
-import no.nav.helse.sporhund.domain.Navn
+import no.nav.helse.sporhund.domain.*
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 fun lagDialog(
     identitetsnummer: Identitetsnummer = lagIdentitetsnummer(),
@@ -56,7 +45,7 @@ fun lagFraBehandlerMelding(
     antallVedlegg: Int = 0,
 ): Dialogmelding.FraBehandler =
     Dialogmelding.FraBehandler(
-        id = DialogmeldingId(UUID.randomUUID()),
+        id = DialogmeldingId(UUID.randomUUID().toString()),
         tidspunkt = opprettet,
         melding = melding,
         behandler = behandler,

@@ -35,8 +35,8 @@ private fun SvarFraBehandler.MedConversationRef.håndterSvarMedConversationRef(
     transactionProvider.transaction {
         val dialog = dialogRepository.finnDialog(conversationRef) ?: return@transaction
         dialog.nyMelding(
-            Dialogmelding.FraBehandler(
-                id = DialogmeldingId(UUID.randomUUID()),
+            Dialogmelding.FraBehandler.ny(
+                meldingId = meldingId,
                 tidspunkt = tidspunktMottattNav,
                 melding = tekst,
                 behandler = behandler,
@@ -58,6 +58,7 @@ private fun DialogmeldingFraBehandlerKafkaDto.svarFraBehandlerMedConversationRef
         tekst = forespørselssvar.tekstNotatInnhold,
         antallVedlegg = this.antallVedlegg,
         tidspunktMottattNav = this.mottattTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toInstant(),
+        meldingId = this.msgId,
     )
 }
 
