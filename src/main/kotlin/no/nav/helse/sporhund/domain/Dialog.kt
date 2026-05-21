@@ -60,8 +60,6 @@ class Dialog private constructor(
         status = if (nyesteMelding() is Dialogmelding.FraNav) Dialogstatus.ForespørselSendt else Dialogstatus.SvarMottatt
     }
 
-    private fun førsteMelding() = meldinger.first()
-
     fun frist(): Instant = nyesteMeldingFraNav().tidspunkt + Duration.ofDays(21)
 
     fun opprettetTidspunkt(): Instant = førsteMelding().tidspunkt
@@ -85,7 +83,9 @@ class Dialog private constructor(
         }
     }
 
-    private fun nyesteMeldingFraNav(): Dialogmelding.FraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().last()
+    private fun førsteMelding() = meldinger.first()
+
+    fun nyesteMeldingFraNav(): Dialogmelding.FraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().last()
 
     private fun førsteMeldingFraNav(): Dialogmelding.FraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().first()
 

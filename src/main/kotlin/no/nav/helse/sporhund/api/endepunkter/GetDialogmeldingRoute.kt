@@ -5,11 +5,11 @@ import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.helse.sporhund.api.ApiDialogDetails
+import no.nav.helse.sporhund.api.conversationRef
 import no.nav.helse.sporhund.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.api.personPseudoId
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
-import no.nav.helse.sporhund.domain.ConversationRef
 import java.util.*
 
 fun Route.getDialogmeldingRoute(
@@ -45,10 +45,10 @@ fun Route.getDialogmeldingRoute(
             call.respond(HttpStatusCode.NotFound)
             return@get
         }
-        val conversationRef = call.parameters["conversationRef"]!!
+        val conversationRef = call.conversationRef()
         val dialog =
             transactionProvider.transaction {
-                dialogRepository.finnDialog(ConversationRef(UUID.fromString(conversationRef)))
+                dialogRepository.finnDialog(conversationRef)
             }
         if (dialog != null) {
             call.respond(dialog.tilApiDialogDetails())

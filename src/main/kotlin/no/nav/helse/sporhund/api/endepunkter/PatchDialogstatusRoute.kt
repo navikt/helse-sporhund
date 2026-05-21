@@ -7,11 +7,11 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.helse.sporhund.api.ApiDialogDetails
 import no.nav.helse.sporhund.api.ApiOppdaterDialogStatus
+import no.nav.helse.sporhund.api.conversationRef
 import no.nav.helse.sporhund.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.api.personPseudoId
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
-import no.nav.helse.sporhund.domain.ConversationRef
 import java.util.*
 
 fun Route.patchDialogstatusRoute(
@@ -50,7 +50,7 @@ fun Route.patchDialogstatusRoute(
         }
 
         val statusOppdatering = call.receive<ApiOppdaterDialogStatus>()
-        val conversationRef = ConversationRef(UUID.fromString(call.parameters["conversationRef"]!!))
+        val conversationRef = call.conversationRef()
         val oppdatertDialog =
             transactionProvider.transaction {
                 val dialog = dialogRepository.finnDialog(conversationRef) ?: return@transaction null

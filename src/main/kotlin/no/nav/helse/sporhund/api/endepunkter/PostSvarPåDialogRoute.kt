@@ -7,6 +7,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.helse.sporhund.api.ApiDialogDetails
 import no.nav.helse.sporhund.api.ApiSvarPaDialog
+import no.nav.helse.sporhund.api.conversationRef
 import no.nav.helse.sporhund.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.api.personPseudoId
 import no.nav.helse.sporhund.api.saksbehandler
@@ -14,7 +15,6 @@ import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.OutboxMeldingId
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
-import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.Dialogmelding
 import java.util.*
 
@@ -53,19 +53,19 @@ fun Route.postSvarPåDialogRoute(
             return@post
         }
         val saksbehandler = call.saksbehandler()
-        val conversationRef = ConversationRef(UUID.fromString(call.parameters["conversationRef"]!!))
+        val conversationRef = call.conversationRef()
         val svar = call.receive<ApiSvarPaDialog>()
         val oppdatertDialog =
             transactionProvider.transaction {
                 val dialog =
                     dialogRepository.finnDialog(conversationRef)
                         ?: return@transaction null
-                val forsteFraNav = dialog.meldinger.filterIsInstance<Dialogmelding.FraNav>().first()
+                val nyesteFraNav = dialog.nyesteMeldingFraNav()
                 dialog.nyMelding(
                     Dialogmelding.FraNav.ny(
                         saksbehandler.ident,
-                        forsteFraNav.behandler,
-                        forsteFraNav.behandlerRef,
+                        nyesteFraNav.behandler,
+                        nyesteFraNav.behandlerRef,
                         svar.melding,
                     ),
                 )
