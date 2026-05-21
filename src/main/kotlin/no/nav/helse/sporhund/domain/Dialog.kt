@@ -40,8 +40,8 @@ class Dialog private constructor(
     val dialogtype: Dialogtype,
     meldinger: List<Dialogmelding>,
 ) {
-    private var _status: Dialogstatus = status
-    val status get() = _status
+    var status: Dialogstatus = status
+        private set
 
     private val _meldinger = meldinger.toMutableList()
     val meldinger get() = _meldinger.toList()
@@ -53,11 +53,11 @@ class Dialog private constructor(
     fun nyesteMelding() = meldinger.last()
 
     fun ferdigstill() {
-        _status = Dialogstatus.DialogLukket
+        status = Dialogstatus.DialogLukket
     }
 
     fun gjenåpne() {
-        _status = Dialogstatus.SvarMottatt // TODO: Her må vi gjøre noe smartere vel
+        status = if (nyesteMelding() is Dialogmelding.FraNav) Dialogstatus.ForespørselSendt else Dialogstatus.SvarMottatt
     }
 
     private fun førsteMelding() = meldinger.first()
@@ -128,14 +128,15 @@ interface Dialogmelding {
     val id: DialogmeldingId
     val tidspunkt: Instant
     val melding: String
+    val behandler: Behandler
 
     class FraNav private constructor(
         override val id: DialogmeldingId,
         override val tidspunkt: Instant,
         override val melding: String,
+        override val behandler: Behandler,
         val saksbehandler: NavIdent,
         val behandlerRef: BehandlerRef,
-        val behandler: Behandler,
     ) : Dialogmelding {
         companion object {
             fun ny(
@@ -175,7 +176,7 @@ interface Dialogmelding {
         override val id: DialogmeldingId,
         override val tidspunkt: Instant,
         override val melding: String,
-        val behandler: Behandler,
+        override val behandler: Behandler,
         val antallVedlegg: Int,
     ) : Dialogmelding
 }

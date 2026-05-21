@@ -107,8 +107,20 @@ class DialogTest {
     }
 
     @Test
-    fun `gjenåpne setter status til svar mottatt (for nå)`() {
-        val dialog = lagDialog(status = Dialogstatus.DialogLukket)
+    fun `gjenåpne setter status basert på nyeste melding - nyeste melding er sendt fra Nav`() {
+        val dialog = lagDialog()
+        dialog.ferdigstill()
+
+        dialog.gjenåpne()
+
+        assertEquals(Dialogstatus.ForespørselSendt, dialog.status)
+    }
+
+    @Test
+    fun `gjenåpne setter status basert på nyeste melding - nyeste melding er sendt fra behandler`() {
+        val dialog = lagDialog()
+        dialog.nyMelding(lagFraBehandlerMelding())
+        dialog.ferdigstill()
 
         dialog.gjenåpne()
 
