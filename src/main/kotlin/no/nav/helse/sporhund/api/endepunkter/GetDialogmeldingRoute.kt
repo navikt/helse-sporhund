@@ -1,16 +1,15 @@
 package no.nav.helse.sporhund.api.endepunkter
 
 import io.github.smiley4.ktoropenapi.get
-import io.ktor.http.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
 import no.nav.helse.sporhund.api.ApiDialogDetails
 import no.nav.helse.sporhund.api.conversationRef
 import no.nav.helse.sporhund.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.api.personPseudoId
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
-import java.util.*
 
 fun Route.getDialogmeldingRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
