@@ -107,7 +107,7 @@ class DialogTest {
     }
 
     @Test
-    fun `gjenåpne setter status til foresporsel sendt`() {
+    fun `gjenåpne setter status til svar mottatt (for nå)`() {
         val dialog = lagDialog(status = Dialogstatus.DialogLukket)
 
         dialog.gjenåpne()
