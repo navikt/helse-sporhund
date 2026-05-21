@@ -11,7 +11,7 @@ fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
         behandler = opprinneligBehandler.tilApiBehandler(opprinneligBehandlerRef),
         fagomrade = this.tilApiFagomrade(),
         meldingstype = this.tilApiDialogmeldingType(),
-        opprettetTidspunkt = this.opprettetTidspunkt(),
+        sisteAktivitetTidspunkt = this.nyesteMeldingFraNav().tidspunkt,
         antallMeldinger = meldinger.size,
         antallVedlegg = this.antallVedleggTotalt(),
         status = status.tilApiDialogmeldingStatus(),
@@ -36,7 +36,6 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
         conversationRef = conversationRef.value,
         behandler =
             opprinneligBehandler.tilApiBehandler(opprinneligBehandlerRef),
-        opprettetTidspunkt = this.opprettetTidspunkt(),
         status = status.tilApiDialogmeldingStatus(),
         dialogmeldinger =
             meldinger.map { dialogmelding ->

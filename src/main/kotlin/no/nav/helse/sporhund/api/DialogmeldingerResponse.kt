@@ -62,7 +62,6 @@ data class ApiDialogmelding(
 data class ApiDialogDetails(
     val conversationRef: UUID,
     val behandler: ApiBehandler,
-    val opprettetTidspunkt: Instant,
     val status: ApiDialogmeldingStatus,
     val dialogmeldinger: List<ApiDialogmelding>,
 )
@@ -74,7 +73,7 @@ data class ApiDialogOppsummering(
     val behandler: ApiBehandler,
     val fagomrade: ApiFagomrade,
     val meldingstype: ApiDialogmeldingType,
-    val opprettetTidspunkt: Instant,
+    val sisteAktivitetTidspunkt: Instant,
     val antallMeldinger: Int,
     val antallVedlegg: Int,
     val status: ApiDialogmeldingStatus,
