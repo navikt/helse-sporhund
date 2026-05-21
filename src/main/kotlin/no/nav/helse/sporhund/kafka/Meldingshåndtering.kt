@@ -4,18 +4,11 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.db.objectMapper
-import no.nav.helse.sporhund.domain.Behandler
-import no.nav.helse.sporhund.domain.ConversationRef
+import no.nav.helse.sporhund.domain.*
 import no.nav.helse.sporhund.domain.Dialogmelding
-import no.nav.helse.sporhund.domain.DialogmeldingId
-import no.nav.helse.sporhund.domain.HprNummer
-import no.nav.helse.sporhund.domain.Identitetsnummer
-import no.nav.helse.sporhund.domain.Kontor
-import no.nav.helse.sporhund.domain.Navn
-import no.nav.helse.sporhund.domain.Organisasjonsnummer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.time.ZoneId
-import java.util.UUID
+import java.util.*
 
 fun KafkaConsumer.håndterSvarFraBehandler(
     transactionProvider: TransactionProvider,
@@ -28,9 +21,9 @@ fun KafkaConsumer.håndterSvarFraBehandler(
     }
 
     if (kafkamelding.conversationRef != null) {
+        loggInfo("conversationRef er uuid, forsøker å knytte meldingen til dialog", "melding" to objectMapper.writeValueAsString(kafkamelding))
         val svarFraBehandler = kafkamelding.svarFraBehandlerMedConversationRef()
         svarFraBehandler.håndterSvarMedConversationRef(transactionProvider)
-        loggInfo("conversationRef er uuid, forsøker å knytte meldingen til dialog", "melding" to objectMapper.writeValueAsString(kafkamelding))
     } else {
         loggInfo("conversationRef er null, ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding))
     }
