@@ -14,6 +14,7 @@ fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
         opprettetTidspunkt = this.opprettetTidspunkt(),
         antallMeldinger = meldinger.size,
         antallVedlegg = this.antallVedleggTotalt(),
+        status = status.tilApiDialogmeldingStatus(),
     )
 }
 

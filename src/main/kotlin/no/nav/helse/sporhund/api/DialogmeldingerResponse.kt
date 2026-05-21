@@ -77,6 +77,7 @@ data class ApiDialogOppsummering(
     val opprettetTidspunkt: Instant,
     val antallMeldinger: Int,
     val antallVedlegg: Int,
+    val status: ApiDialogmeldingStatus,
 )
 
 enum class ApiDialogmeldingStatus {
