@@ -66,6 +66,8 @@ spec:
       rules:
         - application: logging
           namespace: nais-system
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
   gcp:
     sqlInstances:
       - type: POSTGRES_17
