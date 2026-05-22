@@ -1,5 +1,5 @@
 [versions]
-tbd-libs = "20260521.1202"
+tbd-libs = "20260522.1146"
 smiley4KtorOpenapiTools = "5.7.0"
 smiley4SchemaKenerator = "2.7.2"
 ktor = "3.5.0"
@@ -15,6 +15,8 @@ tbd-naisful-app = { module = "com.github.navikt.tbd-libs:naisful-app", version.r
 tbd-kafka = { module = "com.github.navikt.tbd-libs:kafka", version.ref = "tbd-libs" }
 tbd-jackson = { module = "com.github.navikt.tbd-libs:jackson", version.ref = "tbd-libs" }
 tbd-personpseudoid = { module = "com.github.navikt.tbd-libs:person-pseudo-id", version.ref = "tbd-libs" }
+tbd-populasjonstilgangskontroll-tilgangsmaskinen = { module = "com.github.navikt.tbd-libs:populasjonstilgangskontroll-provider-tilgangsmaskinen", version.ref = "tbd-libs" }
+tbd-populasjonstilgangskontroll-api = { module = "com.github.navikt.tbd-libs:populasjonstilgangskontroll-provider-api", version.ref = "tbd-libs" }
 
 smiley4-ktor-openapi = { module = "io.github.smiley4:ktor-openapi", version.ref = "smiley4KtorOpenapiTools" }
 smiley4-ktor-swagger-ui = { module = "io.github.smiley4:ktor-swagger-ui", version.ref = "smiley4KtorOpenapiTools" }

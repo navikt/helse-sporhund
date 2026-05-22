@@ -26,6 +26,9 @@ dependencies {
     implementation(libs.ktor.server.auth.jwt)
     implementation(libs.auth0.jwt)
 
+    implementation(libs.tbd.populasjonstilgangskontroll.tilgangsmaskinen)
+    implementation(libs.tbd.populasjonstilgangskontroll.api)
+
     testImplementation(kotlin("test"))
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.ktor.server.content.negotiation)
