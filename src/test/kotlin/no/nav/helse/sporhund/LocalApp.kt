@@ -1,9 +1,14 @@
 package no.nav.helse.sporhund
 
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Routing
+import io.ktor.server.routing.get
 import no.nav.helse.sporhund.api.auth.AzureAdConfig
+import no.nav.helse.sporhund.clients.accesstokenprovider.AccessTokenProviderConfig
+import no.nav.helse.sporhund.clients.accesstokenprovider.testhelpers.MockTexasServer
 import no.nav.helse.sporhund.clients.personpseudoid.testhelpers.TestcontainersValkey
+import no.nav.helse.sporhund.clients.populasjonstilgangskontroll.PopulasjonstilgangskontrollConfig
+import no.nav.helse.sporhund.clients.populasjonstilgangskontroll.testhelpers.MockTilgangsmaskinenServer
 import no.nav.helse.sporhund.db.testhelpers.TestcontainersDatabase
 import no.nav.helse.sporhund.domain.testhelpers.lagSaksbehandler
 import no.nav.helse.sporhund.kafka.KafkaConfig
@@ -18,6 +23,8 @@ fun main() {
     val kafka = TestcontainersKafka("local-app")
     val postgres = TestcontainersDatabase("local-app")
     val valkey = TestcontainersValkey("local-app")
+    val mockTexasServer = MockTexasServer()
+    val mockTilgangsmaskinenServer = MockTilgangsmaskinenServer()
 
     val saksbehandler = lagSaksbehandler()
 
@@ -55,6 +62,8 @@ fun main() {
         Thread {
             kafka.stop()
             postgres.stop()
+            mockTexasServer.stop()
+            mockTilgangsmaskinenServer.stop()
         },
     )
 
@@ -77,5 +86,15 @@ fun main() {
         personPseudoIdConfig = valkey.personPseudoIdConfig,
         additionalRoutes = { addAdditionalRoutings(this) },
         port = 8282,
+        populasjonstilgangskontrollConfig =
+            PopulasjonstilgangskontrollConfig(
+                scope = "test-scope",
+                baseUrl = mockTilgangsmaskinenServer.baseUrl,
+            ),
+        accessTokenProviderConfig =
+            AccessTokenProviderConfig(
+                tokenEndpoint = mockTexasServer.tokenEndpoint,
+                exchangeEndpoint = mockTexasServer.exchangeEndpoint,
+            ),
     )
 }

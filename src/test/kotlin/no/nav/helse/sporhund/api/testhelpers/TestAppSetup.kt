@@ -3,6 +3,7 @@ package no.nav.helse.sporhund.api.testhelpers
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.github.smiley4.ktoropenapi.OpenApi
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -22,7 +23,7 @@ import no.nav.helse.sporhund.domain.NavIdent
 import no.nav.helse.sporhund.domain.Saksbehandler
 import no.nav.helse.sporhund.domain.SaksbehandlerOid
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import java.util.UUID
+import java.util.*
 
 const val TEST_CLIENT_ID = "test-client-id"
 const val TEST_ISSUER_ID = "TestIssuer"
@@ -31,6 +32,7 @@ fun ApplicationTestBuilder.setupTestApp(
     personPseudoIdProvider: PersonPseudoIdProvider,
     transactionProvider: TransactionProvider,
     mockOAuth2Server: MockOAuth2Server,
+    populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
 ) {
     val azureAdConfig =
         AzureAdConfig(
@@ -54,7 +56,7 @@ fun ApplicationTestBuilder.setupTestApp(
             }
         }
         routing {
-            appRoutes(personPseudoIdProvider, transactionProvider)
+            appRoutes(personPseudoIdProvider, transactionProvider, populasjonstilgangskontrollProvider)
         }
     }
 }

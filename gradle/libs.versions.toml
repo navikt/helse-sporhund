@@ -17,6 +17,8 @@ tbd-jackson = { module = "com.github.navikt.tbd-libs:jackson", version.ref = "tb
 tbd-personpseudoid = { module = "com.github.navikt.tbd-libs:person-pseudo-id", version.ref = "tbd-libs" }
 tbd-populasjonstilgangskontroll-tilgangsmaskinen = { module = "com.github.navikt.tbd-libs:populasjonstilgangskontroll-provider-tilgangsmaskinen", version.ref = "tbd-libs" }
 tbd-populasjonstilgangskontroll-api = { module = "com.github.navikt.tbd-libs:populasjonstilgangskontroll-provider-api", version.ref = "tbd-libs" }
+tbd-access-token-api = { module = "com.github.navikt.tbd-libs:access-token-provider-api", version.ref = "tbd-libs" }
+tbd-access-token-texas = { module = "com.github.navikt.tbd-libs:access-token-provider-texas", version.ref = "tbd-libs" }
 
 smiley4-ktor-openapi = { module = "io.github.smiley4:ktor-openapi", version.ref = "smiley4KtorOpenapiTools" }
 smiley4-ktor-swagger-ui = { module = "io.github.smiley4:ktor-swagger-ui", version.ref = "smiley4KtorOpenapiTools" }

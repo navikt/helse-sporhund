@@ -29,6 +29,9 @@ dependencies {
     implementation(libs.tbd.populasjonstilgangskontroll.tilgangsmaskinen)
     implementation(libs.tbd.populasjonstilgangskontroll.api)
 
+    implementation(libs.tbd.access.token.texas)
+    implementation(libs.tbd.access.token.api)
+
     testImplementation(kotlin("test"))
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.ktor.server.content.negotiation)

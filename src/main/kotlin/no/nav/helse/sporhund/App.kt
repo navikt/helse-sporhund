@@ -1,13 +1,18 @@
 package no.nav.helse.sporhund
 
+import com.github.navikt.tbd_libs.access_token.TexasClient
 import com.github.navikt.tbd_libs.kafka.AivenConfig
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.naisful.naisApp
+import com.github.navikt.tbd_libs.populasjonstilgang.client.TilgangsmaskinenClient
 import io.github.smiley4.ktoropenapi.OpenApi
-import io.ktor.server.application.*
+import io.ktor.server.application.ApplicationStarted
+import io.ktor.server.application.ApplicationStopping
+import io.ktor.server.application.install
 import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.jwt
-import io.ktor.server.routing.*
+import io.ktor.server.routing.Routing
+import io.ktor.server.routing.routing
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -19,8 +24,10 @@ import no.nav.helse.sporhund.api.auth.AzureAdConfig
 import no.nav.helse.sporhund.api.auth.configureJwtAuthentication
 import no.nav.helse.sporhund.api.configureOpenApiPlugin
 import no.nav.helse.sporhund.application.logg.loggError
+import no.nav.helse.sporhund.clients.accesstokenprovider.AccessTokenProviderConfig
 import no.nav.helse.sporhund.clients.personpseudoid.PersonPseudoIdConfig
 import no.nav.helse.sporhund.clients.personpseudoid.ValkeyPersonPseudoIdProvider
+import no.nav.helse.sporhund.clients.populasjonstilgangskontroll.PopulasjonstilgangskontrollConfig
 import no.nav.helse.sporhund.db.DataSourceBuilder
 import no.nav.helse.sporhund.db.DbConfig
 import no.nav.helse.sporhund.db.PgTransactionProvider
@@ -30,6 +37,7 @@ import no.nav.helse.sporhund.kafka.KafkaConsumer
 import no.nav.helse.sporhund.kafka.KafkaProducer
 import no.nav.helse.sporhund.kafka.ReadTopics
 import org.slf4j.LoggerFactory
+import java.net.URI
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
 
@@ -69,11 +77,24 @@ fun main() {
             valkeyPassord = env.getValue("VALKEY_PASSWORD_PERSONPSEUDOID"),
             valkeyConnectionString = env.getValue("VALKEY_URI_PERSONPSEUDOID"),
         )
+    val populasjonstilgangskontrollConfig =
+        PopulasjonstilgangskontrollConfig(
+            scope = env.getValue("TILGANGSMASKINEN_SCOPE"),
+            baseUrl = env.getValue("TILGANGSMASKINEN_BASE_URL"),
+        )
+    val accessTokenProviderConfig =
+        AccessTokenProviderConfig(
+            tokenEndpoint = env.getValue("NAIS_TOKEN_ENDPOINT"),
+            exchangeEndpoint = env.getValue("NAIS_TOKEN_EXCHANGE_ENDPOINT"),
+        )
+
     app(
         kafkaConfig = kafkaConfig,
         dbConfig = dbConfig,
         azureAdConfig = azureAdConfig,
         personPseudoIdConfig = personPseudoIdConfig,
+        accessTokenProviderConfig = accessTokenProviderConfig,
+        populasjonstilgangskontrollConfig = populasjonstilgangskontrollConfig,
     )
 }
 
@@ -82,6 +103,8 @@ fun app(
     dbConfig: DbConfig,
     azureAdConfig: AzureAdConfig,
     personPseudoIdConfig: PersonPseudoIdConfig,
+    populasjonstilgangskontrollConfig: PopulasjonstilgangskontrollConfig,
+    accessTokenProviderConfig: AccessTokenProviderConfig,
     port: Int = 8080,
     additionalRoutes: Routing.() -> Unit = { },
 ) {
@@ -106,6 +129,19 @@ fun app(
             readyToProduce = running,
             consumerProducerFactory = factory,
             transactionProvider = transactionProvider,
+        )
+
+    val accessTokenProvider =
+        TexasClient(
+            tokenEndpoint = URI(accessTokenProviderConfig.tokenEndpoint),
+            tokenExchangeEndpoint = URI(accessTokenProviderConfig.exchangeEndpoint),
+        )
+
+    val tilgangsmaskinenClient =
+        TilgangsmaskinenClient(
+            scope = populasjonstilgangskontrollConfig.scope,
+            baseUrl = populasjonstilgangskontrollConfig.baseUrl,
+            tokenProvider = accessTokenProvider,
         )
 
     var producerJob: Job? = null
@@ -148,7 +184,7 @@ fun app(
 
             routing {
                 additionalRoutes()
-                appRoutes(personPseudoIdProvider, transactionProvider)
+                appRoutes(personPseudoIdProvider, transactionProvider, tilgangsmaskinenClient)
             }
         },
     ).start(wait = true)
