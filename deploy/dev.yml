@@ -88,6 +88,6 @@ spec:
     - name: KAFKA_CONSUMER_GROUP_ID
       value: tbd-sporhund-v1
     - name: TILGANGSMASKINEN_SCOPE
-      value: api://dev-gcp.tilgangsmaskin.populasjonskontroll/.default
+      value: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
     - name: TILGANGSMASKINEN_BASE_URL
       value: https://tilgangsmaskin.intern.dev.nav.no/api/v1
