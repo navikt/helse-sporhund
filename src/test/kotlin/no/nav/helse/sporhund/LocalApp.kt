@@ -3,17 +3,17 @@ package no.nav.helse.sporhund
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
-import no.nav.helse.sporhund.api.auth.AzureAdConfig
-import no.nav.helse.sporhund.clients.accesstokenprovider.AccessTokenProviderConfig
-import no.nav.helse.sporhund.clients.accesstokenprovider.testhelpers.MockTexasServer
-import no.nav.helse.sporhund.clients.personpseudoid.testhelpers.TestcontainersValkey
-import no.nav.helse.sporhund.clients.populasjonstilgangskontroll.PopulasjonstilgangskontrollConfig
-import no.nav.helse.sporhund.clients.populasjonstilgangskontroll.testhelpers.MockTilgangsmaskinenServer
-import no.nav.helse.sporhund.db.testhelpers.TestcontainersDatabase
 import no.nav.helse.sporhund.domain.testhelpers.lagSaksbehandler
-import no.nav.helse.sporhund.kafka.KafkaConfig
-import no.nav.helse.sporhund.kafka.ReadTopics
-import no.nav.helse.sporhund.kafka.testhelpers.TestcontainersKafka
+import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
+import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.AccessTokenProviderConfig
+import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.testhelpers.MockTexasServer
+import no.nav.helse.sporhund.infrastructure.clients.personpseudoid.testhelpers.TestcontainersValkey
+import no.nav.helse.sporhund.infrastructure.clients.populasjonstilgangskontroll.PopulasjonstilgangskontrollConfig
+import no.nav.helse.sporhund.infrastructure.clients.populasjonstilgangskontroll.testhelpers.MockTilgangsmaskinenServer
+import no.nav.helse.sporhund.infrastructure.db.testhelpers.TestcontainersDatabase
+import no.nav.helse.sporhund.infrastructure.kafka.KafkaConfig
+import no.nav.helse.sporhund.infrastructure.kafka.ReadTopics
+import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.TestcontainersKafka
 import no.nav.security.mock.oauth2.MockOAuth2Server
 
 fun main() {
