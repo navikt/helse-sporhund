@@ -90,4 +90,4 @@ spec:
     - name: TILGANGSMASKINEN_SCOPE
       value: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
     - name: TILGANGSMASKINEN_BASE_URL
-      value: https://tilgangsmaskin.intern.dev.nav.no/api/v1
+      value: http://populasjonstilgangskontroll.tilgangsmaskin
