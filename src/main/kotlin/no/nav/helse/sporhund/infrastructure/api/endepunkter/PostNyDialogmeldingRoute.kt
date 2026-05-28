@@ -1,5 +1,6 @@
 package no.nav.helse.sporhund.infrastructure.api.endepunkter
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.github.smiley4.ktoropenapi.post
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
@@ -17,6 +18,7 @@ import java.util.*
 
 fun Route.postNyDialogmeldingRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
+    populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
     transactionProvider: TransactionProvider,
 ) {
     post("/personer/{pseudoId}/dialogmelding", {
@@ -36,23 +38,23 @@ fun Route.postNyDialogmeldingRoute(
             }
         }
     }) {
-        val pseudoId = call.personPseudoId()
-        val saksbehandler = call.saksbehandler()
-        val identitetsnummer =
-            personPseudoIdProvider.hentIdentitetsnummer(pseudoId) ?: error("Fant ikke identitetsnummer for pseudoId $pseudoId")
-        val apiDialogmelding = call.receive<ApiNyDialogmelding>()
-        val dialog =
-            transactionProvider.transaction {
-                val dialog = apiDialogmelding.tilDialog(identitetsnummer, saksbehandler)
-                dialogRepository.lagre(dialog)
-                val events = dialog.events()
-                events.forEach {
-                    outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
-                }
-                return@transaction dialog
-            }
+        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) {
+            val saksbehandler = call.saksbehandler()
 
-        call.respond(HttpStatusCode.Created, dialog.tilApiDialogDetails())
+            val apiDialogmelding = call.receive<ApiNyDialogmelding>()
+            val dialog =
+                transactionProvider.transaction {
+                    val dialog = apiDialogmelding.tilDialog(it, saksbehandler)
+                    dialogRepository.lagre(dialog)
+                    val events = dialog.events()
+                    events.forEach {
+                        outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
+                    }
+                    return@transaction dialog
+                }
+
+            call.respond(HttpStatusCode.Created, dialog.tilApiDialogDetails())
+        }
     }
 }
 

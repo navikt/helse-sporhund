@@ -25,11 +25,11 @@ fun Routing.appRoutes(
 
         authenticate("oidc") {
             getDialogmeldingOppgaverRoute(personPseudoIdProvider, transactionProvider)
-            getDialogmeldingerRoute(personPseudoIdProvider, transactionProvider)
+            getDialogmeldingerRoute(personPseudoIdProvider, populasjonstilgangskontrollProvider, transactionProvider)
             getDialogmeldingRoute(personPseudoIdProvider, transactionProvider, populasjonstilgangskontrollProvider)
-            postNyDialogmeldingRoute(personPseudoIdProvider, transactionProvider)
-            postSvarPåDialogRoute(personPseudoIdProvider, transactionProvider)
-            patchDialogstatusRoute(personPseudoIdProvider, transactionProvider)
+            postNyDialogmeldingRoute(personPseudoIdProvider, populasjonstilgangskontrollProvider, transactionProvider)
+            postSvarPåDialogRoute(personPseudoIdProvider, populasjonstilgangskontrollProvider, transactionProvider)
+            patchDialogstatusRoute(personPseudoIdProvider, populasjonstilgangskontrollProvider, transactionProvider)
         }
     }
 }

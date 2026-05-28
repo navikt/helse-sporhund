@@ -1,5 +1,6 @@
 package no.nav.helse.sporhund.infrastructure.api.endepunkter
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.github.smiley4.ktoropenapi.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
@@ -8,10 +9,11 @@ import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogOppsummering
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogmeldingerOversikt
-import no.nav.helse.sporhund.infrastructure.api.personPseudoId
+import no.nav.helse.sporhund.infrastructure.api.medPerson
 
 fun Route.getDialogmeldingerRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
+    populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
     transactionProvider: TransactionProvider,
 ) {
     get("/personer/{pseudoId}/dialogmeldinger", {
@@ -30,16 +32,12 @@ fun Route.getDialogmeldingerRoute(
             }
         }
     }) {
-        val pseudoId = call.personPseudoId()
-        val identitetsnummer = personPseudoIdProvider.hentIdentitetsnummer(pseudoId)
-        if (identitetsnummer == null) {
-            call.respond(emptyList<ApiDialogOppsummering>())
-            return@get
+        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) {
+            val dialoger =
+                transactionProvider.transaction {
+                    dialogRepository.finnDialoger(it)
+                }
+            call.respond(dialoger.map { dialog -> dialog.tilApiDialogmeldingerOversikt() })
         }
-        val dialoger =
-            transactionProvider.transaction {
-                dialogRepository.finnDialoger(identitetsnummer)
-            }
-        call.respond(dialoger.map { it.tilApiDialogmeldingerOversikt() })
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.helse.sporhund.infrastructure.api.endepunkter
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.github.smiley4.ktoropenapi.post
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
@@ -16,6 +17,7 @@ import java.util.*
 
 fun Route.postSvarPåDialogRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
+    populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
     transactionProvider: TransactionProvider,
 ) {
     post("/personer/{pseudoId}/dialogmeldinger/{conversationRef}", {
@@ -42,40 +44,36 @@ fun Route.postSvarPåDialogRoute(
             }
         }
     }) {
-        val pseudoId = call.personPseudoId()
-        val identitetsnummer = personPseudoIdProvider.hentIdentitetsnummer(pseudoId)
-        if (identitetsnummer == null) {
-            call.respond(HttpStatusCode.NotFound)
-            return@post
-        }
-        val saksbehandler = call.saksbehandler()
-        val conversationRef = call.conversationRef()
-        val svar = call.receive<ApiSvarPaDialog>()
-        val oppdatertDialog =
-            transactionProvider.transaction {
-                val dialog =
-                    dialogRepository.finnDialog(conversationRef)
-                        ?: return@transaction null
-                val nyesteFraNav = dialog.nyesteMeldingFraNav()
-                dialog.nyMelding(
-                    Dialogmelding.FraNav.ny(
-                        saksbehandler.ident,
-                        nyesteFraNav.behandler,
-                        nyesteFraNav.behandlerRef,
-                        svar.melding,
-                    ),
-                )
-                dialogRepository.lagre(dialog)
-                val events = dialog.events()
-                events.forEach {
-                    outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
+        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) {
+            val saksbehandler = call.saksbehandler()
+            val conversationRef = call.conversationRef()
+            val svar = call.receive<ApiSvarPaDialog>()
+            val oppdatertDialog =
+                transactionProvider.transaction {
+                    val dialog =
+                        dialogRepository.finnDialog(conversationRef)
+                            ?: return@transaction null
+                    val nyesteFraNav = dialog.nyesteMeldingFraNav()
+                    dialog.nyMelding(
+                        Dialogmelding.FraNav.ny(
+                            saksbehandler.ident,
+                            nyesteFraNav.behandler,
+                            nyesteFraNav.behandlerRef,
+                            svar.melding,
+                        ),
+                    )
+                    dialogRepository.lagre(dialog)
+                    val events = dialog.events()
+                    events.forEach {
+                        outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
+                    }
+                    dialog
                 }
-                dialog
+            if (oppdatertDialog != null) {
+                call.respond(HttpStatusCode.Created, oppdatertDialog.tilApiDialogDetails())
+            } else {
+                call.respond(HttpStatusCode.NotFound)
             }
-        if (oppdatertDialog != null) {
-            call.respond(HttpStatusCode.Created, oppdatertDialog.tilApiDialogDetails())
-        } else {
-            call.respond(HttpStatusCode.NotFound)
         }
     }
 }

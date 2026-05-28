@@ -13,7 +13,6 @@ import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedToken
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class GetDialogmeldingerTest : EndepunktTest() {
     @Test
@@ -39,7 +38,7 @@ class GetDialogmeldingerTest : EndepunktTest() {
         }
 
     @Test
-    fun `returnerer 200 med tom liste for ukjent pseudoId`() =
+    fun `returnerer 404 for ukjent pseudoId`() =
         testApplication {
             setupDefaultTestApp()
 
@@ -48,9 +47,7 @@ class GetDialogmeldingerTest : EndepunktTest() {
 
             val response = client.get("/api/personer/${UUID.randomUUID()}/dialogmeldinger") { bearerAuth(token) }
 
-            assertEquals(HttpStatusCode.OK, response.status)
-            val dialoger = response.body<List<ApiDialogOppsummering>>()
-            assertTrue(dialoger.isEmpty())
+            assertEquals(HttpStatusCode.NotFound, response.status)
         }
 
     @Test
