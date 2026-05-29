@@ -3,8 +3,10 @@ package no.nav.helse.sporhund.infrastructure.kafka
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggInfo
+import no.nav.helse.sporhund.application.meldinger
 import no.nav.helse.sporhund.domain.NyDialogmeldingFraNavEvent
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -24,14 +26,10 @@ class KafkaProducer(
             this@KafkaProducer.loggInfo("Etablerer producer for outbox")
             while (readyToProduce.get()) {
                 transactionProvider.transaction {
-                    // sjekk mot outbox-tabellen
-                    // hvis det finnes meldinger,
-                    val meldinger = outbox.meldinger()
-                    meldinger.forEach {
-                        val partitionKey =
-                            it.event.conversationRef.value
-                                .toString()
-                        val kafkaDto = it.event.toKafkaDto()
+                    outbox.meldinger<NyDialogmeldingFraNav>().forEach {
+                        val event = it.nyDialogmeldingFraNavEvent
+                        val partitionKey = event.conversationRef.value.toString()
+                        val kafkaDto = event.toKafkaDto()
                         producer.send(ProducerRecord(dialogmeldingFraNayTopic, partitionKey, objectMapper.writeValueAsString(kafkaDto)))
                         outbox.meldingSendt(it.id)
                     }

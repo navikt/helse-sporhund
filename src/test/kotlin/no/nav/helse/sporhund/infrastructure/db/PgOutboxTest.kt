@@ -1,7 +1,8 @@
 package no.nav.helse.sporhund.infrastructure.db
 
+import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
 import no.nav.helse.sporhund.application.OutboxMelding
-import no.nav.helse.sporhund.application.OutboxMeldingId
+import no.nav.helse.sporhund.application.meldinger
 import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.DialogmeldingId
 import no.nav.helse.sporhund.domain.NyDialogmeldingFraNavEvent
@@ -20,10 +21,8 @@ class PgOutboxTest : DbTest() {
         val outbox = sessionContext.outbox
 
         // when
-        outbox.nyMelding(
-            nyOutboxMelding(OutboxMeldingId(UUID.randomUUID())),
-        )
-        val funnet = outbox.meldinger()
+        outbox.nyMelding(nyOutboxMelding())
+        val funnet = outbox.meldinger<NyDialogmeldingFraNav>()
 
         // then
         assertEquals(1, funnet.size)
@@ -33,31 +32,29 @@ class PgOutboxTest : DbTest() {
     fun `henter kun usendte meldinger`() {
         // given
         val outbox = sessionContext.outbox
-        val outboxMeldingIdForMeldingSomErSendt = OutboxMeldingId(UUID.randomUUID())
-        val outboxMeldingIdForMeldingSomIkkeErSendt = OutboxMeldingId(UUID.randomUUID())
+        val meldingSomErSendt = nyOutboxMelding()
+        val meldingSomIkkeErSendt = nyOutboxMelding()
 
-        outbox.nyMelding(nyOutboxMelding(outboxMeldingIdForMeldingSomErSendt))
-        outbox.meldingSendt(outboxMeldingIdForMeldingSomErSendt)
-        outbox.nyMelding(nyOutboxMelding(outboxMeldingIdForMeldingSomIkkeErSendt))
+        outbox.nyMelding(meldingSomErSendt)
+        outbox.meldingSendt(meldingSomErSendt.id)
+        outbox.nyMelding(meldingSomIkkeErSendt)
 
         // when
-        val funnet = outbox.meldinger()
+        val funnet = outbox.meldinger<NyDialogmeldingFraNav>()
 
         // then
-        assertTrue(funnet.none { it.id == outboxMeldingIdForMeldingSomErSendt })
-        assertTrue(funnet.any { it.id == outboxMeldingIdForMeldingSomIkkeErSendt })
+        assertTrue(funnet.none { it.id == meldingSomErSendt.id })
+        assertTrue(funnet.any { it.id == meldingSomIkkeErSendt.id })
     }
 
-    private fun nyOutboxMelding(outboxMeldingIdForMeldingSomErSendt: OutboxMeldingId): OutboxMelding =
-        OutboxMelding(
-            id = outboxMeldingIdForMeldingSomErSendt,
-            event =
-                NyDialogmeldingFraNavEvent(
-                    ConversationRef(UUID.randomUUID()),
-                    lagBehandlerRef(),
-                    identitetsnummer = lagIdentitetsnummer(),
-                    meldingId = DialogmeldingId(UUID.randomUUID()),
-                    tekst = "En tekst",
-                ),
+    private fun nyOutboxMelding(): NyDialogmeldingFraNav =
+        OutboxMelding.nyDialogmeldingFraNav(
+            NyDialogmeldingFraNavEvent(
+                conversationRef = ConversationRef(UUID.randomUUID()),
+                behandlerRef = lagBehandlerRef(),
+                identitetsnummer = lagIdentitetsnummer(),
+                meldingId = DialogmeldingId(UUID.randomUUID()),
+                tekst = "En tekst",
+            ),
         )
 }

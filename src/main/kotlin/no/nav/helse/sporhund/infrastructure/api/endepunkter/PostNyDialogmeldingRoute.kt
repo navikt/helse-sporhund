@@ -7,14 +7,24 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import no.nav.helse.sporhund.application.OutboxMelding
-import no.nav.helse.sporhund.application.OutboxMeldingId
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
-import no.nav.helse.sporhund.domain.*
-import no.nav.helse.sporhund.infrastructure.api.*
+import no.nav.helse.sporhund.domain.BehandlerRef
+import no.nav.helse.sporhund.domain.Dialog
+import no.nav.helse.sporhund.domain.Dialogmelding
+import no.nav.helse.sporhund.domain.Dialogtype
+import no.nav.helse.sporhund.domain.Fagområde
+import no.nav.helse.sporhund.domain.Identitetsnummer
+import no.nav.helse.sporhund.domain.Navn
+import no.nav.helse.sporhund.domain.Saksbehandler
+import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
+import no.nav.helse.sporhund.infrastructure.api.ApiDialogmeldingType
+import no.nav.helse.sporhund.infrastructure.api.ApiFagomrade
+import no.nav.helse.sporhund.infrastructure.api.ApiNyDialogmelding
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilBehandler
-import java.util.*
+import no.nav.helse.sporhund.infrastructure.api.medPerson
+import no.nav.helse.sporhund.infrastructure.api.saksbehandler
 
 fun Route.postNyDialogmeldingRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
@@ -48,7 +58,7 @@ fun Route.postNyDialogmeldingRoute(
                     dialogRepository.lagre(dialog)
                     val events = dialog.events()
                     events.forEach {
-                        outbox.nyMelding(OutboxMelding(OutboxMeldingId(UUID.randomUUID()), it))
+                        outbox.nyMelding(OutboxMelding.nyDialogmeldingFraNav(it))
                     }
                     return@transaction dialog
                 }
