@@ -13,6 +13,7 @@ import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.routing.routing
 import io.ktor.server.testing.ApplicationTestBuilder
+import java.util.*
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.domain.NavIdent
@@ -23,7 +24,6 @@ import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
 import no.nav.helse.sporhund.infrastructure.api.auth.configureJwtAuthentication
 import no.nav.helse.sporhund.infrastructure.api.configureOpenApiPlugin
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import java.util.*
 
 const val TEST_CLIENT_ID = "test-client-id"
 const val TEST_ISSUER_ID = "TestIssuer"
@@ -32,13 +32,13 @@ fun ApplicationTestBuilder.setupTestApp(
     personPseudoIdProvider: PersonPseudoIdProvider,
     transactionProvider: TransactionProvider,
     mockOAuth2Server: MockOAuth2Server,
-    populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
+    populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider
 ) {
     val azureAdConfig =
         AzureAdConfig(
             clientId = TEST_CLIENT_ID,
             issuerUrl = mockOAuth2Server.issuerUrl(TEST_ISSUER_ID).toString(),
-            jwkProviderUri = mockOAuth2Server.jwksUrl(TEST_ISSUER_ID).toString(),
+            jwkProviderUri = mockOAuth2Server.jwksUrl(TEST_ISSUER_ID).toString()
         )
 
     application {
@@ -77,7 +77,7 @@ fun lagTestSaksbehandler() =
         id = SaksbehandlerOid(UUID.randomUUID()),
         navn = "Test Saksbehandler",
         epost = "test.saksbehandler@nav.no",
-        ident = NavIdent("T123456"),
+        ident = NavIdent("T123456")
     )
 
 fun MockOAuth2Server.utstedToken(saksbehandler: Saksbehandler): String =
@@ -90,6 +90,6 @@ fun MockOAuth2Server.utstedToken(saksbehandler: Saksbehandler): String =
                 "NAVident" to saksbehandler.ident.value,
                 "preferred_username" to saksbehandler.epost,
                 "oid" to saksbehandler.id.value.toString(),
-                "name" to saksbehandler.navn,
-            ),
+                "name" to saksbehandler.navn
+            )
     ).serialize()

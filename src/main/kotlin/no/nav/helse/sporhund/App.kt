@@ -15,6 +15,9 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.routing
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import java.net.URI
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -37,9 +40,6 @@ import no.nav.helse.sporhund.infrastructure.kafka.KafkaConsumer
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaProducer
 import no.nav.helse.sporhund.infrastructure.kafka.ReadTopics
 import org.slf4j.LoggerFactory
-import java.net.URI
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.Duration.Companion.seconds
 
 const val DIALOGMELDING_FRA_NAY_TOPIC = "teamsykefravr.isdialogmelding-behandler-dialogmelding-bestilling"
 const val DIALOGMELDING_STATUS_TOPIC = "teamsykefravr.behandler-dialogmelding-status"
@@ -55,37 +55,37 @@ fun main() {
                 ReadTopics(
                     dialogmeldingFraBehandlerTopic = DIALOGMELDING_FRA_BEHANDLER_TOPIC,
                     dialogmeldingStatusTopic = DIALOGMELDING_STATUS_TOPIC,
-                    legeerklæringTopic = DIALOGMELDING_STATUS_TOPIC, // TODO: Endre tilbake til legeerklæring-topicet når vi har fått tilgang
+                    legeerklæringTopic = DIALOGMELDING_STATUS_TOPIC // TODO: Endre tilbake til legeerklæring-topicet når vi har fått tilgang
                 ),
-            writeTopic = DIALOGMELDING_FRA_NAY_TOPIC,
+            writeTopic = DIALOGMELDING_FRA_NAY_TOPIC
         )
     val dbConfig =
         DbConfig(
             jdbcUrl = env.getValue("DATABASE_JDBC_URL"),
             username = env.getValue("DATABASE_USERNAME"),
-            password = env.getValue("DATABASE_PASSWORD"),
+            password = env.getValue("DATABASE_PASSWORD")
         )
     val azureAdConfig =
         AzureAdConfig(
             clientId = env.getValue("AZURE_APP_CLIENT_ID"),
             issuerUrl = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
-            jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
+            jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI")
         )
     val personPseudoIdConfig =
         PersonPseudoIdConfig(
             valkeyBrukernavn = env.getValue("VALKEY_USERNAME_PERSONPSEUDOID"),
             valkeyPassord = env.getValue("VALKEY_PASSWORD_PERSONPSEUDOID"),
-            valkeyConnectionString = env.getValue("VALKEY_URI_PERSONPSEUDOID"),
+            valkeyConnectionString = env.getValue("VALKEY_URI_PERSONPSEUDOID")
         )
     val populasjonstilgangskontrollConfig =
         PopulasjonstilgangskontrollConfig(
             scope = env.getValue("TILGANGSMASKINEN_SCOPE"),
-            baseUrl = env.getValue("TILGANGSMASKINEN_BASE_URL"),
+            baseUrl = env.getValue("TILGANGSMASKINEN_BASE_URL")
         )
     val accessTokenProviderConfig =
         AccessTokenProviderConfig(
             tokenEndpoint = env.getValue("NAIS_TOKEN_ENDPOINT"),
-            exchangeEndpoint = env.getValue("NAIS_TOKEN_EXCHANGE_ENDPOINT"),
+            exchangeEndpoint = env.getValue("NAIS_TOKEN_EXCHANGE_ENDPOINT")
         )
 
     app(
@@ -94,7 +94,7 @@ fun main() {
         azureAdConfig = azureAdConfig,
         personPseudoIdConfig = personPseudoIdConfig,
         accessTokenProviderConfig = accessTokenProviderConfig,
-        populasjonstilgangskontrollConfig = populasjonstilgangskontrollConfig,
+        populasjonstilgangskontrollConfig = populasjonstilgangskontrollConfig
     )
 }
 
@@ -106,7 +106,7 @@ fun app(
     populasjonstilgangskontrollConfig: PopulasjonstilgangskontrollConfig,
     accessTokenProviderConfig: AccessTokenProviderConfig,
     port: Int = 8080,
-    additionalRoutes: Routing.() -> Unit = { },
+    additionalRoutes: Routing.() -> Unit = { }
 ) {
     val factory = ConsumerProducerFactory(kafkaConfig.aivenConfig)
     val running = AtomicBoolean(false)
@@ -121,27 +121,27 @@ fun app(
             consumerGroupId = System.getenv("KAFKA_CONSUMER_GROUP_ID") ?: "local-group",
             readyToConsume = running,
             consumerProducerFactory = factory,
-            transactionProvider = transactionProvider,
+            transactionProvider = transactionProvider
         )
     val kafkaProducer =
         KafkaProducer(
             dialogmeldingFraNayTopic = kafkaConfig.writeTopic,
             readyToProduce = running,
             consumerProducerFactory = factory,
-            transactionProvider = transactionProvider,
+            transactionProvider = transactionProvider
         )
 
     val accessTokenProvider =
         TexasClient(
             tokenEndpoint = URI(accessTokenProviderConfig.tokenEndpoint),
-            tokenExchangeEndpoint = URI(accessTokenProviderConfig.exchangeEndpoint),
+            tokenExchangeEndpoint = URI(accessTokenProviderConfig.exchangeEndpoint)
         )
 
     val tilgangsmaskinenClient =
         TilgangsmaskinenClient(
             scope = populasjonstilgangskontrollConfig.scope,
             baseUrl = populasjonstilgangskontrollConfig.baseUrl,
-            tokenProvider = accessTokenProvider,
+            tokenProvider = accessTokenProvider
         )
 
     var producerJob: Job? = null
@@ -186,6 +186,6 @@ fun app(
                 additionalRoutes()
                 appRoutes(personPseudoIdProvider, transactionProvider, tilgangsmaskinenClient)
             }
-        },
+        }
     ).start(wait = true)
 }

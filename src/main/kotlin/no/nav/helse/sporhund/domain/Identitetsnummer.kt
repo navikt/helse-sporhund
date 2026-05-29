@@ -16,9 +16,9 @@ sealed interface Identitetsnummer {
 }
 
 data class Fødselsnummer(
-    override val value: String,
+    override val value: String
 ) : Identitetsnummer
 
 data class DNummer(
-    override val value: String,
+    override val value: String
 ) : Identitetsnummer

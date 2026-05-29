@@ -2,20 +2,20 @@ package no.nav.helse.sporhund.infrastructure.kafka
 
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.kafka.poll
+import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.application.logg.loggWarn
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.errors.WakeupException
-import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
 
 class KafkaConsumer(
     private val topics: ReadTopics,
     consumerGroupId: String,
     private val readyToConsume: AtomicBoolean,
     consumerProducerFactory: ConsumerProducerFactory,
-    private val transactionProvider: TransactionProvider,
+    private val transactionProvider: TransactionProvider
 ) {
     private val defaultConsumerProperties =
         Properties().apply {

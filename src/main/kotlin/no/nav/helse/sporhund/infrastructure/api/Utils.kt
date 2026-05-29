@@ -2,10 +2,10 @@ package no.nav.helse.sporhund.infrastructure.api
 
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.principal
+import java.util.*
 import no.nav.helse.sporhund.application.PersonPseudoId
 import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.infrastructure.api.auth.SaksbehandlerPrincipal
-import java.util.*
 
 fun ApplicationCall.personPseudoId() = PersonPseudoId(UUID.fromString(requireNotNull(this.parameters["pseudoId"])))
 

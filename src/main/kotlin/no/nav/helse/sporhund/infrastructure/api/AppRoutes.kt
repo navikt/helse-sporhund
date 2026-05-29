@@ -13,7 +13,7 @@ import no.nav.helse.sporhund.infrastructure.api.endepunkter.*
 fun Routing.appRoutes(
     personPseudoIdProvider: PersonPseudoIdProvider,
     transactionProvider: TransactionProvider,
-    populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
+    populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider
 ) {
     route("/api") {
         route("/openapi.json") {

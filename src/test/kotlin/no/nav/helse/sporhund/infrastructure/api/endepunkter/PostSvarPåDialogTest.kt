@@ -8,15 +8,15 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import java.util.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.ApiSvarPaDialog
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedToken
-import java.util.*
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class PostSvarPåDialogTest : EndepunktTest() {
     @Test
@@ -37,7 +37,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
 
             val response =
                 client.post(
-                    "/api/personer/${pseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}",
+                    "/api/personer/${pseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}"
                 ) {
                     bearerAuth(token)
                     contentType(ContentType.Application.Json)
@@ -60,7 +60,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
 
             val response =
                 client.post(
-                    "/api/personer/${UUID.randomUUID()}/dialogmeldinger/${UUID.randomUUID()}",
+                    "/api/personer/${UUID.randomUUID()}/dialogmeldinger/${UUID.randomUUID()}"
                 ) {
                     bearerAuth(token)
                     contentType(ContentType.Application.Json)
@@ -83,7 +83,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
 
             val response =
                 client.post(
-                    "/api/personer/${pseudoId.value}/dialogmeldinger/${UUID.randomUUID()}",
+                    "/api/personer/${pseudoId.value}/dialogmeldinger/${UUID.randomUUID()}"
                 ) {
                     bearerAuth(token)
                     contentType(ContentType.Application.Json)
@@ -100,7 +100,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
 
             val response =
                 client.post(
-                    "/api/personer/${UUID.randomUUID()}/dialogmeldinger/${UUID.randomUUID()}",
+                    "/api/personer/${UUID.randomUUID()}/dialogmeldinger/${UUID.randomUUID()}"
                 ) {
                     contentType(ContentType.Application.Json)
                     setBody("{}")

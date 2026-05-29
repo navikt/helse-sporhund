@@ -11,7 +11,7 @@ import no.nav.helse.sporhund.domain.Identitetsnummer
 suspend fun RoutingContext.medPerson(
     personPseudoIdProvider: PersonPseudoIdProvider,
     populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
-    block: suspend (identitetsnummer: Identitetsnummer) -> Unit,
+    block: suspend (identitetsnummer: Identitetsnummer) -> Unit
 ) {
     val pseudoId = call.personPseudoId()
     val identitetsnummer =

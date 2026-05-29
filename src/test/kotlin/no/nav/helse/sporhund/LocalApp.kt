@@ -39,15 +39,15 @@ fun main() {
                         "NAVident" to saksbehandler.ident.value,
                         "preferred_username" to saksbehandler.epost,
                         "oid" to saksbehandler.id.value.toString(),
-                        "name" to saksbehandler.navn,
-                    ),
+                        "name" to saksbehandler.navn
+                    )
             ).serialize()
 
     val azureAdConfig =
         AzureAdConfig(
             clientId = clientId,
             issuerUrl = mockOAuth2Server.issuerUrl(issuerId).toString(),
-            jwkProviderUri = mockOAuth2Server.jwksUrl(issuerId).toString(),
+            jwkProviderUri = mockOAuth2Server.jwksUrl(issuerId).toString()
         )
 
     fun addAdditionalRoutings(routing: Routing) {
@@ -64,14 +64,14 @@ fun main() {
             postgres.stop()
             mockTexasServer.stop()
             mockTilgangsmaskinenServer.stop()
-        },
+        }
     )
 
     val topics =
         ReadTopics(
             dialogmeldingFraBehandlerTopic = DIALOGMELDING_FRA_BEHANDLER_TOPIC,
             dialogmeldingStatusTopic = DIALOGMELDING_STATUS_TOPIC,
-            legeerklæringTopic = LEGEERKLÆRING_TOPIC,
+            legeerklæringTopic = LEGEERKLÆRING_TOPIC
         )
 
     app(
@@ -79,7 +79,7 @@ fun main() {
             KafkaConfig(
                 aivenConfig = kafka.config,
                 readTopics = topics,
-                writeTopic = DIALOGMELDING_FRA_NAY_TOPIC,
+                writeTopic = DIALOGMELDING_FRA_NAY_TOPIC
             ),
         dbConfig = postgres.dbConfig,
         azureAdConfig = azureAdConfig,
@@ -89,12 +89,12 @@ fun main() {
         populasjonstilgangskontrollConfig =
             PopulasjonstilgangskontrollConfig(
                 scope = "test-scope",
-                baseUrl = mockTilgangsmaskinenServer.baseUrl,
+                baseUrl = mockTilgangsmaskinenServer.baseUrl
             ),
         accessTokenProviderConfig =
             AccessTokenProviderConfig(
                 tokenEndpoint = mockTexasServer.tokenEndpoint,
-                exchangeEndpoint = mockTexasServer.exchangeEndpoint,
-            ),
+                exchangeEndpoint = mockTexasServer.exchangeEndpoint
+            )
     )
 }

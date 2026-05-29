@@ -1,10 +1,10 @@
 package no.nav.helse.sporhund.infrastructure.kafka
 
+import java.time.Instant
 import no.nav.helse.sporhund.domain.Behandler
 import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.HprNummer
 import no.nav.helse.sporhund.domain.Identitetsnummer
-import java.time.Instant
 
 sealed interface SvarFraBehandler {
     val hprNummer: HprNummer
@@ -23,7 +23,7 @@ sealed interface SvarFraBehandler {
         override val tekst: String,
         override val antallVedlegg: Int,
         override val tidspunktMottattNav: Instant,
-        override val meldingId: String,
+        override val meldingId: String
     ) : SvarFraBehandler
 
     class UtenConversationRef(
@@ -33,6 +33,6 @@ sealed interface SvarFraBehandler {
         override val tekst: String,
         override val antallVedlegg: Int,
         override val tidspunktMottattNav: Instant,
-        override val meldingId: String,
+        override val meldingId: String
     ) : SvarFraBehandler
 }

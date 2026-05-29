@@ -7,7 +7,7 @@ import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.domain.Identitetsnummer
 
 class ValkeyPersonPseudoIdProvider(
-    config: PersonPseudoIdConfig,
+    config: PersonPseudoIdConfig
 ) : PersonPseudoIdProvider {
     private val client = PersonPseudoIdClient(ValkeyConfig(username = config.valkeyBrukernavn, password = config.valkeyPassord, connectionString = config.valkeyConnectionString))
 

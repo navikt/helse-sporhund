@@ -8,14 +8,14 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
-import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
-import no.nav.helse.sporhund.infrastructure.api.*
-import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
-import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedToken
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
+import no.nav.helse.sporhund.infrastructure.api.*
+import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
+import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedToken
 
 class PostNyDialogmeldingTest : EndepunktTest() {
     @Test
@@ -44,13 +44,13 @@ class PostNyDialogmeldingTest : EndepunktTest() {
                                     orgnummer = "912345678",
                                     adresse = "Storgata 1",
                                     postnummer = "0181",
-                                    poststed = "Oslo",
+                                    poststed = "Oslo"
                                 ),
-                            telefonnummer = "22334455",
+                            telefonnummer = "22334455"
                         ),
                     fagomrade = ApiFagomrade.TILBAKEDATERING,
                     melding = "Jeg trenger informasjon om pasienten",
-                    meldingstype = ApiDialogmeldingType.JOURNALNOTAT,
+                    meldingstype = ApiDialogmeldingType.JOURNALNOTAT
                 )
 
             val response =

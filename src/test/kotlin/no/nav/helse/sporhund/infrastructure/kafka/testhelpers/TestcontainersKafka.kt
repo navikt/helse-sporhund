@@ -2,13 +2,13 @@ package no.nav.helse.sporhund.infrastructure.kafka.testhelpers
 
 import com.github.navikt.tbd_libs.kafka.findOffsets
 import com.github.navikt.tbd_libs.kafka.getPartitions
+import java.util.*
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.OffsetSpec
 import org.testcontainers.kafka.KafkaContainer
-import java.util.*
 
 class TestcontainersKafka(
-    moduleLabel: String,
+    moduleLabel: String
 ) {
     private val kafka =
         KafkaContainer("apache/kafka:3.7.1")
@@ -19,19 +19,19 @@ class TestcontainersKafka(
 
     val config =
         LocalKafkaConfig(
-            kafka.bootstrapServers,
+            kafka.bootstrapServers
         )
 
     private val adminClient = AdminClient.create(config.adminConfig(Properties()))
 
     fun isOnLatestOffset(
         consumerGroupId: String,
-        topic: String,
+        topic: String
     ): Boolean {
         val offsets =
             adminClient.findOffsets(
                 adminClient.getPartitions(topic),
-                OffsetSpec.latest(),
+                OffsetSpec.latest()
             )
         val committed =
             adminClient

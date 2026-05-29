@@ -12,7 +12,7 @@ private val etternavnListe =
         "Genser",
         "Fornøyelse",
         "Campingvogn",
-        "Bakkeklaring",
+        "Bakkeklaring"
     )
 
 fun lagEtternavn() = etternavnListe.random()
@@ -27,7 +27,7 @@ private val fornavnListe =
         "Upresis",
         "Stridlynt",
         "Rund",
-        "Internasjonal",
+        "Internasjonal"
     )
 
 fun lagFornavn() = fornavnListe.random()
@@ -43,7 +43,7 @@ private val mellomnavnListe =
         "Uforutsigbar",
         "Behagelig",
         "Robust",
-        "Sofistikert",
+        "Sofistikert"
     )
 
 fun lagMellomnavn() = mellomnavnListe.random()
@@ -59,5 +59,5 @@ fun lagNavn() =
     Navn(
         fornavn = lagFornavn(),
         mellomnavn = lagMellomnavnOrNull(),
-        etternavn = lagEtternavn(),
+        etternavn = lagEtternavn()
     )

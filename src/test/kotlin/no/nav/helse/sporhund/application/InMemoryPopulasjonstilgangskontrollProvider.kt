@@ -6,6 +6,6 @@ import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResulta
 class InMemoryPopulasjonstilgangskontrollProvider : PopulasjonstilgangskontrollProvider {
     override fun kontrollerTilgang(
         accessToken: String,
-        fødselsnummer: String,
+        fødselsnummer: String
     ): TilgangskontrollResultat = TilgangskontrollResultat.Ok
 }

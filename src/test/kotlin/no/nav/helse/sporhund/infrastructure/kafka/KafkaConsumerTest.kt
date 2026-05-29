@@ -1,6 +1,12 @@
 package no.nav.helse.sporhund.infrastructure.kafka
 
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.*
 import no.nav.helse.sporhund.application.InMemoryTransactionProvider
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
@@ -8,12 +14,6 @@ import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.TestcontainersKafka
 import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.lagDialogmeldingFraBehandlerKafkaDto
 import org.apache.kafka.clients.producer.ProducerRecord
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 class KafkaConsumerTest {
     private val kafka = TestcontainersKafka("test-kafka")
@@ -28,12 +28,12 @@ class KafkaConsumerTest {
                 ReadTopics(
                     dialogmeldingFraBehandlerTopic,
                     "et-status-topic",
-                    "et-legeerklaering-topic",
+                    "et-legeerklaering-topic"
                 ),
             consumerGroupId = "test-consumer",
             readyToConsume = readyToConsume,
             consumerProducerFactory = consumerProducerFactory,
-            transactionProvider = transactionProvider,
+            transactionProvider = transactionProvider
         )
 
     @Test
@@ -46,8 +46,8 @@ class KafkaConsumerTest {
         producer.send(
             ProducerRecord(
                 dialogmeldingFraBehandlerTopic,
-                objectMapper.writeValueAsString(lagDialogmeldingFraBehandlerKafkaDto(conversationRef = dialog.conversationRef.value.toString())),
-            ),
+                objectMapper.writeValueAsString(lagDialogmeldingFraBehandlerKafkaDto(conversationRef = dialog.conversationRef.value.toString()))
+            )
         )
 
         lesTilEndenAvTopicetOgStoppConsumer()

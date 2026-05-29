@@ -6,10 +6,10 @@ data class Saksbehandler(
     val id: SaksbehandlerOid,
     val navn: String,
     val epost: String,
-    val ident: NavIdent,
+    val ident: NavIdent
 )
 
 @JvmInline
 value class SaksbehandlerOid(
-    val value: UUID,
+    val value: UUID
 )

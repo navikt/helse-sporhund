@@ -24,8 +24,8 @@ fun OpenApiPluginConfig.configureOpenApiPlugin() {
                                 it.types = setOf("string")
                                 it.format = "bigdecimal"
                             }
-                        },
-                    ) {},
+                        }
+                    ) {}
                 )
             }
     }

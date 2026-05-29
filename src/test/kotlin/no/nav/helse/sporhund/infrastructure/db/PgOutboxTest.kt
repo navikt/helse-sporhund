@@ -1,5 +1,8 @@
 package no.nav.helse.sporhund.infrastructure.db
 
+import java.util.*
+import kotlin.test.Test
+import kotlin.test.assertTrue
 import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
 import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.meldinger
@@ -10,9 +13,6 @@ import no.nav.helse.sporhund.domain.testhelpers.lagBehandlerRef
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.db.testhelpers.DbTest
 import org.junit.jupiter.api.Assertions.assertEquals
-import java.util.*
-import kotlin.test.Test
-import kotlin.test.assertTrue
 
 class PgOutboxTest : DbTest() {
     @Test
@@ -54,7 +54,7 @@ class PgOutboxTest : DbTest() {
                 behandlerRef = lagBehandlerRef(),
                 identitetsnummer = lagIdentitetsnummer(),
                 meldingId = DialogmeldingId(UUID.randomUUID()),
-                tekst = "En tekst",
-            ),
+                tekst = "En tekst"
+            )
         )
 }

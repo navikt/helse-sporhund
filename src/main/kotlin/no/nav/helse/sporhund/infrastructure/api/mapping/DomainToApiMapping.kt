@@ -14,7 +14,7 @@ fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
         sisteAktivitetTidspunkt = this.nyesteMeldingFraNav().tidspunkt,
         antallMeldinger = meldinger.size,
         antallVedlegg = this.antallVedleggTotalt(),
-        status = status.tilApiDialogmeldingStatus(),
+        status = status.tilApiDialogmeldingStatus()
     )
 }
 
@@ -27,7 +27,7 @@ fun Dialog.tilApiDialogmeldingOppgave(personPseudoId: PersonPseudoId): ApiDialog
         fagomrade = this.tilApiFagomrade(),
         meldingstype = this.tilApiDialogmeldingType(),
         soker = this.søkernavn.tilApiNavn(),
-        status = status.tilApiDialogmeldingStatus(),
+        status = status.tilApiDialogmeldingStatus()
     )
 
 fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
@@ -45,9 +45,9 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
                     melding = dialogmelding.melding,
                     sendtTidspunkt = dialogmelding.tidspunkt,
                     fraNav = dialogmelding is Dialogmelding.FraNav,
-                    vedlegg = emptyList(),
+                    vedlegg = emptyList()
                 )
-            },
+            }
     )
 }
 
@@ -77,7 +77,7 @@ private fun Dialog.tilApiDialogmeldingType(): ApiDialogmeldingType =
     }
 
 private fun Behandler.tilApiBehandler(
-    behandlerRef: BehandlerRef,
+    behandlerRef: BehandlerRef
 ): ApiBehandler =
     ApiBehandler(
         id = behandlerRef.value,
@@ -85,7 +85,7 @@ private fun Behandler.tilApiBehandler(
             ApiNavn(
                 fornavn = navn.fornavn,
                 mellomnavn = navn.mellomnavn,
-                etternavn = navn.etternavn,
+                etternavn = navn.etternavn
             ),
         type = null,
         kategori = ApiBehandlerKategori.LEGE,
@@ -95,14 +95,14 @@ private fun Behandler.tilApiBehandler(
                 orgnummer = kontor.organisasjonsnummer?.value,
                 adresse = kontor.adresse?.veiadresse,
                 postnummer = kontor.adresse?.postnummer,
-                poststed = kontor.adresse?.poststed,
+                poststed = kontor.adresse?.poststed
             ),
-        telefonnummer = telefonnummer?.value,
+        telefonnummer = telefonnummer?.value
     )
 
 private fun Navn.tilApiNavn(): ApiNavn =
     ApiNavn(
         fornavn = this.fornavn,
         mellomnavn = this.mellomnavn,
-        etternavn = this.etternavn,
+        etternavn = this.etternavn
     )

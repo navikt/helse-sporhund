@@ -14,7 +14,7 @@ class DialogmeldingTilBehandlerKafkaDto(
     val dialogmeldingKode: Int,
     val dialogmeldingTekst: String?,
     val dialogmeldingVedlegg: ByteArray? = null,
-    val kilde: String?,
+    val kilde: String?
 )
 
 // https://github.com/navikt/padm2/blob/master/src/main/kotlin/no/nav/syfo/kafka/DialogmeldingForKafka.kt
@@ -37,7 +37,7 @@ data class DialogmeldingFraBehandlerKafkaDto(
     val dialogmelding: Dialogmelding,
     val antallVedlegg: Int,
     val journalpostId: String,
-    val fellesformatXML: String,
+    val fellesformatXML: String
 )
 
 data class Dialogmelding(
@@ -46,7 +46,7 @@ data class Dialogmelding(
     val foresporselFraSaksbehandlerForesporselSvar: ForesporselFraSaksbehandlerForesporselSvar?,
     val henvendelseFraLegeHenvendelse: HenvendelseFraLegeHenvendelse?,
     val navnHelsepersonell: String,
-    val signaturDato: LocalDateTime,
+    val signaturDato: LocalDateTime
 )
 
 data class HenvendelseFraLegeHenvendelse(
@@ -54,14 +54,14 @@ data class HenvendelseFraLegeHenvendelse(
     val tekstNotatInnhold: String,
     val dokIdNotat: String?,
     val foresporsel: Foresporsel?,
-    val rollerRelatertNotat: RollerRelatertNotat?,
+    val rollerRelatertNotat: RollerRelatertNotat?
 )
 
 data class InnkallingMoterespons(
     val temaKode: TemaKode,
     val tekstNotatInnhold: String?,
     val dokIdNotat: String?,
-    val foresporsel: Foresporsel?,
+    val foresporsel: Foresporsel?
 )
 
 data class TemaKode(
@@ -70,46 +70,46 @@ data class TemaKode(
     val v: String,
     val arenaNotatKategori: String,
     val arenaNotatKode: String,
-    val arenaNotatTittel: String,
+    val arenaNotatTittel: String
 )
 
 data class ForesporselFraSaksbehandlerForesporselSvar(
     val temaKode: TemaKode,
     val tekstNotatInnhold: String,
     val dokIdNotat: String?,
-    val datoNotat: LocalDateTime?,
+    val datoNotat: LocalDateTime?
 )
 
 data class Foresporsel(
     val typeForesp: TypeForesp,
     val sporsmal: String,
     val dokIdForesp: String?,
-    val rollerRelatertNotat: RollerRelatertNotat?,
+    val rollerRelatertNotat: RollerRelatertNotat?
 )
 
 data class RollerRelatertNotat(
     val rolleNotat: RolleNotat?,
     val person: Person?,
-    val helsepersonell: Helsepersonell?,
+    val helsepersonell: Helsepersonell?
 )
 
 data class Helsepersonell(
     val givenName: String,
-    val familyName: String,
+    val familyName: String
 )
 
 data class Person(
     val givenName: String,
-    val familyName: String,
+    val familyName: String
 )
 
 data class RolleNotat(
     val s: String,
-    val v: String,
+    val v: String
 )
 
 data class TypeForesp(
     val dn: String,
     val s: String,
-    val v: String,
+    val v: String
 )

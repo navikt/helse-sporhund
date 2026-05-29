@@ -16,7 +16,7 @@ import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogDetails
 fun Route.postSvarPåDialogRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
     populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
-    transactionProvider: TransactionProvider,
+    transactionProvider: TransactionProvider
 ) {
     post("/personer/{pseudoId}/dialogmeldinger/{conversationRef}", {
         operationId = "postSvarPaDialog"
@@ -57,8 +57,8 @@ fun Route.postSvarPåDialogRoute(
                             saksbehandler.ident,
                             nyesteFraNav.behandler,
                             nyesteFraNav.behandlerRef,
-                            svar.melding,
-                        ),
+                            svar.melding
+                        )
                     )
                     dialogRepository.lagre(dialog)
                     val events = dialog.events()

@@ -1,11 +1,11 @@
 package no.nav.helse.sporhund.infrastructure.kafka.testhelpers
 
+import java.time.LocalDateTime
+import java.util.*
 import no.nav.helse.sporhund.infrastructure.kafka.Dialogmelding
 import no.nav.helse.sporhund.infrastructure.kafka.DialogmeldingFraBehandlerKafkaDto
 import no.nav.helse.sporhund.infrastructure.kafka.ForesporselFraSaksbehandlerForesporselSvar
 import no.nav.helse.sporhund.infrastructure.kafka.TemaKode
-import java.time.LocalDateTime
-import java.util.*
 
 fun lagDialogmeldingFraBehandlerKafkaDto(
     msgId: String = UUID.randomUUID().toString(),
@@ -23,7 +23,7 @@ fun lagDialogmeldingFraBehandlerKafkaDto(
     dialogmelding: Dialogmelding = lagDialogmelding(),
     antallVedlegg: Int = 0,
     journalpostId: String = UUID.randomUUID().toString(),
-    fellesformatXML: String = "<fellesformat/>",
+    fellesformatXML: String = "<fellesformat/>"
 ): DialogmeldingFraBehandlerKafkaDto =
     DialogmeldingFraBehandlerKafkaDto(
         msgId = msgId,
@@ -41,13 +41,13 @@ fun lagDialogmeldingFraBehandlerKafkaDto(
         dialogmelding = dialogmelding,
         antallVedlegg = antallVedlegg,
         journalpostId = journalpostId,
-        fellesformatXML = fellesformatXML,
+        fellesformatXML = fellesformatXML
     )
 
 fun lagDialogmeldingUtenForesporselssvar(
     id: String = UUID.randomUUID().toString(),
     navnHelsepersonell: String = "Ola Testlege",
-    signaturDato: LocalDateTime = LocalDateTime.now(),
+    signaturDato: LocalDateTime = LocalDateTime.now()
 ): Dialogmelding =
     Dialogmelding(
         id = id,
@@ -55,14 +55,14 @@ fun lagDialogmeldingUtenForesporselssvar(
         foresporselFraSaksbehandlerForesporselSvar = null,
         henvendelseFraLegeHenvendelse = null,
         navnHelsepersonell = navnHelsepersonell,
-        signaturDato = signaturDato,
+        signaturDato = signaturDato
     )
 
 fun lagDialogmelding(
     id: String = UUID.randomUUID().toString(),
     tekstNotatInnhold: String = "Dette er en testmelding",
     navnHelsepersonell: String = "Ola Testlege",
-    signaturDato: LocalDateTime = LocalDateTime.now(),
+    signaturDato: LocalDateTime = LocalDateTime.now()
 ): Dialogmelding =
     Dialogmelding(
         id = id,
@@ -76,13 +76,13 @@ fun lagDialogmelding(
                         v = "DIALOG_FORESPORSEL",
                         arenaNotatKategori = "IJ",
                         arenaNotatKode = "FORESPORSEL",
-                        arenaNotatTittel = "Forespørsel",
+                        arenaNotatTittel = "Forespørsel"
                     ),
                 tekstNotatInnhold = tekstNotatInnhold,
                 dokIdNotat = null,
-                datoNotat = null,
+                datoNotat = null
             ),
         henvendelseFraLegeHenvendelse = null,
         navnHelsepersonell = navnHelsepersonell,
-        signaturDato = signaturDato,
+        signaturDato = signaturDato
     )

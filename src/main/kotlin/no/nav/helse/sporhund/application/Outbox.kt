@@ -8,16 +8,16 @@ import no.nav.helse.sporhund.domain.NyDialogmeldingFraNavEvent
 interface Outbox {
     fun nyMelding(melding: OutboxMelding)
 
-    fun <T: OutboxMelding> meldinger(type: KClass<T>): List<T>
+    fun <T : OutboxMelding> meldinger(type: KClass<T>): List<T>
 
     fun meldingSendt(id: OutboxMeldingId)
 }
 
-inline fun <reified T: OutboxMelding> Outbox.meldinger(): List<T> = meldinger(T::class)
+inline fun <reified T : OutboxMelding> Outbox.meldinger(): List<T> = meldinger(T::class)
 
 @JvmInline
 value class OutboxMeldingId(
-    val value: UUID,
+    val value: UUID
 )
 
 sealed interface OutboxMelding {
@@ -33,11 +33,17 @@ sealed interface OutboxMelding {
         fun opprettJournalpost(conversationRef: ConversationRef) =
             OpprettJournalpost(
                 id = OutboxMeldingId(UUID.randomUUID()),
-                conversationRef = conversationRef,
+                conversationRef = conversationRef
             )
     }
 }
 
-data class NyDialogmeldingFraNav(override val id: OutboxMeldingId, val nyDialogmeldingFraNavEvent: NyDialogmeldingFraNavEvent) : OutboxMelding
+data class NyDialogmeldingFraNav(
+    override val id: OutboxMeldingId,
+    val nyDialogmeldingFraNavEvent: NyDialogmeldingFraNavEvent
+) : OutboxMelding
 
-data class OpprettJournalpost(override val id: OutboxMeldingId, val conversationRef: ConversationRef) : OutboxMelding
+data class OpprettJournalpost(
+    override val id: OutboxMeldingId,
+    val conversationRef: ConversationRef
+) : OutboxMelding

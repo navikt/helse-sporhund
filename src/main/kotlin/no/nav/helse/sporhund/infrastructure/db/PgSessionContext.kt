@@ -5,7 +5,7 @@ import no.nav.helse.sporhund.application.Outbox
 import no.nav.helse.sporhund.application.SessionContext
 
 class PgSessionContext(
-    session: Session,
+    session: Session
 ) : SessionContext {
     override val outbox: Outbox = PgOutbox(session)
     override val dialogRepository = PgDialogRepository(session)

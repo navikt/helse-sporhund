@@ -10,7 +10,7 @@ inline val <reified T> T.logg: Logger
 
 inline fun <reified T> T.loggError(
     melding: String,
-    vararg teamLogsDetaljer: Pair<String, Any?>,
+    vararg teamLogsDetaljer: Pair<String, Any?>
 ) {
     loggMedDetaljer(logg, Level.ERROR, melding, teamLogsDetaljer.toList())
 }
@@ -18,14 +18,14 @@ inline fun <reified T> T.loggError(
 inline fun <reified T> T.loggError(
     melding: String,
     throwable: Throwable?,
-    vararg teamLogsDetaljer: Pair<String, Any?>,
+    vararg teamLogsDetaljer: Pair<String, Any?>
 ) {
     loggMedDetaljer(logg, Level.ERROR, melding, teamLogsDetaljer.toList(), throwable)
 }
 
 inline fun <reified T> T.loggWarn(
     melding: String,
-    vararg teamLogsDetaljer: Pair<String, Any?>,
+    vararg teamLogsDetaljer: Pair<String, Any?>
 ) {
     loggMedDetaljer(logg, Level.WARN, melding, teamLogsDetaljer.toList())
 }
@@ -33,21 +33,21 @@ inline fun <reified T> T.loggWarn(
 inline fun <reified T> T.loggWarn(
     melding: String,
     throwable: Throwable?,
-    vararg teamLogsDetaljer: Pair<String, Any?>,
+    vararg teamLogsDetaljer: Pair<String, Any?>
 ) {
     loggMedDetaljer(logg, Level.WARN, melding, teamLogsDetaljer.toList(), throwable)
 }
 
 inline fun <reified T> T.loggInfo(
     melding: String,
-    vararg teamLogsDetaljer: Pair<String, Any?>,
+    vararg teamLogsDetaljer: Pair<String, Any?>
 ) {
     loggMedDetaljer(logg, Level.INFO, melding, teamLogsDetaljer.toList())
 }
 
 inline fun <reified T> T.loggDebug(
     melding: String,
-    vararg teamLogsDetaljer: Pair<String, Any?>,
+    vararg teamLogsDetaljer: Pair<String, Any?>
 ) {
     loggMedDetaljer(logg, Level.DEBUG, melding, teamLogsDetaljer.toList())
 }
@@ -57,7 +57,7 @@ fun loggMedDetaljer(
     level: Level,
     melding: String,
     teamLogsDetaljer: List<Pair<String, Any?>>,
-    throwable: Throwable? = null,
+    throwable: Throwable? = null
 ) {
     logger
         .atLevel(level)

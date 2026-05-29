@@ -11,7 +11,7 @@ import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogmeldingOppga
 
 fun Route.getDialogmeldingOppgaverRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
-    transactionProvider: TransactionProvider,
+    transactionProvider: TransactionProvider
 ) {
     get("/dialogmelding-oppgaver", {
         operationId = "getDialogmeldingOppgaver"
@@ -31,7 +31,7 @@ fun Route.getDialogmeldingOppgaverRoute(
             dialoger.map { dialog ->
                 val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(dialog.identitetsnummer)
                 dialog.tilApiDialogmeldingOppgave(personPseudoId)
-            },
+            }
         )
     }
 }

@@ -6,12 +6,12 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.jwt.JWTAuthenticationProvider
 import io.ktor.server.auth.jwt.JWTCredential
 import io.ktor.server.request.uri
+import java.net.URI
+import java.util.*
 import no.nav.helse.sporhund.domain.NavIdent
 import no.nav.helse.sporhund.domain.Saksbehandler
 import no.nav.helse.sporhund.domain.SaksbehandlerOid
 import org.slf4j.LoggerFactory
-import java.net.URI
-import java.util.*
 
 private val logger = LoggerFactory.getLogger("JWT-Auth")
 
@@ -49,6 +49,6 @@ private fun JWTCredential.tilSaksbehandler(): Saksbehandler =
             id = getClaim("oid").asString().let(UUID::fromString).let(::SaksbehandlerOid),
             navn = getClaim("name").asString(),
             epost = getClaim("preferred_username").asString(),
-            ident = getClaim("NAVident").asString().let(::NavIdent),
+            ident = getClaim("NAVident").asString().let(::NavIdent)
         )
     }
