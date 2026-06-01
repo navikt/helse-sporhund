@@ -5,8 +5,8 @@ import io.ktor.server.testing.testApplication
 import no.nav.helse.sporhund.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.sporhund.application.InMemoryPopulasjonstilgangskontrollProvider
 import no.nav.helse.sporhund.application.InMemoryTransactionProvider
-import no.nav.helse.sporhund.application.VedleggProvider
 import no.nav.helse.sporhund.application.OutboxMelding
+import no.nav.helse.sporhund.application.VedleggProvider
 import no.nav.helse.sporhund.application.meldinger
 import no.nav.helse.sporhund.domain.Saksbehandler
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.lagTestSaksbehandler
