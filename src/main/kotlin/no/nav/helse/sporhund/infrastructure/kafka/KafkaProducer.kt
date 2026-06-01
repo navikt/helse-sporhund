@@ -1,8 +1,6 @@
 package no.nav.helse.sporhund.infrastructure.kafka
 
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
@@ -12,12 +10,14 @@ import no.nav.helse.sporhund.application.meldinger
 import no.nav.helse.sporhund.domain.NyDialogmeldingFraNavEvent
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import org.apache.kafka.clients.producer.ProducerRecord
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration.Companion.milliseconds
 
 class KafkaProducer(
     private val dialogmeldingFraNayTopic: String,
     private val readyToProduce: AtomicBoolean,
     consumerProducerFactory: ConsumerProducerFactory,
-    private val transactionProvider: TransactionProvider
+    private val transactionProvider: TransactionProvider,
 ) {
     private val producer = consumerProducerFactory.createProducer()
 
@@ -52,5 +52,5 @@ private fun NyDialogmeldingFraNavEvent.toKafkaDto(): DialogmeldingTilBehandlerKa
         dialogmeldingKode = 1,
         dialogmeldingTekst = tekst,
         dialogmeldingVedlegg = null,
-        kilde = "sykepenger"
+        kilde = "sykepenger",
     )

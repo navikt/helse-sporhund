@@ -5,7 +5,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.utility.DockerImageName
 
 class TestcontainersValkey(
-    moduleLabel: String
+    moduleLabel: String,
 ) {
     private val valkey: GenericContainer<*> =
         GenericContainer(DockerImageName.parse("valkey/valkey:latest"))
@@ -23,6 +23,6 @@ class TestcontainersValkey(
         PersonPseudoIdConfig(
             valkeyBrukernavn = "default",
             valkeyPassord = "password",
-            valkeyConnectionString = "valkey://${valkey.host}:${valkey.getMappedPort(6379)}"
+            valkeyConnectionString = "valkey://${valkey.host}:${valkey.getMappedPort(6379)}",
         )
 }

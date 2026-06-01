@@ -17,7 +17,7 @@ import no.nav.helse.sporhund.infrastructure.api.medPerson
 fun Route.patchDialogstatusRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
     populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
-    transactionProvider: TransactionProvider
+    transactionProvider: TransactionProvider,
 ) {
     patch("/personer/{pseudoId}/dialogmeldinger/{conversationRef}", {
         operationId = "patchDialogstatus"

@@ -5,14 +5,14 @@ import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
-import java.util.*
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedToken
+import java.util.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class GetDialogmeldingTest : EndepunktTest() {
     @Test
@@ -31,7 +31,7 @@ class GetDialogmeldingTest : EndepunktTest() {
 
             val response =
                 client.get(
-                    "/api/personer/${pseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}"
+                    "/api/personer/${pseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}",
                 ) { bearerAuth(token) }
 
             assertEquals(HttpStatusCode.OK, response.status)
@@ -50,7 +50,7 @@ class GetDialogmeldingTest : EndepunktTest() {
 
             val response =
                 client.get(
-                    "/api/personer/${UUID.randomUUID()}/dialogmeldinger/${UUID.randomUUID()}"
+                    "/api/personer/${UUID.randomUUID()}/dialogmeldinger/${UUID.randomUUID()}",
                 ) { bearerAuth(token) }
 
             assertEquals(HttpStatusCode.NotFound, response.status)
@@ -69,7 +69,7 @@ class GetDialogmeldingTest : EndepunktTest() {
 
             val response =
                 client.get(
-                    "/api/personer/${pseudoId.value}/dialogmeldinger/${UUID.randomUUID()}"
+                    "/api/personer/${pseudoId.value}/dialogmeldinger/${UUID.randomUUID()}",
                 ) { bearerAuth(token) }
 
             assertEquals(HttpStatusCode.NotFound, response.status)

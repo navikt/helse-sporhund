@@ -29,7 +29,7 @@ import no.nav.helse.sporhund.infrastructure.api.saksbehandler
 fun Route.postNyDialogmeldingRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
     populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
-    transactionProvider: TransactionProvider
+    transactionProvider: TransactionProvider,
 ) {
     post("/personer/{pseudoId}/dialogmelding", {
         operationId = "postNyDialogmelding"
@@ -70,7 +70,7 @@ fun Route.postNyDialogmeldingRoute(
 
 private fun ApiNyDialogmelding.tilDialog(
     identitetsnummer: Identitetsnummer,
-    saksbehandler: Saksbehandler
+    saksbehandler: Saksbehandler,
 ): Dialog =
     Dialog.ny(
         identitetsnummer = identitetsnummer,
@@ -78,14 +78,14 @@ private fun ApiNyDialogmelding.tilDialog(
             Navn(
                 fornavn = sokernavn.fornavn,
                 mellomnavn = sokernavn.mellomnavn,
-                etternavn = sokernavn.etternavn
+                etternavn = sokernavn.etternavn,
             ),
         melding =
             Dialogmelding.FraNav.ny(
                 saksbehandler = saksbehandler.ident,
                 behandler = tilBehandler(),
                 behandlerRef = BehandlerRef(behandler.id),
-                melding = melding
+                melding = melding,
             ),
         fagområde =
             when (fagomrade) {
@@ -101,5 +101,5 @@ private fun ApiNyDialogmelding.tilDialog(
                 ApiDialogmeldingType.EKSTRA_UTTALELSER_FRA_LEGE -> Dialogtype.EkstraUttalelserFraLege
                 ApiDialogmeldingType.SPESIALISTERKLAERING -> Dialogtype.SpesialistErklæring
                 ApiDialogmeldingType.UTVIDET_SPESIALISTERKLAERING -> Dialogtype.UtvidetSpesialistErklæring
-            }
+            },
     )

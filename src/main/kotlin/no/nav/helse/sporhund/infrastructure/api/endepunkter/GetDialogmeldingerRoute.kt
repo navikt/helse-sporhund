@@ -14,7 +14,7 @@ import no.nav.helse.sporhund.infrastructure.api.medPerson
 fun Route.getDialogmeldingerRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
     populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
-    transactionProvider: TransactionProvider
+    transactionProvider: TransactionProvider,
 ) {
     get("/personer/{pseudoId}/dialogmeldinger", {
         operationId = "getDialogmeldinger"

@@ -1,17 +1,17 @@
 package no.nav.helse.sporhund.infrastructure.kafka
 
+import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.lagDialogmeldingFraBehandlerKafkaDto
+import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.lagDialogmeldingUtenForesporselssvar
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.lagDialogmeldingFraBehandlerKafkaDto
-import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.lagDialogmeldingUtenForesporselssvar
 
 class UtilsTest {
     @Test
     fun `erRelevant - conversationRef er gyldig UUID og har forespørselssvar`() {
         val dto =
             lagDialogmeldingFraBehandlerKafkaDto(
-                conversationRef = "123e4567-e89b-12d3-a456-426614174000"
+                conversationRef = "123e4567-e89b-12d3-a456-426614174000",
             )
         assertTrue(dto.erRelevant())
     }
@@ -20,7 +20,7 @@ class UtilsTest {
     fun `erRelevant - conversationRef er null og har forespørselssvar`() {
         val dto =
             lagDialogmeldingFraBehandlerKafkaDto(
-                conversationRef = null
+                conversationRef = null,
             )
         assertTrue(dto.erRelevant())
     }
@@ -29,7 +29,7 @@ class UtilsTest {
     fun `erRelevant - conversationRef er ikke UUID`() {
         val dto =
             lagDialogmeldingFraBehandlerKafkaDto(
-                conversationRef = "ikke-en-uuid"
+                conversationRef = "ikke-en-uuid",
             )
         assertFalse(dto.erRelevant())
     }
@@ -38,7 +38,7 @@ class UtilsTest {
     fun `erRelevant - conversationRef er tom streng`() {
         val dto =
             lagDialogmeldingFraBehandlerKafkaDto(
-                conversationRef = ""
+                conversationRef = "",
             )
         assertFalse(dto.erRelevant())
     }
@@ -47,7 +47,7 @@ class UtilsTest {
     fun `erRelevant - mangler forespørselssvar`() {
         val dto =
             lagDialogmeldingFraBehandlerKafkaDto(
-                dialogmelding = lagDialogmeldingUtenForesporselssvar()
+                dialogmelding = lagDialogmeldingUtenForesporselssvar(),
             )
         assertFalse(dto.erRelevant())
     }
@@ -57,7 +57,7 @@ class UtilsTest {
         val dto =
             lagDialogmeldingFraBehandlerKafkaDto(
                 conversationRef = null,
-                dialogmelding = lagDialogmeldingUtenForesporselssvar()
+                dialogmelding = lagDialogmeldingUtenForesporselssvar(),
             )
         assertFalse(dto.erRelevant())
     }

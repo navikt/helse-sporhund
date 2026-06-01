@@ -3,14 +3,14 @@ package no.nav.helse.sporhund.infrastructure.db
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.time.Instant
-import java.util.*
 import kotliquery.Session
 import no.nav.helse.sporhund.application.DialogRepository
 import no.nav.helse.sporhund.domain.*
+import java.time.Instant
+import java.util.*
 
 class PgDialogRepository(
-    private val session: Session
+    private val session: Session,
 ) : DialogRepository {
     override fun lagre(dialog: Dialog) {
         asSQL(
@@ -22,7 +22,7 @@ class PgDialogRepository(
             """,
             "conversation_ref" to dialog.conversationRef.value,
             "identitetsnummer" to dialog.identitetsnummer.value,
-            "json" to DialogDto.fraDialog(dialog).let { objectMapper.writeValueAsString(it) }
+            "json" to DialogDto.fraDialog(dialog).let { objectMapper.writeValueAsString(it) },
         ).update(session)
     }
 
@@ -31,7 +31,7 @@ class PgDialogRepository(
             """
                 SELECT json FROM dialog WHERE conversation_ref = :conversation_ref
             """,
-            "conversation_ref" to conversationRef.value
+            "conversation_ref" to conversationRef.value,
         ).single(session) {
             objectMapper.readValue<DialogDto>(it.string("json")).tilDomene()
         }
@@ -41,7 +41,7 @@ class PgDialogRepository(
             """
                 SELECT json FROM dialog WHERE identitetsnummer = :identitetsnummer
             """,
-            "identitetsnummer" to identitetsnummer.value
+            "identitetsnummer" to identitetsnummer.value,
         ).list(session) {
             objectMapper.readValue<DialogDto>(it.string("json")).tilDomene()
         }
@@ -50,7 +50,7 @@ class PgDialogRepository(
         asSQL(
             """
             SELECT json FROM dialog WHERE json -> 'status' != '"DialogLukket"'
-            """.trimIndent()
+            """.trimIndent(),
         ).list(session) {
             objectMapper.readValue<DialogDto>(it.string("json")).tilDomene()
         }
@@ -62,7 +62,7 @@ class PgDialogRepository(
         val meldinger: List<DialogmeldingDto>,
         val status: DialogstatusDto,
         val dialogtype: DialogtypeDto,
-        val fagområde: FagområdeDto
+        val fagområde: FagområdeDto,
     ) {
         fun tilDomene(): Dialog =
             Dialog.fraLagring(
@@ -72,7 +72,7 @@ class PgDialogRepository(
                 status = status.tilDomene(),
                 dialogtype = dialogtype.tilDomene(),
                 fagområde = fagområde.tilDomene(),
-                søkernavn = søkernavn.tilDomene()
+                søkernavn = søkernavn.tilDomene(),
             )
 
         companion object {
@@ -84,7 +84,7 @@ class PgDialogRepository(
                     status = DialogstatusDto.fraDialogstatus(dialog.status),
                     dialogtype = DialogtypeDto.fraDialogtype(dialog.dialogtype),
                     fagområde = FagområdeDto.fraDialogtype(dialog.fagområde),
-                    søkernavn = NavnDto(fornavn = dialog.søkernavn.fornavn, mellomnavn = dialog.søkernavn.mellomnavn, etternavn = dialog.søkernavn.etternavn)
+                    søkernavn = NavnDto(fornavn = dialog.søkernavn.fornavn, mellomnavn = dialog.søkernavn.mellomnavn, etternavn = dialog.søkernavn.etternavn),
                 )
         }
     }
@@ -92,7 +92,7 @@ class PgDialogRepository(
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
     @JsonSubTypes(
         JsonSubTypes.Type(value = IdentitetsnummerDto.Fødselsnummer::class, name = "FODSELSNUMMER"),
-        JsonSubTypes.Type(value = IdentitetsnummerDto.DNummer::class, name = "DNUMMER")
+        JsonSubTypes.Type(value = IdentitetsnummerDto.DNummer::class, name = "DNUMMER"),
     )
     private sealed interface IdentitetsnummerDto {
         val value: String
@@ -100,7 +100,7 @@ class PgDialogRepository(
         fun tilDomene(): Identitetsnummer
 
         data class Fødselsnummer(
-            override val value: String
+            override val value: String,
         ) : IdentitetsnummerDto {
             override fun tilDomene() =
                 no.nav.helse.sporhund.domain
@@ -108,7 +108,7 @@ class PgDialogRepository(
         }
 
         data class DNummer(
-            override val value: String
+            override val value: String,
         ) : IdentitetsnummerDto {
             override fun tilDomene() =
                 no.nav.helse.sporhund.domain
@@ -128,7 +128,8 @@ class PgDialogRepository(
         ForespørselSendt,
         SvarMottatt,
         PurringSendt,
-        DialogLukket ;
+        DialogLukket,
+        ;
 
         fun tilDomene(): Dialogstatus =
             when (this) {
@@ -153,7 +154,7 @@ class PgDialogRepository(
         EnkeltståendeBehandlingsdager,
         Tilbakedatering,
         Yrkesskade,
-        Bestridelse
+        Bestridelse,
         ;
 
         fun tilDomene(): Fagområde =
@@ -180,7 +181,7 @@ class PgDialogRepository(
         MedisinskeOpplysninger,
         EkstraUttalelserFraLege,
         SpesialistErklæring,
-        UtvidetSpesialistErklæring
+        UtvidetSpesialistErklæring,
         ;
 
         fun tilDomene(): Dialogtype =
@@ -207,7 +208,7 @@ class PgDialogRepository(
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
     @JsonSubTypes(
         JsonSubTypes.Type(value = DialogmeldingDto.FraNav::class, name = "FRA_NAV"),
-        JsonSubTypes.Type(value = DialogmeldingDto.FraBehandler::class, name = "FRA_BEHANDLER")
+        JsonSubTypes.Type(value = DialogmeldingDto.FraBehandler::class, name = "FRA_BEHANDLER"),
     )
     private sealed interface DialogmeldingDto {
         fun tilDomene(): Dialogmelding<*>
@@ -218,7 +219,7 @@ class PgDialogRepository(
             val melding: String,
             val saksbehandler: String,
             val behandlerRef: String,
-            val behandler: BehandlerDto
+            val behandler: BehandlerDto,
         ) : DialogmeldingDto {
             override fun tilDomene(): Dialogmelding.FraNav =
                 Dialogmelding.FraNav.fraLagring(
@@ -227,7 +228,7 @@ class PgDialogRepository(
                     melding = melding,
                     saksbehandler = NavIdent(saksbehandler),
                     behandler = behandler.tilDomene(),
-                    behandlerRef = BehandlerRef(behandlerRef)
+                    behandlerRef = BehandlerRef(behandlerRef),
                 )
         }
 
@@ -236,7 +237,7 @@ class PgDialogRepository(
             val tidspunkt: Instant,
             val melding: String,
             val behandler: BehandlerDto,
-            val antallVedlegg: Int
+            val antallVedlegg: Int,
         ) : DialogmeldingDto {
             override fun tilDomene(): Dialogmelding.FraBehandler =
                 Dialogmelding.FraBehandler.fraLagring(
@@ -244,7 +245,7 @@ class PgDialogRepository(
                     tidspunkt = tidspunkt,
                     melding = melding,
                     behandler = behandler.tilDomene(),
-                    antallVedlegg = antallVedlegg
+                    antallVedlegg = antallVedlegg,
                 )
         }
 
@@ -258,7 +259,7 @@ class PgDialogRepository(
                             melding = dialogmelding.melding,
                             saksbehandler = dialogmelding.saksbehandler.value,
                             behandlerRef = dialogmelding.behandlerRef.value,
-                            behandler = BehandlerDto.fraBehandler(dialogmelding.behandler)
+                            behandler = BehandlerDto.fraBehandler(dialogmelding.behandler),
                         )
                     }
 
@@ -268,7 +269,7 @@ class PgDialogRepository(
                             tidspunkt = dialogmelding.tidspunkt,
                             melding = dialogmelding.melding,
                             behandler = BehandlerDto.fraBehandler(dialogmelding.behandler),
-                            antallVedlegg = dialogmelding.antallVedlegg
+                            antallVedlegg = dialogmelding.antallVedlegg,
                         )
                     }
                 }
@@ -278,7 +279,7 @@ class PgDialogRepository(
     private data class NavnDto(
         val fornavn: String,
         val mellomnavn: String?,
-        val etternavn: String
+        val etternavn: String,
     ) {
         fun tilDomene() = Navn(fornavn = fornavn, mellomnavn = mellomnavn, etternavn = etternavn)
     }
@@ -287,33 +288,33 @@ class PgDialogRepository(
         val hprNummer: String,
         val navn: NavnDto,
         val kontor: KontorDto,
-        val telefonnummer: String?
+        val telefonnummer: String?,
     ) {
         fun tilDomene(): Behandler =
             Behandler(
                 hprNummer = HprNummer(hprNummer),
                 navn = navn.tilDomene(),
                 kontor = kontor.tilDomene(),
-                telefonnummer = if (telefonnummer != null) Telefonnummer(telefonnummer) else null
+                telefonnummer = if (telefonnummer != null) Telefonnummer(telefonnummer) else null,
             )
 
         data class KontorDto(
             val navn: String?,
             val organisasjonsnummer: String?,
-            val adresse: AdresseDto?
+            val adresse: AdresseDto?,
         ) {
             fun tilDomene() =
                 Kontor(
                     navn = navn,
                     organisasjonsnummer = organisasjonsnummer?.let { Organisasjonsnummer(it) },
-                    adresse = adresse?.tilDomene()
+                    adresse = adresse?.tilDomene(),
                 )
         }
 
         data class AdresseDto(
             val veiadresse: String?,
             val postnummer: String?,
-            val poststed: String?
+            val poststed: String?,
         ) {
             fun tilDomene() = Adresse(veiadresse = veiadresse, postnummer = postnummer, poststed = poststed)
         }
@@ -326,7 +327,7 @@ class PgDialogRepository(
                         NavnDto(
                             fornavn = behandler.navn.fornavn,
                             mellomnavn = behandler.navn.mellomnavn,
-                            etternavn = behandler.navn.etternavn
+                            etternavn = behandler.navn.etternavn,
                         ),
                     kontor =
                         KontorDto(
@@ -335,9 +336,9 @@ class PgDialogRepository(
                             adresse =
                                 behandler.kontor.adresse?.let {
                                     AdresseDto(veiadresse = it.veiadresse, postnummer = it.postnummer, poststed = it.poststed)
-                                }
+                                },
                         ),
-                    telefonnummer = behandler.telefonnummer?.value
+                    telefonnummer = behandler.telefonnummer?.value,
                 )
         }
     }

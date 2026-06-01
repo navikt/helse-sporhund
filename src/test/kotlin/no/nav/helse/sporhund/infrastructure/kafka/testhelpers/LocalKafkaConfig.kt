@@ -1,13 +1,13 @@
 package no.nav.helse.sporhund.infrastructure.kafka.testhelpers
 
 import com.github.navikt.tbd_libs.kafka.Config
-import java.util.*
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
+import java.util.*
 
 class LocalKafkaConfig(
-    private val brokers: String = "localhost:9092"
+    private val brokers: String = "localhost:9092",
 ) : Config {
     override fun producerConfig(properties: Properties) =
         Properties().apply {
@@ -19,7 +19,7 @@ class LocalKafkaConfig(
 
     override fun consumerConfig(
         groupId: String,
-        properties: Properties
+        properties: Properties,
     ) = Properties().apply {
         putAll(baseConfig())
         put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")

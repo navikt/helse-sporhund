@@ -11,7 +11,7 @@ fun ApiNyDialogmelding.tilBehandler(): Behandler {
             Navn(
                 fornavn = this.behandler.navn.fornavn,
                 mellomnavn = this.behandler.navn.mellomnavn,
-                etternavn = this.behandler.navn.etternavn
+                etternavn = this.behandler.navn.etternavn,
             ),
         kontor =
             Kontor(
@@ -22,10 +22,10 @@ fun ApiNyDialogmelding.tilBehandler(): Behandler {
                         Adresse(
                             veiadresse = it,
                             postnummer = legekontor.postnummer,
-                            poststed = legekontor.poststed
+                            poststed = legekontor.poststed,
                         )
-                    }
+                    },
             ),
-        telefonnummer = behandler.telefonnummer?.let { Telefonnummer(it) }
+        telefonnummer = behandler.telefonnummer?.let { Telefonnummer(it) },
     )
 }

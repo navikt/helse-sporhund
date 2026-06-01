@@ -6,21 +6,21 @@ import java.util.*
 
 @JvmInline
 value class ConversationRef(
-    val value: UUID
+    val value: UUID,
 )
 
 enum class Dialogstatus {
     ForespørselSendt,
     SvarMottatt,
     PurringSendt,
-    DialogLukket
+    DialogLukket,
 }
 
 enum class Fagområde {
     EnkeltståendeBehandlingsdager,
     Tilbakedatering,
     Yrkesskade,
-    Bestridelse
+    Bestridelse,
 }
 
 enum class Dialogtype {
@@ -28,7 +28,7 @@ enum class Dialogtype {
     MedisinskeOpplysninger,
     EkstraUttalelserFraLege,
     SpesialistErklæring,
-    UtvidetSpesialistErklæring
+    UtvidetSpesialistErklæring,
 }
 
 class Dialog private constructor(
@@ -38,7 +38,7 @@ class Dialog private constructor(
     status: Dialogstatus,
     val fagområde: Fagområde,
     val dialogtype: Dialogtype,
-    meldinger: List<Dialogmelding<*>>
+    meldinger: List<Dialogmelding<*>>,
 ) {
     var status: Dialogstatus = status
         private set
@@ -77,8 +77,8 @@ class Dialog private constructor(
                     behandlerRef = dialogmelding.behandlerRef,
                     identitetsnummer = identitetsnummer,
                     meldingId = dialogmelding.id,
-                    tekst = dialogmelding.melding
-                )
+                    tekst = dialogmelding.melding,
+                ),
             )
         }
     }
@@ -95,7 +95,7 @@ class Dialog private constructor(
             søkernavn: Navn,
             melding: Dialogmelding.FraNav,
             fagområde: Fagområde,
-            dialogtype: Dialogtype
+            dialogtype: Dialogtype,
         ): Dialog =
             Dialog(
                 conversationRef = ConversationRef(UUID.randomUUID()),
@@ -104,7 +104,7 @@ class Dialog private constructor(
                 meldinger = emptyList(),
                 status = Dialogstatus.ForespørselSendt,
                 fagområde = fagområde,
-                dialogtype = dialogtype
+                dialogtype = dialogtype,
             ).also { it.nyMelding(melding) }
 
         fun fraLagring(
@@ -114,14 +114,14 @@ class Dialog private constructor(
             meldinger: List<Dialogmelding<*>>,
             status: Dialogstatus,
             fagområde: Fagområde,
-            dialogtype: Dialogtype
+            dialogtype: Dialogtype,
         ): Dialog = Dialog(conversationRef, identitetsnummer, søkernavn, status, fagområde, dialogtype, meldinger)
     }
 }
 
 @JvmInline
 value class DialogmeldingId<ID_TYPE>(
-    val value: ID_TYPE
+    val value: ID_TYPE,
 )
 
 sealed interface Dialogmelding<ID_TYPE> {
@@ -136,14 +136,14 @@ sealed interface Dialogmelding<ID_TYPE> {
         override val melding: String,
         override val behandler: Behandler,
         val saksbehandler: NavIdent,
-        val behandlerRef: BehandlerRef
+        val behandlerRef: BehandlerRef,
     ) : Dialogmelding<UUID> {
         companion object {
             fun ny(
                 saksbehandler: NavIdent,
                 behandler: Behandler,
                 behandlerRef: BehandlerRef,
-                melding: String
+                melding: String,
             ): FraNav =
                 FraNav(
                     id = DialogmeldingId(UUID.randomUUID()),
@@ -151,7 +151,7 @@ sealed interface Dialogmelding<ID_TYPE> {
                     melding = melding,
                     saksbehandler = saksbehandler,
                     behandler = behandler,
-                    behandlerRef = behandlerRef
+                    behandlerRef = behandlerRef,
                 )
 
             fun fraLagring(
@@ -160,14 +160,14 @@ sealed interface Dialogmelding<ID_TYPE> {
                 melding: String,
                 saksbehandler: NavIdent,
                 behandler: Behandler,
-                behandlerRef: BehandlerRef
+                behandlerRef: BehandlerRef,
             ) = FraNav(
                 id = id,
                 tidspunkt = tidspunkt,
                 melding = melding,
                 saksbehandler = saksbehandler,
                 behandler = behandler,
-                behandlerRef = behandlerRef
+                behandlerRef = behandlerRef,
             )
         }
     }
@@ -177,7 +177,7 @@ sealed interface Dialogmelding<ID_TYPE> {
         override val tidspunkt: Instant,
         override val melding: String,
         override val behandler: Behandler,
-        val antallVedlegg: Int
+        val antallVedlegg: Int,
     ) : Dialogmelding<String> {
         companion object {
             fun ny(
@@ -185,14 +185,14 @@ sealed interface Dialogmelding<ID_TYPE> {
                 behandler: Behandler,
                 tidspunkt: Instant,
                 antallVedlegg: Int,
-                melding: String
+                melding: String,
             ): FraBehandler =
                 FraBehandler(
                     id = DialogmeldingId(meldingId),
                     tidspunkt = tidspunkt,
                     melding = melding,
                     behandler = behandler,
-                    antallVedlegg = antallVedlegg
+                    antallVedlegg = antallVedlegg,
                 )
 
             fun fraLagring(
@@ -200,13 +200,13 @@ sealed interface Dialogmelding<ID_TYPE> {
                 tidspunkt: Instant,
                 melding: String,
                 behandler: Behandler,
-                antallVedlegg: Int
+                antallVedlegg: Int,
             ) = FraBehandler(
                 id = id,
                 tidspunkt = tidspunkt,
                 melding = melding,
                 behandler = behandler,
-                antallVedlegg = antallVedlegg
+                antallVedlegg = antallVedlegg,
             )
         }
     }

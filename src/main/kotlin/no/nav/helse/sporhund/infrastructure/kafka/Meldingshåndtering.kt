@@ -1,18 +1,18 @@
 package no.nav.helse.sporhund.infrastructure.kafka
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.time.ZoneId
-import java.util.*
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.domain.*
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import java.time.ZoneId
+import java.util.*
 
 fun KafkaConsumer.håndterSvarFraBehandler(
     transactionProvider: TransactionProvider,
-    record: ConsumerRecord<String, String>
+    record: ConsumerRecord<String, String>,
 ) {
     val kafkamelding = objectMapper.readValue<DialogmeldingFraBehandlerKafkaDto>(record.value())
     if (!kafkamelding.erRelevant()) {
@@ -30,7 +30,7 @@ fun KafkaConsumer.håndterSvarFraBehandler(
 }
 
 private fun SvarFraBehandler.MedConversationRef.håndterSvarMedConversationRef(
-    transactionProvider: TransactionProvider
+    transactionProvider: TransactionProvider,
 ) {
     transactionProvider.transaction {
         val dialog = dialogRepository.finnDialog(conversationRef) ?: return@transaction
@@ -40,8 +40,8 @@ private fun SvarFraBehandler.MedConversationRef.håndterSvarMedConversationRef(
                 tidspunkt = tidspunktMottattNav,
                 melding = tekst,
                 behandler = behandler,
-                antallVedlegg = antallVedlegg
-            )
+                antallVedlegg = antallVedlegg,
+            ),
         )
         dialogRepository.lagre(dialog)
         loggInfo("Knytter meldingen til dialog")
@@ -58,7 +58,7 @@ private fun DialogmeldingFraBehandlerKafkaDto.svarFraBehandlerMedConversationRef
         tekst = forespørselssvar.tekstNotatInnhold,
         antallVedlegg = this.antallVedlegg,
         tidspunktMottattNav = this.mottattTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toInstant(),
-        meldingId = this.msgId
+        meldingId = this.msgId,
     )
 }
 
@@ -67,7 +67,7 @@ private fun String.tilNavn(): Navn {
     return Navn(
         fornavn = deler.first(),
         mellomnavn = if (deler.size > 2) deler.drop(1).dropLast(1).joinToString(" ") else null,
-        etternavn = deler.last()
+        etternavn = deler.last(),
     )
 }
 
@@ -79,7 +79,7 @@ private fun DialogmeldingFraBehandlerKafkaDto.tilBehandler(): Behandler =
             Kontor(
                 this.legekontorOrgName,
                 Organisasjonsnummer(checkNotNull(this.legekontorOrgNr)),
-                adresse = null
+                adresse = null,
             ),
-        telefonnummer = null
+        telefonnummer = null,
     )

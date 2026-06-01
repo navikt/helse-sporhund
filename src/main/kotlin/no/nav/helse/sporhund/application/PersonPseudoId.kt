@@ -4,5 +4,5 @@ import java.util.UUID
 
 @JvmInline
 value class PersonPseudoId(
-    val value: UUID
+    val value: UUID,
 )

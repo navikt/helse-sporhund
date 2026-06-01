@@ -1,11 +1,11 @@
 package no.nav.helse.sporhund.domain
 
+import no.nav.helse.sporhund.domain.testhelpers.*
 import java.time.Duration
 import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import no.nav.helse.sporhund.domain.testhelpers.*
 
 class DialogTest {
     @Test
@@ -20,10 +20,10 @@ class DialogTest {
                         ident = lagNavIdent(),
                         behandler = lagBehandler(),
                         behandlerRef = behandlerRef,
-                        melding = "En melding"
+                        melding = "En melding",
                     ),
                 fagområde = Fagområde.EnkeltståendeBehandlingsdager,
-                dialogtype = Dialogtype.MedisinskeOpplysninger
+                dialogtype = Dialogtype.MedisinskeOpplysninger,
             )
         val events = dialog.events()
         assertEquals(1, events.size)

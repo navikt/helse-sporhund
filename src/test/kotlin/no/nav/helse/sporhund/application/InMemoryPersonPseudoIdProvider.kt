@@ -1,7 +1,7 @@
 package no.nav.helse.sporhund.application
 
-import java.util.UUID
 import no.nav.helse.sporhund.domain.Identitetsnummer
+import java.util.UUID
 
 class InMemoryPersonPseudoIdProvider : PersonPseudoIdProvider {
     private val store = mutableMapOf<PersonPseudoId, Identitetsnummer>()

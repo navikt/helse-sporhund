@@ -8,9 +8,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
-import java.util.*
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import no.nav.helse.sporhund.domain.Dialogstatus
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
@@ -18,6 +15,9 @@ import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.ApiOppdaterDialogStatus
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedToken
+import java.util.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class PatchDialogstatusRouteTest : EndepunktTest() {
     @Test

@@ -4,7 +4,7 @@ import no.nav.helse.sporhund.infrastructure.db.DbConfig
 import org.testcontainers.postgresql.PostgreSQLContainer
 
 class TestcontainersDatabase(
-    moduleLabel: String
+    moduleLabel: String,
 ) {
     private val postgres =
         PostgreSQLContainer("postgres:17")
@@ -21,7 +21,7 @@ class TestcontainersDatabase(
         DbConfig(
             jdbcUrl = postgres.jdbcUrl,
             username = postgres.username,
-            password = postgres.password
+            password = postgres.password,
         )
 
     fun stop() = postgres.stop()

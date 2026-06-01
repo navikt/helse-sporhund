@@ -6,11 +6,11 @@ import io.micrometer.core.instrument.Clock
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.prometheus.metrics.model.registry.PrometheusRegistry
-import java.time.Duration
 import org.flywaydb.core.Flyway
+import java.time.Duration
 
 internal class DataSourceBuilder(
-    private val dbConfig: DbConfig
+    private val dbConfig: DbConfig,
 ) {
     private val hikariConfig =
         HikariConfig().apply {
@@ -28,7 +28,7 @@ internal class DataSourceBuilder(
                 PrometheusMeterRegistry(
                     PrometheusConfig.DEFAULT,
                     PrometheusRegistry.defaultRegistry,
-                    Clock.SYSTEM
+                    Clock.SYSTEM,
                 )
         }
 

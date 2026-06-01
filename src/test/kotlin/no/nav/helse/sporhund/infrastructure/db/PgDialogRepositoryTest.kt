@@ -1,7 +1,5 @@
 package no.nav.helse.sporhund.infrastructure.db
 
-import java.util.*
-import kotlin.test.*
 import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.domain.Dialogstatus
@@ -11,6 +9,8 @@ import no.nav.helse.sporhund.domain.testhelpers.lagFraBehandlerMelding
 import no.nav.helse.sporhund.domain.testhelpers.lagFraNavMelding
 import no.nav.helse.sporhund.infrastructure.db.testhelpers.DbTest
 import org.junit.jupiter.api.AfterEach
+import java.util.*
+import kotlin.test.*
 
 class PgDialogRepositoryTest : DbTest() {
     @AfterEach
@@ -56,7 +56,7 @@ class PgDialogRepositoryTest : DbTest() {
             lagFraBehandlerMelding(
                 melding = "Svar fra behandler",
                 behandler = lagBehandler(),
-                antallVedlegg = 2
+                antallVedlegg = 2,
             )
         dialog.nyMelding(fraBehandlerMelding)
 
@@ -170,7 +170,7 @@ class PgDialogRepositoryTest : DbTest() {
             listOf(
                 Dialogstatus.ForespørselSendt,
                 Dialogstatus.SvarMottatt,
-                Dialogstatus.PurringSendt
+                Dialogstatus.PurringSendt,
             )
         val dialoger =
             statuser.map { status ->

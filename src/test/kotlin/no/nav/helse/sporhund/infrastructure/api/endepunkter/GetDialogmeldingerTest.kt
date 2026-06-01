@@ -5,14 +5,14 @@ import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
-import java.util.*
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogOppsummering
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedToken
+import java.util.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class GetDialogmeldingerTest : EndepunktTest() {
     @Test

@@ -1,11 +1,11 @@
 package no.nav.helse.sporhund.domain.testhelpers
 
-import java.util.UUID
-import kotlin.random.Random
 import no.nav.helse.sporhund.domain.Behandler
 import no.nav.helse.sporhund.domain.BehandlerRef
 import no.nav.helse.sporhund.domain.HprNummer
 import no.nav.helse.sporhund.domain.Telefonnummer
+import java.util.UUID
+import kotlin.random.Random
 
 fun lagBehandlerRef() = BehandlerRef(UUID.randomUUID().toString())
 
@@ -19,6 +19,6 @@ fun lagBehandler(): Behandler {
         hprNummer = hprNummer,
         navn = lagNavn(),
         kontor = lagKontor(),
-        telefonnummer = lagTelefonnummer()
+        telefonnummer = lagTelefonnummer(),
     )
 }

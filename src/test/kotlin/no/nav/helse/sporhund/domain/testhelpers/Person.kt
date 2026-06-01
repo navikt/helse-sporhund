@@ -1,8 +1,8 @@
 package no.nav.helse.sporhund.domain.testhelpers
 
+import no.nav.helse.sporhund.domain.Identitetsnummer
 import java.time.LocalDate
 import kotlin.random.Random
-import no.nav.helse.sporhund.domain.Identitetsnummer
 
 fun lagIdentitetsnummer() = lagIdentitetsnummer(fødselsdato = lagFødselsdato(), mann = Math.random() <= 0.5)
 
@@ -10,14 +10,14 @@ fun lagDNummer() = lagDNummer(fødselsdato = lagFødselsdato(), mann = Math.rand
 
 fun lagIdentitetsnummer(
     fødselsdato: LocalDate,
-    mann: Boolean
+    mann: Boolean,
 ): Identitetsnummer =
     Identitetsnummer.fraString(
         if (Math.random() < 0.9) {
             lagFødselsnummer(fødselsdato, mann)
         } else {
             lagDNummer(fødselsdato, mann)
-        }
+        },
     )
 
 fun lagFødselsdato(): LocalDate {
@@ -31,7 +31,7 @@ fun lagFødselsdato(): LocalDate {
 // Ref. https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/test-for-konsumenter/
 fun lagFødselsnummer(
     fødselsdato: LocalDate = lagFødselsdato(),
-    mann: Boolean = Math.random() <= 0.5
+    mann: Boolean = Math.random() <= 0.5,
 ): String {
     val fødselsnummerFødselsdato =
         buildString {
@@ -43,7 +43,7 @@ fun lagFødselsnummer(
         lagPersonnummerForFødselsnummer(
             fødselsnummerFødselsdato = fødselsnummerFødselsdato,
             fødselsår = fødselsdato.year,
-            mann = mann
+            mann = mann,
         )
     return fødselsnummerFødselsdato + personnummer
 }
@@ -52,7 +52,7 @@ fun lagFødselsnummer(
 // Ref. https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/test-for-konsumenter/
 fun lagDNummer(
     fødselsdato: LocalDate,
-    mann: Boolean
+    mann: Boolean,
 ): String {
     val dNummerFødselsdato =
         buildString {
@@ -63,7 +63,7 @@ fun lagDNummer(
     val personnummer =
         lagPersonnummerForDNummer(
             dNummerFødselsdato = dNummerFødselsdato,
-            mann = mann
+            mann = mann,
         )
     return dNummerFødselsdato + personnummer
 }
@@ -71,7 +71,7 @@ fun lagDNummer(
 private fun lagPersonnummerForFødselsnummer(
     fødselsnummerFødselsdato: String,
     fødselsår: Int,
-    mann: Boolean
+    mann: Boolean,
 ): String {
     var individnummer: String
     var kontrollsiffer1: Int
@@ -96,7 +96,7 @@ private fun lagPersonnummerForFødselsnummer(
 
 private fun lagPersonnummerForDNummer(
     dNummerFødselsdato: String,
-    mann: Boolean
+    mann: Boolean,
 ): String {
     var individnummer: String
     var kontrollsiffer1: Int
@@ -120,5 +120,5 @@ internal fun beregnKontrollsiffer2(sifre: String): Int = beregnKontrollsiffer(si
 
 private fun beregnKontrollsiffer(
     sifre: String,
-    vekting: List<Int>
+    vekting: List<Int>,
 ): Int = 11 - ((sifre).foldIndexed(0) { index, acc, char -> acc + vekting[index] * char.digitToInt() } % 11)
