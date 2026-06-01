@@ -45,7 +45,6 @@ class PgOutbox(
         ).update(session)
     }
 
-    @Suppress("UNCHECKED_CAST")
     override fun <T : OutboxMelding> meldinger(type: KClass<T>): List<T> =
         asSQL(
             """SELECT id, event FROM outbox WHERE sendt_tidspunkt IS NULL FOR UPDATE SKIP LOCKED""",
@@ -69,7 +68,7 @@ class PgOutbox(
                         conversationRef = ConversationRef(dto.conversationRef),
                     )
             }
-        }.filter(type::isInstance) as List<T>
+        }.filterIsInstance(type.java)
 
     override fun meldingSendt(id: OutboxMeldingId) {
         asSQL(
