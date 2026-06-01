@@ -48,7 +48,7 @@ class PgOutbox(
     @Suppress("UNCHECKED_CAST")
     override fun <T : OutboxMelding> meldinger(type: KClass<T>): List<T> =
         asSQL(
-            """SELECT id, event FROM outbox WHERE sendt_tidspunkt IS NULL""",
+            """SELECT id, event FROM outbox WHERE sendt_tidspunkt IS NULL FOR UPDATE SKIP LOCKED""",
         ).list(session) { row ->
             when (val dto = objectMapper.readValue<OutboxMeldingDto>(row.string("event"))) {
                 is NyDialogmeldingFraNavDto ->
