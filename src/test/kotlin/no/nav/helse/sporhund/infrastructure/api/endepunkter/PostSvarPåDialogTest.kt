@@ -8,6 +8,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
+import no.nav.helse.sporhund.application.OpprettJournalpost
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
@@ -21,14 +23,12 @@ import kotlin.test.assertEquals
 class PostSvarPåDialogTest : EndepunktTest() {
     @Test
     fun `returnerer 201 med oppdatert dialog`() =
-        testApplication {
+        testApp {
             val identitetsnummer = lagIdentitetsnummer()
             val pseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer)
 
             val dialog = lagDialog(identitetsnummer = identitetsnummer)
             transactionProvider.dialogRepository.lagre(dialog)
-
-            setupDefaultTestApp()
 
             val client = jsonClient()
             val token = mockOAuth2Server.utstedToken(saksbehandler)
@@ -48,6 +48,8 @@ class PostSvarPåDialogTest : EndepunktTest() {
             val oppdatert = response.body<ApiDialogDetails>()
             assertEquals(dialog.conversationRef.value, oppdatert.conversationRef)
             assertEquals(2, oppdatert.dialogmeldinger.size)
+            assertOutboxContains<NyDialogmeldingFraNav>()
+            assertOutboxContains<OpprettJournalpost>()
         }
 
     @Test
@@ -68,6 +70,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
                 }
 
             assertEquals(HttpStatusCode.NotFound, response.status)
+            assertEmptyOutbox()
         }
 
     @Test
@@ -91,6 +94,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
                 }
 
             assertEquals(HttpStatusCode.NotFound, response.status)
+            assertEmptyOutbox()
         }
 
     @Test
@@ -107,5 +111,6 @@ class PostSvarPåDialogTest : EndepunktTest() {
                 }
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEmptyOutbox()
         }
 }

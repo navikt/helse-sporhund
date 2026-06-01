@@ -59,6 +59,7 @@ fun Route.postNyDialogmeldingRoute(
                     val events = dialog.events()
                     events.forEach {
                         outbox.nyMelding(OutboxMelding.nyDialogmeldingFraNav(it))
+                        outbox.nyMelding(OutboxMelding.opprettJournalpost(dialog.conversationRef))
                     }
                     return@transaction dialog
                 }
