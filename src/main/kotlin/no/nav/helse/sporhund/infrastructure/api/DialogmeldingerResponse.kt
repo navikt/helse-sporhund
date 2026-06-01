@@ -54,9 +54,10 @@ data class ApiDialogmelding(
     val fagomrade: ApiFagomrade,
     val meldingstype: ApiDialogmeldingType,
     val melding: String,
+    val msgId: String,
     val sendtTidspunkt: Instant,
     val fraNav: Boolean,
-    val vedlegg: List<ApiVedlegg>,
+    val antallVedlegg: Int,
 )
 
 data class ApiDialogDetails(

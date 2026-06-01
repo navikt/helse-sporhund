@@ -45,7 +45,16 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
                     melding = dialogmelding.melding,
                     sendtTidspunkt = dialogmelding.tidspunkt,
                     fraNav = dialogmelding is Dialogmelding.FraNav,
-                    vedlegg = emptyList(),
+                    msgId =
+                        when (dialogmelding) {
+                            is Dialogmelding.FraBehandler -> dialogmelding.id.value
+                            is Dialogmelding.FraNav -> dialogmelding.id.value.toString()
+                        },
+                    antallVedlegg =
+                        when (dialogmelding) {
+                            is Dialogmelding.FraBehandler -> dialogmelding.antallVedlegg
+                            is Dialogmelding.FraNav -> 0
+                        },
                 )
             },
     )

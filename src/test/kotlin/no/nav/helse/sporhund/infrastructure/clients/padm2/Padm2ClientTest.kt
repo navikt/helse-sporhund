@@ -133,5 +133,3 @@ class Padm2ClientTest {
         assertEquals("Bearer fake-token", capturedToken)
     }
 }
-
-

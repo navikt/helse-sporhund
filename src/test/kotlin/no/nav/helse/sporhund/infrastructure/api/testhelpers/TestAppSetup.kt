@@ -58,8 +58,8 @@ fun ApplicationTestBuilder.setupTestApp(
             }
         }
         routing {
-                appRoutes(personPseudoIdProvider, transactionProvider, populasjonstilgangskontrollProvider, vedleggProvider)
-            }
+            appRoutes(personPseudoIdProvider, transactionProvider, populasjonstilgangskontrollProvider, vedleggProvider)
+        }
     }
 }
 

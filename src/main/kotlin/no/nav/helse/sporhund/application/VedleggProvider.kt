@@ -5,4 +5,3 @@ import java.util.UUID
 fun interface VedleggProvider {
     fun hentVedlegg(msgId: UUID): List<ByteArray>
 }
-

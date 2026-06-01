@@ -4,4 +4,3 @@ data class Padm2Config(
     val baseUrl: String,
     val scope: String,
 )
-

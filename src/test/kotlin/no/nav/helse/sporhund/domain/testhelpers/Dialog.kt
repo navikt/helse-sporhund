@@ -39,13 +39,14 @@ fun lagFraNavMelding(
     )
 
 fun lagFraBehandlerMelding(
+    msgId: UUID = UUID.randomUUID(),
     opprettet: Instant = Instant.now(),
     melding: String = "Svar fra behandler",
     behandler: Behandler = lagBehandler(),
     antallVedlegg: Int = 0,
 ): Dialogmelding.FraBehandler =
     Dialogmelding.FraBehandler(
-        id = DialogmeldingId(UUID.randomUUID().toString()),
+        id = DialogmeldingId(msgId.toString()),
         tidspunkt = opprettet,
         melding = melding,
         behandler = behandler,

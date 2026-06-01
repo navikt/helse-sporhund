@@ -194,9 +194,9 @@ fun app(
             }
 
             routing {
-                    additionalRoutes()
-                    appRoutes(personPseudoIdProvider, transactionProvider, tilgangsmaskinenClient, padm2Client)
-                }
+                additionalRoutes()
+                appRoutes(personPseudoIdProvider, transactionProvider, tilgangsmaskinenClient, padm2Client)
+            }
         },
     ).start(wait = true)
 }
