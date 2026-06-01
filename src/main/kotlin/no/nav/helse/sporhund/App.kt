@@ -25,6 +25,8 @@ import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
 import no.nav.helse.sporhund.infrastructure.api.auth.configureJwtAuthentication
 import no.nav.helse.sporhund.infrastructure.api.configureOpenApiPlugin
 import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.AccessTokenProviderConfig
+import no.nav.helse.sporhund.infrastructure.clients.padm2.Padm2Client
+import no.nav.helse.sporhund.infrastructure.clients.padm2.Padm2Config
 import no.nav.helse.sporhund.infrastructure.clients.personpseudoid.PersonPseudoIdConfig
 import no.nav.helse.sporhund.infrastructure.clients.personpseudoid.ValkeyPersonPseudoIdProvider
 import no.nav.helse.sporhund.infrastructure.clients.populasjonstilgangskontroll.PopulasjonstilgangskontrollConfig
@@ -87,6 +89,11 @@ fun main() {
             tokenEndpoint = env.getValue("NAIS_TOKEN_ENDPOINT"),
             exchangeEndpoint = env.getValue("NAIS_TOKEN_EXCHANGE_ENDPOINT"),
         )
+    val padm2Config =
+        Padm2Config(
+            baseUrl = env.getValue("PADM2_BASE_URL"),
+            scope = env.getValue("PADM2_SCOPE"),
+        )
 
     app(
         kafkaConfig = kafkaConfig,
@@ -95,6 +102,7 @@ fun main() {
         personPseudoIdConfig = personPseudoIdConfig,
         accessTokenProviderConfig = accessTokenProviderConfig,
         populasjonstilgangskontrollConfig = populasjonstilgangskontrollConfig,
+        padm2Config = padm2Config,
     )
 }
 
@@ -105,6 +113,7 @@ fun app(
     personPseudoIdConfig: PersonPseudoIdConfig,
     populasjonstilgangskontrollConfig: PopulasjonstilgangskontrollConfig,
     accessTokenProviderConfig: AccessTokenProviderConfig,
+    padm2Config: Padm2Config,
     port: Int = 8080,
     additionalRoutes: Routing.() -> Unit = { },
 ) {
@@ -136,6 +145,8 @@ fun app(
             tokenEndpoint = URI(accessTokenProviderConfig.tokenEndpoint),
             tokenExchangeEndpoint = URI(accessTokenProviderConfig.exchangeEndpoint),
         )
+
+    val padm2Client = Padm2Client(padm2Config, accessTokenProvider)
 
     val tilgangsmaskinenClient =
         TilgangsmaskinenClient(
@@ -183,9 +194,9 @@ fun app(
             }
 
             routing {
-                additionalRoutes()
-                appRoutes(personPseudoIdProvider, transactionProvider, tilgangsmaskinenClient)
-            }
+                    additionalRoutes()
+                    appRoutes(personPseudoIdProvider, transactionProvider, tilgangsmaskinenClient, padm2Client)
+                }
         },
     ).start(wait = true)
 }

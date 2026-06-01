@@ -15,6 +15,7 @@ import io.ktor.server.routing.routing
 import io.ktor.server.testing.ApplicationTestBuilder
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.application.VedleggProvider
 import no.nav.helse.sporhund.domain.NavIdent
 import no.nav.helse.sporhund.domain.Saksbehandler
 import no.nav.helse.sporhund.domain.SaksbehandlerOid
@@ -33,6 +34,7 @@ fun ApplicationTestBuilder.setupTestApp(
     transactionProvider: TransactionProvider,
     mockOAuth2Server: MockOAuth2Server,
     populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
+    vedleggProvider: VedleggProvider = VedleggProvider { emptyList() },
 ) {
     val azureAdConfig =
         AzureAdConfig(
@@ -56,8 +58,8 @@ fun ApplicationTestBuilder.setupTestApp(
             }
         }
         routing {
-            appRoutes(personPseudoIdProvider, transactionProvider, populasjonstilgangskontrollProvider)
-        }
+                appRoutes(personPseudoIdProvider, transactionProvider, populasjonstilgangskontrollProvider, vedleggProvider)
+            }
     }
 }
 

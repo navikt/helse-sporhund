@@ -7,6 +7,7 @@ import no.nav.helse.sporhund.domain.testhelpers.lagSaksbehandler
 import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
 import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.AccessTokenProviderConfig
 import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.testhelpers.MockTexasServer
+import no.nav.helse.sporhund.infrastructure.clients.padm2.Padm2Config
 import no.nav.helse.sporhund.infrastructure.clients.personpseudoid.testhelpers.TestcontainersValkey
 import no.nav.helse.sporhund.infrastructure.clients.populasjonstilgangskontroll.PopulasjonstilgangskontrollConfig
 import no.nav.helse.sporhund.infrastructure.clients.populasjonstilgangskontroll.testhelpers.MockTilgangsmaskinenServer
@@ -95,6 +96,11 @@ fun main() {
             AccessTokenProviderConfig(
                 tokenEndpoint = mockTexasServer.tokenEndpoint,
                 exchangeEndpoint = mockTexasServer.exchangeEndpoint,
+            ),
+        padm2Config =
+            Padm2Config(
+                baseUrl = "http://localhost",
+                scope = "local-padm2-scope",
             ),
     )
 }

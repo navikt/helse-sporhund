@@ -8,12 +8,14 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.route
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.application.VedleggProvider
 import no.nav.helse.sporhund.infrastructure.api.endepunkter.*
 
 fun Routing.appRoutes(
     personPseudoIdProvider: PersonPseudoIdProvider,
     transactionProvider: TransactionProvider,
     populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
+    vedleggProvider: VedleggProvider,
 ) {
     route("/api") {
         route("/openapi.json") {
@@ -30,6 +32,7 @@ fun Routing.appRoutes(
             postNyDialogmeldingRoute(personPseudoIdProvider, populasjonstilgangskontrollProvider, transactionProvider)
             postSvarPåDialogRoute(personPseudoIdProvider, populasjonstilgangskontrollProvider, transactionProvider)
             patchDialogstatusRoute(personPseudoIdProvider, populasjonstilgangskontrollProvider, transactionProvider)
+            getVedleggRoute(personPseudoIdProvider, populasjonstilgangskontrollProvider, transactionProvider, vedleggProvider)
         }
     }
 }

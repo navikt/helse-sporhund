@@ -5,6 +5,7 @@ import io.ktor.server.testing.testApplication
 import no.nav.helse.sporhund.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.sporhund.application.InMemoryPopulasjonstilgangskontrollProvider
 import no.nav.helse.sporhund.application.InMemoryTransactionProvider
+import no.nav.helse.sporhund.application.VedleggProvider
 import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.meldinger
 import no.nav.helse.sporhund.domain.Saksbehandler
@@ -21,9 +22,10 @@ abstract class EndepunktTest {
     protected val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
     protected val transactionProvider = InMemoryTransactionProvider()
     protected val populasjonstilgangskontrollProvider = InMemoryPopulasjonstilgangskontrollProvider()
+    protected var vedleggProvider: VedleggProvider = VedleggProvider { emptyList() }
 
     fun ApplicationTestBuilder.setupDefaultTestApp() {
-        setupTestApp(personPseudoIdProvider, transactionProvider, mockOAuth2Server, populasjonstilgangskontrollProvider)
+        setupTestApp(personPseudoIdProvider, transactionProvider, mockOAuth2Server, populasjonstilgangskontrollProvider, vedleggProvider)
     }
 
     protected inline fun <reified T : OutboxMelding> assertOutboxContains() {
