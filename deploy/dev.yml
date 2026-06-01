@@ -93,3 +93,7 @@ spec:
       value: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
     - name: TILGANGSMASKINEN_BASE_URL
       value: http://populasjonstilgangskontroll.tilgangsmaskin
+    - name: PADM2_BASE_URL
+      value: http://padm2.teamsykefravr
+    - name: PADM2_SCOPE
+      value: api://dev-gcp.teamsykefravr.padm2/.default
