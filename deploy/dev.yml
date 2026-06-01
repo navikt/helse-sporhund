@@ -68,6 +68,8 @@ spec:
           namespace: nais-system
         - application: populasjonstilgangskontroll
           namespace: tilgangsmaskin
+        - application: padm2
+          namespace: teamsykefravr
   gcp:
     sqlInstances:
       - type: POSTGRES_17
