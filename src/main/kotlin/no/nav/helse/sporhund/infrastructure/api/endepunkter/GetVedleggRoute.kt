@@ -10,6 +10,7 @@ import io.ktor.server.routing.Route
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.VedleggProvider
+import no.nav.helse.sporhund.application.logg.teamLogs
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.infrastructure.api.medPerson
 import java.util.UUID
@@ -54,6 +55,7 @@ fun Route.getVedleggRoute(
 
             val msgUuid =
                 runCatching { UUID.fromString(msgId) }.getOrElse {
+                    teamLogs.error("msgId er ikke en UUID, msgId=$msgId")
                     return@medPerson call.respond(HttpStatusCode.NotFound)
                 }
 
@@ -67,6 +69,7 @@ fun Route.getVedleggRoute(
                 }
 
             if (melding == null) {
+                teamLogs.error("Melding med id $msgId ikke funnet for person med identitetsnummer $identitetsnummer")
                 return@medPerson call.respond(HttpStatusCode.NotFound)
             }
 
