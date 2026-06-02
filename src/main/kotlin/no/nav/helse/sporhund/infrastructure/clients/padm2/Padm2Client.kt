@@ -1,5 +1,6 @@
 package no.nav.helse.sporhund.infrastructure.clients.padm2
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
@@ -17,6 +18,8 @@ import java.util.UUID
 internal data class VedleggDto(
     val content: String,
 )
+
+private fun JsonNode?.isNullOrMissing() = this == null || isNull || isMissingNode
 
 class Padm2Client(
     private val config: Padm2Config,
@@ -37,7 +40,11 @@ class Padm2Client(
                 check(response.status == HttpStatusCode.OK) {
                     "Uventet statuskode fra padm2: ${response.status} for msgId=$msgId"
                 }
-                val vedleggListe: List<VedleggDto> = objectMapper.readValue(response.bodyAsText())
+                val vedleggListe: List<VedleggDto> =
+                    objectMapper
+                        .readValue<List<JsonNode>>(response.bodyAsText())
+                        .filterNot { it.get("content").isNullOrMissing() }
+                        .map { objectMapper.treeToValue(it, VedleggDto::class.java) }
                 vedleggListe.map { Base64.getDecoder().decode(it.content) }
             }
         }.onFailure {

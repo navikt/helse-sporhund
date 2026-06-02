@@ -90,6 +90,29 @@ class Padm2ClientTest {
     }
 
     @Test
+    fun `hentVedlegg filtrerer bort vedlegg med null content`() {
+        val pdf = lagPdf("vedlegg1")
+        val responseBody =
+            objectMapper.writeValueAsString(
+                listOf(
+                    mapOf("content" to Base64.getEncoder().encodeToString(pdf)),
+                    mapOf("content" to null),
+                ),
+            )
+        val client =
+            Padm2Client(
+                config = config,
+                accessTokenProvider = fakeTokenProvider,
+                httpClient = lagMockEngine("/api/system/v1/vedlegg/$msgId", responseBody),
+            )
+
+        val resultat = client.hentVedlegg(msgId)
+
+        assertEquals(1, resultat.size)
+        assertContentEquals(pdf, resultat[0])
+    }
+
+    @Test
     fun `hentVedlegg kaster exception ved ikke-OK statuskode`() {
         val client =
             Padm2Client(
