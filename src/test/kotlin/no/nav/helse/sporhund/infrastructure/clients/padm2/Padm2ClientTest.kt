@@ -56,8 +56,8 @@ class Padm2ClientTest {
         val responseBody =
             objectMapper.writeValueAsString(
                 listOf(
-                    mapOf("content" to Base64.getEncoder().encodeToString(pdf1)),
-                    mapOf("content" to Base64.getEncoder().encodeToString(pdf2)),
+                    mapOf("bytes" to Base64.getEncoder().encodeToString(pdf1)),
+                    mapOf("bytes" to Base64.getEncoder().encodeToString(pdf2)),
                 ),
             )
         val client =
@@ -90,13 +90,13 @@ class Padm2ClientTest {
     }
 
     @Test
-    fun `hentVedlegg filtrerer bort vedlegg med null content`() {
+    fun `hentVedlegg filtrerer bort vedlegg med null bytes`() {
         val pdf = lagPdf("vedlegg1")
         val responseBody =
             objectMapper.writeValueAsString(
                 listOf(
-                    mapOf("content" to Base64.getEncoder().encodeToString(pdf)),
-                    mapOf("content" to null),
+                    mapOf("bytes" to Base64.getEncoder().encodeToString(pdf)),
+                    mapOf("bytes" to null),
                 ),
             )
         val client =
