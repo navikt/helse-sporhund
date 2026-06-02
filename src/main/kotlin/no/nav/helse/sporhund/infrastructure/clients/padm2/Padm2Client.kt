@@ -16,7 +16,7 @@ import java.util.Base64
 import java.util.UUID
 
 internal data class VedleggDto(
-    val content: String,
+    val bytes: String,
 )
 
 private fun JsonNode?.isNullOrMissing() = this == null || isNull || isMissingNode
@@ -43,9 +43,10 @@ class Padm2Client(
                 val vedleggListe: List<VedleggDto> =
                     objectMapper
                         .readValue<List<JsonNode>>(response.bodyAsText())
-                        .filterNot { it.get("content").isNullOrMissing() }
+                        .filterNot { it.get("bytes").isNullOrMissing() }
                         .map { objectMapper.treeToValue(it, VedleggDto::class.java) }
-                vedleggListe.map { Base64.getDecoder().decode(it.content) }
+
+                vedleggListe.map { Base64.getDecoder().decode(it.bytes) }
             }
         }.onFailure {
             log.error("Feil ved henting av vedlegg fra padm2 for msgId=$msgId", it)
