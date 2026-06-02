@@ -11,6 +11,8 @@ import no.nav.helse.sporhund.infrastructure.clients.padm2.Padm2Config
 import no.nav.helse.sporhund.infrastructure.clients.personpseudoid.testhelpers.TestcontainersValkey
 import no.nav.helse.sporhund.infrastructure.clients.populasjonstilgangskontroll.PopulasjonstilgangskontrollConfig
 import no.nav.helse.sporhund.infrastructure.clients.populasjonstilgangskontroll.testhelpers.MockTilgangsmaskinenServer
+import no.nav.helse.sporhund.infrastructure.clients.sprinter.SprinterConfig
+import no.nav.helse.sporhund.infrastructure.clients.sprinter.testhelpers.MockSprinterServer
 import no.nav.helse.sporhund.infrastructure.db.testhelpers.TestcontainersDatabase
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaConfig
 import no.nav.helse.sporhund.infrastructure.kafka.ReadTopics
@@ -26,6 +28,7 @@ fun main() {
     val valkey = TestcontainersValkey("local-app")
     val mockTexasServer = MockTexasServer()
     val mockTilgangsmaskinenServer = MockTilgangsmaskinenServer()
+    val mockSprinterServer = MockSprinterServer()
 
     val saksbehandler = lagSaksbehandler()
 
@@ -65,6 +68,7 @@ fun main() {
             postgres.stop()
             mockTexasServer.stop()
             mockTilgangsmaskinenServer.stop()
+            mockSprinterServer.stop()
         },
     )
 
@@ -85,8 +89,6 @@ fun main() {
         dbConfig = postgres.dbConfig,
         azureAdConfig = azureAdConfig,
         personPseudoIdConfig = valkey.personPseudoIdConfig,
-        additionalRoutes = { addAdditionalRoutings(this) },
-        port = 8282,
         populasjonstilgangskontrollConfig =
             PopulasjonstilgangskontrollConfig(
                 scope = "test-scope",
@@ -102,5 +104,11 @@ fun main() {
                 baseUrl = "http://localhost",
                 scope = "local-padm2-scope",
             ),
+        sprinterConfig =
+            SprinterConfig(
+                baseUrl = mockSprinterServer.baseUrl,
+            ),
+        port = 8282,
+        additionalRoutes = { addAdditionalRoutings(this) },
     )
 }

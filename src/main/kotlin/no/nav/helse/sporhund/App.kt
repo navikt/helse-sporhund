@@ -30,6 +30,8 @@ import no.nav.helse.sporhund.infrastructure.clients.padm2.Padm2Config
 import no.nav.helse.sporhund.infrastructure.clients.personpseudoid.PersonPseudoIdConfig
 import no.nav.helse.sporhund.infrastructure.clients.personpseudoid.ValkeyPersonPseudoIdProvider
 import no.nav.helse.sporhund.infrastructure.clients.populasjonstilgangskontroll.PopulasjonstilgangskontrollConfig
+import no.nav.helse.sporhund.infrastructure.clients.sprinter.SprinterClient
+import no.nav.helse.sporhund.infrastructure.clients.sprinter.SprinterConfig
 import no.nav.helse.sporhund.infrastructure.db.DataSourceBuilder
 import no.nav.helse.sporhund.infrastructure.db.DbConfig
 import no.nav.helse.sporhund.infrastructure.db.PgTransactionProvider
@@ -95,6 +97,11 @@ fun main() {
             scope = env.getValue("PADM2_SCOPE"),
         )
 
+    val sprinterConfig =
+        SprinterConfig(
+            baseUrl = env.getValue("SPRINTER_BASE_URL"),
+        )
+
     app(
         kafkaConfig = kafkaConfig,
         dbConfig = dbConfig,
@@ -103,6 +110,7 @@ fun main() {
         accessTokenProviderConfig = accessTokenProviderConfig,
         populasjonstilgangskontrollConfig = populasjonstilgangskontrollConfig,
         padm2Config = padm2Config,
+        sprinterConfig = sprinterConfig,
     )
 }
 
@@ -116,6 +124,7 @@ fun app(
     padm2Config: Padm2Config,
     port: Int = 8080,
     additionalRoutes: Routing.() -> Unit = { },
+    sprinterConfig: SprinterConfig,
 ) {
     val factory = ConsumerProducerFactory(kafkaConfig.aivenConfig)
     val running = AtomicBoolean(false)
@@ -147,6 +156,8 @@ fun app(
         )
 
     val padm2Client = Padm2Client(padm2Config, accessTokenProvider)
+
+    val pdfProvider = SprinterClient(sprinterConfig)
 
     val tilgangsmaskinenClient =
         TilgangsmaskinenClient(

@@ -19,6 +19,7 @@ tbd-populasjonstilgangskontroll-tilgangsmaskinen = { module = "com.github.navikt
 tbd-populasjonstilgangskontroll-api = { module = "com.github.navikt.tbd-libs:populasjonstilgangskontroll-provider-api", version.ref = "tbd-libs" }
 tbd-access-token-api = { module = "com.github.navikt.tbd-libs:access-token-provider-api", version.ref = "tbd-libs" }
 tbd-access-token-texas = { module = "com.github.navikt.tbd-libs:access-token-provider-texas", version.ref = "tbd-libs" }
+tbd-retry = { module = "com.github.navikt.tbd-libs:retry", version.ref = "tbd-libs" }
 
 smiley4-ktor-openapi = { module = "io.github.smiley4:ktor-openapi", version.ref = "smiley4KtorOpenapiTools" }
 smiley4-ktor-swagger-ui = { module = "io.github.smiley4:ktor-swagger-ui", version.ref = "smiley4KtorOpenapiTools" }

@@ -70,6 +70,7 @@ spec:
           namespace: tilgangsmaskin
         - application: padm2
           namespace: teamsykefravr
+        - application: sprinter
   gcp:
     sqlInstances:
       - type: POSTGRES_17
@@ -97,3 +98,5 @@ spec:
       value: http://padm2.teamsykefravr
     - name: PADM2_SCOPE
       value: api://dev-gcp.teamsykefravr.padm2/.default
+    - name: SPRINTER_BASE_URL
+      value: http://sprinter
