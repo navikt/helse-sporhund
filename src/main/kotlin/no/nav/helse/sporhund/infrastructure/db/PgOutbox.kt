@@ -28,6 +28,7 @@ class PgOutbox(
                         identitetsnummer = melding.nyDialogmeldingFraNavEvent.identitetsnummer.value,
                         meldingId = melding.nyDialogmeldingFraNavEvent.meldingId.value,
                         tekst = melding.nyDialogmeldingFraNavEvent.tekst,
+                        erPurring = melding.nyDialogmeldingFraNavEvent.erPurring,
                     )
                 is OpprettJournalpost ->
                     OpprettJournalpostDto(
@@ -60,6 +61,7 @@ class PgOutbox(
                                 identitetsnummer = Identitetsnummer.fraString(dto.identitetsnummer),
                                 meldingId = DialogmeldingId(dto.meldingId),
                                 tekst = dto.tekst,
+                                erPurring = dto.erPurring,
                             ),
                     )
                 is OpprettJournalpostDto ->
@@ -94,6 +96,7 @@ class PgOutbox(
         val identitetsnummer: String,
         val meldingId: UUID,
         val tekst: String?,
+        val erPurring: Boolean = false,
     ) : OutboxMeldingDto
 
     private data class OpprettJournalpostDto(

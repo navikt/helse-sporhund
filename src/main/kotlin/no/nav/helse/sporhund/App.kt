@@ -36,6 +36,7 @@ import no.nav.helse.sporhund.infrastructure.db.DataSourceBuilder
 import no.nav.helse.sporhund.infrastructure.db.DbConfig
 import no.nav.helse.sporhund.infrastructure.db.PgTransactionProvider
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
+import no.nav.helse.sporhund.infrastructure.jobs.PurringJob
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaConfig
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaConsumer
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaProducer
@@ -159,6 +160,12 @@ fun app(
 
     val pdfProvider = SprinterClient(sprinterConfig)
 
+    val purring =
+        PurringJob(
+            running = running,
+            transactionProvider = transactionProvider,
+        )
+
     val tilgangsmaskinenClient =
         TilgangsmaskinenClient(
             scope = populasjonstilgangskontrollConfig.scope,
@@ -168,6 +175,7 @@ fun app(
 
     var producerJob: Job? = null
     var consumerJob: Job? = null
+    var purringJob: Job? = null
     naisApp(
         meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         objectMapper = objectMapper,
@@ -187,12 +195,14 @@ fun app(
                     }
                 consumerJob = launch(exceptionHandler) { kafkaConsumer.start() }
                 producerJob = launch(exceptionHandler) { kafkaProducer.start() }
+                purringJob = launch(exceptionHandler) { purring.start() }
             }
             this.monitor.subscribe(ApplicationStopping) {
                 running.set(false)
                 runBlocking {
                     consumerJob?.join()
                     producerJob?.join()
+                    purringJob?.join()
                 }
             }
 

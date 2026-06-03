@@ -8,4 +8,5 @@ data class NyDialogmeldingFraNavEvent(
     val identitetsnummer: Identitetsnummer,
     val meldingId: DialogmeldingId<UUID>,
     val tekst: String?,
+    val erPurring: Boolean = false,
 )

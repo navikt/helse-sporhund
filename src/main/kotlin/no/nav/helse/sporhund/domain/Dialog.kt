@@ -2,6 +2,8 @@ package no.nav.helse.sporhund.domain
 
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @JvmInline
@@ -54,6 +56,41 @@ class Dialog private constructor(
 
     fun ferdigstill() {
         status = Dialogstatus.DialogLukket
+    }
+
+    fun sendPurring() {
+        val nyesteFraNav = nyesteMeldingFraNav()
+        val opprinneligDato =
+            nyesteFraNav.tidspunkt
+                .atZone(ZoneId.of("Europe/Oslo"))
+                .format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
+        val purringTekst =
+            """
+            Vi viser til tidligere forespørsel av $opprinneligDato angående din pasient.
+
+            Vi kan ikke se å ha mottatt svar på vår forespørsel og ber om at denne besvares snarest.
+
+            Hvis opplysningene er sendt oss i løpet av de siste dagene, kan du se bort fra denne meldingen.
+            """.trimIndent()
+        val purringMelding =
+            Dialogmelding.FraNav.ny(
+                saksbehandler = NavIdent("Speil"),
+                behandler = nyesteFraNav.behandler,
+                behandlerRef = nyesteFraNav.behandlerRef,
+                melding = purringTekst,
+            )
+        _meldinger.add(purringMelding)
+        status = Dialogstatus.PurringSendt
+        events.add(
+            NyDialogmeldingFraNavEvent(
+                conversationRef = conversationRef,
+                behandlerRef = purringMelding.behandlerRef,
+                identitetsnummer = identitetsnummer,
+                meldingId = purringMelding.id,
+                tekst = purringMelding.melding,
+                erPurring = true,
+            ),
+        )
     }
 
     fun gjenåpne() {

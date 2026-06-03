@@ -49,7 +49,7 @@ private fun NyDialogmeldingFraNavEvent.toKafkaDto(): DialogmeldingTilBehandlerKa
         dialogmeldingRefConversation = conversationRef.value.toString(),
         dialogmeldingType = "DIALOG_FORESPORSEL",
         dialogmeldingKodeverk = "FORESPORSEL",
-        dialogmeldingKode = 1,
+        dialogmeldingKode = if (erPurring) 2 else 1,
         dialogmeldingTekst = tekst,
         dialogmeldingVedlegg = null,
         kilde = "sykepenger",
