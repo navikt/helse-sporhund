@@ -28,7 +28,7 @@ class SendPurringTest {
         dialog.sendPurring()
 
         assertEquals(antallFør + 1, dialog.meldinger.size)
-        assertIs<Dialogmelding.FraNav>(dialog.nyesteMelding())
+        assertIs<Dialogmelding.FraSystem>(dialog.nyesteMelding())
     }
 
     @Test
@@ -80,7 +80,7 @@ class SendPurringTest {
 
         dialog.sendPurring()
 
-        val purringMelding = dialog.nyesteMelding() as Dialogmelding.FraNav
+        val purringMelding = dialog.nyesteMelding() as Dialogmelding.FraSystem
         assertTrue(purringMelding.melding.contains(forventetDatoStr))
         assertTrue(purringMelding.melding.contains("Vi viser til tidligere forespørsel av"))
         assertTrue(purringMelding.melding.contains("Vi kan ikke se å ha mottatt svar"))

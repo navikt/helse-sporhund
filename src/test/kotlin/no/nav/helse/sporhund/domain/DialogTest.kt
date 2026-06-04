@@ -125,4 +125,15 @@ class DialogTest {
 
         assertEquals(Dialogstatus.SvarMottatt, dialog.status)
     }
+
+    @Test
+    fun `gjenåpne setter status basert på nyeste melding - nyeste melding er sendt fra systemet`() {
+        val dialog = lagDialog()
+        dialog.nyMelding(lagFraSystemMelding())
+        dialog.ferdigstill()
+
+        dialog.gjenåpne()
+
+        assertEquals(Dialogstatus.PurringSendt, dialog.status)
+    }
 }

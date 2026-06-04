@@ -56,9 +56,15 @@ data class ApiDialogmelding(
     val melding: String,
     val msgId: String,
     val sendtTidspunkt: Instant,
-    val fraNav: Boolean,
+    val avsender: Avsender,
     val antallVedlegg: Int,
-)
+) {
+    enum class Avsender {
+        BEHANDLER,
+        NAV,
+        SYSTEM,
+    }
+}
 
 data class ApiDialogDetails(
     val conversationRef: UUID,

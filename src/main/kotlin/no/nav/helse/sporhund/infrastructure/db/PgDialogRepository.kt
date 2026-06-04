@@ -84,7 +84,12 @@ class PgDialogRepository(
                     status = DialogstatusDto.fraDialogstatus(dialog.status),
                     dialogtype = DialogtypeDto.fraDialogtype(dialog.dialogtype),
                     fagområde = FagområdeDto.fraDialogtype(dialog.fagområde),
-                    søkernavn = NavnDto(fornavn = dialog.søkernavn.fornavn, mellomnavn = dialog.søkernavn.mellomnavn, etternavn = dialog.søkernavn.etternavn),
+                    søkernavn =
+                        NavnDto(
+                            fornavn = dialog.søkernavn.fornavn,
+                            mellomnavn = dialog.søkernavn.mellomnavn,
+                            etternavn = dialog.søkernavn.etternavn,
+                        ),
                 )
         }
     }
@@ -209,6 +214,7 @@ class PgDialogRepository(
     @JsonSubTypes(
         JsonSubTypes.Type(value = DialogmeldingDto.FraNav::class, name = "FRA_NAV"),
         JsonSubTypes.Type(value = DialogmeldingDto.FraBehandler::class, name = "FRA_BEHANDLER"),
+        JsonSubTypes.Type(value = DialogmeldingDto.FraSystem::class, name = "FRA_SYSTEM"),
     )
     private sealed interface DialogmeldingDto {
         fun tilDomene(): Dialogmelding<*>
@@ -249,6 +255,23 @@ class PgDialogRepository(
                 )
         }
 
+        data class FraSystem(
+            val id: UUID,
+            val tidspunkt: Instant,
+            val melding: String,
+            val behandlerRef: String,
+            val behandler: BehandlerDto,
+        ) : DialogmeldingDto {
+            override fun tilDomene(): Dialogmelding.FraSystem =
+                Dialogmelding.FraSystem.fraLagring(
+                    id = DialogmeldingId(id),
+                    tidspunkt = tidspunkt,
+                    melding = melding,
+                    behandler = behandler.tilDomene(),
+                    behandlerRef = BehandlerRef(behandlerRef),
+                )
+        }
+
         companion object {
             fun fraDialogmelding(dialogmelding: Dialogmelding<*>): DialogmeldingDto =
                 when (dialogmelding) {
@@ -270,6 +293,16 @@ class PgDialogRepository(
                             melding = dialogmelding.melding,
                             behandler = BehandlerDto.fraBehandler(dialogmelding.behandler),
                             antallVedlegg = dialogmelding.antallVedlegg,
+                        )
+                    }
+
+                    is Dialogmelding.FraSystem -> {
+                        FraSystem(
+                            id = dialogmelding.id.value,
+                            tidspunkt = dialogmelding.tidspunkt,
+                            melding = dialogmelding.melding,
+                            behandlerRef = dialogmelding.behandlerRef.value,
+                            behandler = BehandlerDto.fraBehandler(dialogmelding.behandler),
                         )
                     }
                 }
@@ -335,7 +368,11 @@ class PgDialogRepository(
                             organisasjonsnummer = behandler.kontor.organisasjonsnummer?.value,
                             adresse =
                                 behandler.kontor.adresse?.let {
-                                    AdresseDto(veiadresse = it.veiadresse, postnummer = it.postnummer, poststed = it.poststed)
+                                    AdresseDto(
+                                        veiadresse = it.veiadresse,
+                                        postnummer = it.postnummer,
+                                        poststed = it.poststed,
+                                    )
                                 },
                         ),
                     telefonnummer = behandler.telefonnummer?.value,

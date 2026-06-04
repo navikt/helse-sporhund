@@ -52,3 +52,17 @@ fun lagFraBehandlerMelding(
         behandler = behandler,
         antallVedlegg = antallVedlegg,
     )
+
+fun lagFraSystemMelding(
+    behandler: Behandler = lagBehandler(),
+    behandlerRef: BehandlerRef = lagBehandlerRef(),
+    melding: String = "En melding til behandler fra systemet",
+    opprettet: Instant = Instant.now(),
+): Dialogmelding.FraSystem =
+    Dialogmelding.FraSystem.fraLagring(
+        id = DialogmeldingId(UUID.randomUUID()),
+        behandler = behandler,
+        behandlerRef = behandlerRef,
+        melding = melding,
+        tidspunkt = opprettet,
+    )

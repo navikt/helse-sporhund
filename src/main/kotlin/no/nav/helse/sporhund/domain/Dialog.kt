@@ -73,8 +73,7 @@ class Dialog private constructor(
             Hvis opplysningene er sendt oss i løpet av de siste dagene, kan du se bort fra denne meldingen.
             """.trimIndent()
         val purringMelding =
-            Dialogmelding.FraNav.ny(
-                saksbehandler = NavIdent("Speil"),
+            Dialogmelding.FraSystem.ny(
                 behandler = nyesteFraNav.behandler,
                 behandlerRef = nyesteFraNav.behandlerRef,
                 melding = purringTekst,
@@ -94,7 +93,12 @@ class Dialog private constructor(
     }
 
     fun gjenåpne() {
-        status = if (nyesteMelding() is Dialogmelding.FraNav) Dialogstatus.ForespørselSendt else Dialogstatus.SvarMottatt
+        status =
+            when (nyesteMelding()) {
+                is Dialogmelding.FraBehandler -> Dialogstatus.SvarMottatt
+                is Dialogmelding.FraNav -> Dialogstatus.ForespørselSendt
+                is Dialogmelding.FraSystem -> Dialogstatus.PurringSendt
+            }
     }
 
     fun frist(): Instant = førsteMeldingFraNav().tidspunkt + Duration.ofDays(21)
@@ -246,6 +250,43 @@ sealed interface Dialogmelding<ID_TYPE> {
                 melding = melding,
                 behandler = behandler,
                 antallVedlegg = antallVedlegg,
+            )
+        }
+    }
+
+    class FraSystem(
+        override val id: DialogmeldingId<UUID>,
+        override val tidspunkt: Instant,
+        override val melding: String,
+        override val behandler: Behandler,
+        val behandlerRef: BehandlerRef,
+    ) : Dialogmelding<UUID> {
+        companion object {
+            fun ny(
+                behandler: Behandler,
+                melding: String,
+                behandlerRef: BehandlerRef,
+            ): FraSystem =
+                FraSystem(
+                    id = DialogmeldingId(UUID.randomUUID()),
+                    tidspunkt = Instant.now(),
+                    melding = melding,
+                    behandler = behandler,
+                    behandlerRef = behandlerRef,
+                )
+
+            fun fraLagring(
+                id: DialogmeldingId<UUID>,
+                tidspunkt: Instant,
+                melding: String,
+                behandler: Behandler,
+                behandlerRef: BehandlerRef,
+            ) = FraSystem(
+                id = id,
+                tidspunkt = tidspunkt,
+                melding = melding,
+                behandler = behandler,
+                behandlerRef = behandlerRef,
             )
         }
     }
