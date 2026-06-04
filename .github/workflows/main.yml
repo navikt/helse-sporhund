@@ -53,6 +53,11 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: deploy/dev.yml
           IMAGE: ${{ needs.build.outputs.image }}
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/purring-job.yml
+          IMAGE: ${{ needs.build.outputs.image }}
 #
 #  deployProd:
 #    name: deploy to prod
