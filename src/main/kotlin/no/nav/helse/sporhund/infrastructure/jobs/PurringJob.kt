@@ -5,7 +5,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggInfo
-import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.domain.Dialogstatus
 import java.time.Clock
 import java.time.Instant
@@ -41,7 +40,7 @@ class PurringJob(
                 .finnIkkeLukkedeDialoger()
                 .filter { dialog ->
                     dialog.status == Dialogstatus.ForespørselSendt &&
-                        dialog.nyesteMelding() is Dialogmelding.FraNav &&
+                        !dialog.harFåttSvar() &&
                         dialog.frist() <= now
                 }.forEach { dialog ->
                     this@PurringJob.loggInfo("Sender purring for dialog ${dialog.conversationRef.value}")

@@ -162,13 +162,29 @@ class PurringJobTest {
     }
 
     @Test
-    fun `sender ikke purring når siste melding er fra behandler`() {
+    fun `sender ikke purring når behandler har svart`() {
+        val dialog =
+            lagDialog(
+                status = Dialogstatus.SvarMottatt,
+                melding = lagFraNavMelding(opprettet = Instant.now().minusSeconds(22 * 24 * 3600)),
+            )
+        dialog.nyMelding(lagFraBehandlerMelding())
+        transactionProvider.dialogRepository.lagre(dialog)
+
+        lagJob().sendPurringerForUtlopteFrister()
+
+        assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
+    }
+
+    @Test
+    fun `sender ikke purring når behandler har svart og nav har sendt ny melding etterpå`() {
         val dialog =
             lagDialog(
                 status = Dialogstatus.ForespørselSendt,
                 melding = lagFraNavMelding(opprettet = Instant.now().minusSeconds(22 * 24 * 3600)),
             )
         dialog.nyMelding(lagFraBehandlerMelding())
+        dialog.nyMelding(lagFraNavMelding(opprettet = Instant.now().minusSeconds(22 * 24 * 3600)))
         transactionProvider.dialogRepository.lagre(dialog)
 
         lagJob().sendPurringerForUtlopteFrister()

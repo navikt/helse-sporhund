@@ -103,6 +103,8 @@ class Dialog private constructor(
 
     fun antallVedleggTotalt() = meldinger.filterIsInstance<Dialogmelding.FraBehandler>().sumOf { it.antallVedlegg }
 
+    fun harFåttSvar(): Boolean = meldinger.any { it is Dialogmelding.FraBehandler }
+
     fun opprinneligBehandler() = førsteMeldingFraNav().behandler to førsteMeldingFraNav().behandlerRef
 
     fun nyMelding(dialogmelding: Dialogmelding<*>) {
