@@ -5,53 +5,14 @@ import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
 import no.nav.helse.sporhund.application.meldinger
 import no.nav.helse.sporhund.domain.Dialogstatus
 import no.nav.helse.sporhund.domain.testhelpers.*
-import java.time.Clock
+import no.nav.helse.sporhund.sendPurringerForUtlopteFrister
 import java.time.Instant
-import java.time.ZoneId
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class PurringJobTest {
     private val transactionProvider = InMemoryTransactionProvider()
-    private val running = AtomicBoolean(false)
-    private val osloZone = ZoneId.of("Europe/Oslo")
-
-    private fun lagJob(clock: Clock = Clock.systemDefaultZone()) = PurringJob(running, transactionProvider, clock = clock)
-
-    // ── erMidnatt ───────────────────────────────────────────────────────────
-
-    @Test
-    fun `erMidnatt returnerer true når klokken er 00 30 Oslo-tid`() {
-        val clock =
-            Clock.fixed(
-                Instant.parse("2026-06-02T22:30:00Z"), // 00:30 CEST (UTC+2)
-                osloZone,
-            )
-        assertTrue(lagJob(clock).erMidnatt())
-    }
-
-    @Test
-    fun `erMidnatt returnerer false når klokken er 12 00 Oslo-tid`() {
-        val clock =
-            Clock.fixed(
-                Instant.parse("2026-06-03T10:00:00Z"), // 12:00 CEST (UTC+2)
-                osloZone,
-            )
-        assertFalse(lagJob(clock).erMidnatt())
-    }
-
-    @Test
-    fun `erMidnatt returnerer false når klokken er 23 59 Oslo-tid`() {
-        val clock =
-            Clock.fixed(
-                Instant.parse("2026-06-03T21:59:00Z"), // 23:59 CEST (UTC+2)
-                osloZone,
-            )
-        assertFalse(lagJob(clock).erMidnatt())
-    }
 
     // ── sendPurringerForUtlopteFrister ───────────────────────────────────────
 
@@ -64,7 +25,7 @@ class PurringJobTest {
             )
         transactionProvider.dialogRepository.lagre(forfallenDialog)
 
-        lagJob().sendPurringerForUtlopteFrister()
+        sendPurringerForUtlopteFrister(transactionProvider)
 
         val outboxMeldinger = transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>()
         assertEquals(1, outboxMeldinger.size)
@@ -80,7 +41,7 @@ class PurringJobTest {
             )
         transactionProvider.dialogRepository.lagre(forfallenDialog)
 
-        lagJob().sendPurringerForUtlopteFrister()
+        sendPurringerForUtlopteFrister(transactionProvider)
 
         val event =
             transactionProvider.outbox
@@ -99,7 +60,7 @@ class PurringJobTest {
             )
         transactionProvider.dialogRepository.lagre(forfallenDialog)
 
-        lagJob().sendPurringerForUtlopteFrister()
+        sendPurringerForUtlopteFrister(transactionProvider)
 
         val lagretDialog = transactionProvider.dialogRepository.finnDialog(forfallenDialog.conversationRef)!!
         assertEquals(Dialogstatus.PurringSendt, lagretDialog.status)
@@ -114,7 +75,7 @@ class PurringJobTest {
             )
         transactionProvider.dialogRepository.lagre(ikkeForfallDialog)
 
-        lagJob().sendPurringerForUtlopteFrister()
+        sendPurringerForUtlopteFrister(transactionProvider)
 
         assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
     }
@@ -128,7 +89,7 @@ class PurringJobTest {
             )
         transactionProvider.dialogRepository.lagre(dialog)
 
-        lagJob().sendPurringerForUtlopteFrister()
+        sendPurringerForUtlopteFrister(transactionProvider)
 
         assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
     }
@@ -142,7 +103,7 @@ class PurringJobTest {
             )
         transactionProvider.dialogRepository.lagre(dialog)
 
-        lagJob().sendPurringerForUtlopteFrister()
+        sendPurringerForUtlopteFrister(transactionProvider)
 
         assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
     }
@@ -156,7 +117,7 @@ class PurringJobTest {
             )
         transactionProvider.dialogRepository.lagre(lukketDialog)
 
-        lagJob().sendPurringerForUtlopteFrister()
+        sendPurringerForUtlopteFrister(transactionProvider)
 
         assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
     }
@@ -171,7 +132,7 @@ class PurringJobTest {
         dialog.nyMelding(lagFraBehandlerMelding())
         transactionProvider.dialogRepository.lagre(dialog)
 
-        lagJob().sendPurringerForUtlopteFrister()
+        sendPurringerForUtlopteFrister(transactionProvider)
 
         assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
     }
@@ -187,7 +148,7 @@ class PurringJobTest {
         dialog.nyMelding(lagFraNavMelding(opprettet = Instant.now().minusSeconds(22 * 24 * 3600)))
         transactionProvider.dialogRepository.lagre(dialog)
 
-        lagJob().sendPurringerForUtlopteFrister()
+        sendPurringerForUtlopteFrister(transactionProvider)
 
         assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
     }
@@ -213,7 +174,7 @@ class PurringJobTest {
         transactionProvider.dialogRepository.lagre(forfallen2)
         transactionProvider.dialogRepository.lagre(ikkeForfalt)
 
-        lagJob().sendPurringerForUtlopteFrister()
+        sendPurringerForUtlopteFrister(transactionProvider)
 
         val outboxRefs =
             transactionProvider.outbox
