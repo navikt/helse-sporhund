@@ -87,14 +87,13 @@ class DialogTest {
     }
 
     @Test
-    fun `frist oppdateres til 21 dager etter purring`() {
+    fun `frist endres ikke når nav sender ny melding`() {
         val opprinnelig = Instant.parse("2026-05-01T10:00:00Z")
-        val purringTidspunkt = Instant.parse("2026-05-15T10:00:00Z")
         val dialog = lagDialog(melding = lagFraNavMelding(opprettet = opprinnelig))
         dialog.nyMelding(lagFraBehandlerMelding())
-        dialog.nyMelding(lagFraNavMelding(opprettet = purringTidspunkt))
+        dialog.nyMelding(lagFraNavMelding(opprettet = Instant.parse("2026-05-15T10:00:00Z")))
 
-        assertEquals(purringTidspunkt + Duration.ofDays(21), dialog.frist())
+        assertEquals(opprinnelig + Duration.ofDays(21), dialog.frist())
     }
 
     @Test

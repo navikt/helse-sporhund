@@ -97,7 +97,7 @@ class Dialog private constructor(
         status = if (nyesteMelding() is Dialogmelding.FraNav) Dialogstatus.ForespørselSendt else Dialogstatus.SvarMottatt
     }
 
-    fun frist(): Instant = nyesteMeldingFraNav().tidspunkt + Duration.ofDays(21)
+    fun frist(): Instant = førsteMeldingFraNav().tidspunkt + Duration.ofDays(21)
 
     fun opprettetTidspunkt(): Instant = førsteMelding().tidspunkt
 

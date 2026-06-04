@@ -52,7 +52,7 @@ class SendPurringTest {
     }
 
     @Test
-    fun `sendPurring oppdaterer frist til 21 dager etter purringen`() {
+    fun `sendPurring endrer ikke frist - den er fortsatt 21 dager fra opprinnelig forespørsel`() {
         val opprinnelig = Instant.parse("2026-05-01T10:00:00Z")
         val dialog =
             lagDialog(
@@ -62,8 +62,7 @@ class SendPurringTest {
 
         dialog.sendPurring()
 
-        val purringTidspunkt = (dialog.nyesteMelding() as Dialogmelding.FraNav).tidspunkt
-        assertEquals(purringTidspunkt + Duration.ofDays(21), dialog.frist())
+        assertEquals(opprinnelig + Duration.ofDays(21), dialog.frist())
     }
 
     @Test
