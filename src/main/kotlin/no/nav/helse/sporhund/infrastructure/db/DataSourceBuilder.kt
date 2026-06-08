@@ -14,7 +14,7 @@ internal class DataSourceBuilder(
 ) {
     private val hikariConfig =
         HikariConfig().apply {
-            jdbcUrl = dbConfig.jdbcUrl
+            jdbcUrl = dbConfig.effectiveJdbcUrl
             username = dbConfig.username
             password = dbConfig.password
             maximumPoolSize = 20
