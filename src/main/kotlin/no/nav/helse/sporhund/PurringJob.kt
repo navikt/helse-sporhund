@@ -13,7 +13,10 @@ fun main() {
     val env = System.getenv()
     val dbConfig =
         DbConfig(
-            jdbcUrl = env.getValue("DATABASE_PURRING_JDBC_URL"),
+            gcpProjectId = env.getValue("GCP_TEAM_PROJECT_ID"),
+            databaseRegion = env.getValue("DATABASE_REGION"),
+            databaseInstance = env.getValue("DATABASE_INSTANCE"),
+            databaseName = env.getValue("DATABASE_PURRING_DATABASE"),
             username = env.getValue("DATABASE_PURRING_USERNAME"),
             password = env.getValue("DATABASE_PURRING_PASSWORD"),
         )

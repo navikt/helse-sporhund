@@ -19,9 +19,13 @@ class TestcontainersDatabase(
 
     val dbConfig =
         DbConfig(
-            jdbcUrl = postgres.jdbcUrl,
             username = postgres.username,
             password = postgres.password,
+            gcpProjectId = "",
+            databaseRegion = "",
+            databaseInstance = "",
+            databaseName = postgres.databaseName,
+            jdbcUrlOverride = postgres.jdbcUrl,
         )
 
     fun stop() = postgres.stop()

@@ -18,6 +18,7 @@ dependencies {
     implementation(libs.tbd.retry)
     implementation(libs.bundles.smiley4.ktor.openapi.tools)
     implementation(libs.bundles.db)
+    implementation(libs.cloud.sql.postgres.socket.factory)
     implementation(libs.bundles.jackson)
 
     implementation(libs.logback.classic)
