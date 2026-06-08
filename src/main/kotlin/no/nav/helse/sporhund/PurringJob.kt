@@ -19,6 +19,7 @@ fun main() {
         )
 
     val dataSourceBuilder = DataSourceBuilder(dbConfig)
+    dataSourceBuilder.migrate()
     val transactionProvider = PgTransactionProvider(dataSourceBuilder.build())
 
     teamLogs.info("Starter purring-jobb")
