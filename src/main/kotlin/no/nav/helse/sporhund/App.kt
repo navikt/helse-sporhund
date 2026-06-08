@@ -65,12 +65,10 @@ fun main() {
         )
     val dbConfig =
         DbConfig(
-            gcpProjectId = env.getValue("GCP_TEAM_PROJECT_ID"),
-            databaseRegion = env.getValue("DATABASE_REGION"),
-            databaseInstance = env.getValue("DATABASE_INSTANCE"),
             databaseName = env.getValue("DATABASE_DATABASE"),
             username = env.getValue("DATABASE_USERNAME"),
             password = env.getValue("DATABASE_PASSWORD"),
+            jdbcUrl = env.getValue("DATABASE_JDBC_URL"),
         )
     val azureAdConfig =
         AzureAdConfig(
