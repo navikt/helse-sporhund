@@ -84,6 +84,8 @@ spec:
         databases:
           - name: sporhund
             envVarPrefix: DATABASE
+            users:
+              - name: purring
   valkey:
     - instance: personpseudoid
       access: readwrite
