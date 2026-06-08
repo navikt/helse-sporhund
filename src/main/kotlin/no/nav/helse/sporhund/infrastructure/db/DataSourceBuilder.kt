@@ -14,9 +14,13 @@ internal class DataSourceBuilder(
 ) {
     private val hikariConfig =
         HikariConfig().apply {
-            jdbcUrl = dbConfig.effectiveJdbcUrl
+            jdbcUrl = dbConfig.jdbcUrl
             username = dbConfig.username
             password = dbConfig.password
+            // Cloud SQL's certificate is signed by Google's internal CA, not trusted by the JVM
+            // default truststore. Connections go via GCP private VPC so disabling SSL at the JDBC
+            // level is safe. This also overrides sslmode=require if present in the injected URL.
+            addDataSourceProperty("sslmode", "disable")
             maximumPoolSize = 20
             minimumIdle = 2
             idleTimeout = Duration.ofMinutes(1).toMillis()
