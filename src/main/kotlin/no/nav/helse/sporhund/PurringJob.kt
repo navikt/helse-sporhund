@@ -1,13 +1,14 @@
 package no.nav.helse.sporhund
 
-import no.nav.helse.sporhund.application.logg.teamLogs
 import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.application.logg.teamLogs
 import no.nav.helse.sporhund.domain.Dialogstatus
 import no.nav.helse.sporhund.infrastructure.db.DataSourceBuilder
 import no.nav.helse.sporhund.infrastructure.db.DbConfig
 import no.nav.helse.sporhund.infrastructure.db.PgTransactionProvider
 import java.time.Instant
+
 fun main() {
     val env = System.getenv()
     val dbConfig =
