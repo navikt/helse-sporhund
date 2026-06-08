@@ -13,10 +13,9 @@ fun main() {
     val env = System.getenv()
     val dbConfig =
         DbConfig(
-            databaseName = env.getValue("DATABASE_PURRING_DATABASE"),
+            jdbcUrl = env.getValue("DATABASE_PURRING_JDBC_URL"),
             username = env.getValue("DATABASE_PURRING_USERNAME"),
             password = env.getValue("DATABASE_PURRING_PASSWORD"),
-            jdbcUrl = env.getValue("DATABASE_PURRING_JDBC_URL"),
         )
 
     val dataSourceBuilder = DataSourceBuilder(dbConfig)

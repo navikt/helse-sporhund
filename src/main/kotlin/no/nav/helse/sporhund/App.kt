@@ -65,10 +65,9 @@ fun main() {
         )
     val dbConfig =
         DbConfig(
-            databaseName = env.getValue("DATABASE_DATABASE"),
+            jdbcUrl = env.getValue("DATABASE_JDBC_URL"),
             username = env.getValue("DATABASE_USERNAME"),
             password = env.getValue("DATABASE_PASSWORD"),
-            jdbcUrl = env.getValue("DATABASE_JDBC_URL"),
         )
     val azureAdConfig =
         AzureAdConfig(
@@ -179,6 +178,7 @@ fun app(
         gracefulShutdownDelay = 10.seconds,
         applicationModule = {
             this.monitor.subscribe(ApplicationStarted) {
+                dataSourceBuilder.migrate()
                 running.set(true)
                 val exceptionHandler =
                     CoroutineExceptionHandler { _, throwable ->
