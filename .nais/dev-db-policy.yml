@@ -10,7 +10,7 @@ spec:
             cidr: 100.71.4.133/32
   podSelector:
     matchLabels:
-      db: sporhund
+      dbPolicyUser: purring
   policyTypes:
     - Egress
 
