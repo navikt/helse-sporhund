@@ -25,6 +25,11 @@ spec:
       destinations:
         - id: elastic
         - id: loki
+  accessPolicy:
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
   envFrom:
     - secret: google-sql-sporhund-sporhund-purring-494b7001
   gcp:
