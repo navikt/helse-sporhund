@@ -49,7 +49,7 @@ class PgDialogRepository(
     override fun finnIkkeLukkedeDialoger(): List<Dialog> =
         asSQL(
             """
-            SELECT json FROM dialog WHERE json->> 'status' != 'DialogLukket'
+            SELECT json FROM dialog WHERE json -> 'status' != '"DialogLukket"'
             """.trimIndent(),
         ).list(session) {
             objectMapper.readValue<DialogDto>(it.string("json")).tilDomene()
