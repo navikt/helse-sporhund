@@ -11,7 +11,8 @@ import java.time.Instant
 
 fun main() {
     val env = System.getenv()
-    val cloudSqlInstance = "${env.getValue("GCP_TEAM_PROJECT_ID")}:${env.getValue("DATABASE_REGION")}:${env.getValue("DATABASE_INSTANCE")}"
+    val cloudSqlInstance =
+        "${env.getValue("GCP_TEAM_PROJECT_ID")}:${env.getValue("DATABASE_REGION")}:${env.getValue("DATABASE_INSTANCE")}"
     val dbConfig =
         DbConfig(
             jdbcUrl = "jdbc:postgresql:///${env.getValue("DATABASE_PURRING_DATABASE")}?cloudSqlInstance=$cloudSqlInstance&socketFactory=com.google.cloud.sql.postgres.SocketFactory",
@@ -23,10 +24,8 @@ fun main() {
     val transactionProvider = PgTransactionProvider(dataSourceBuilder.build())
 
     teamLogs.info("Starter purring-jobb")
-    println("Starter purring-jobb")
     sendPurringerForUtlopteFrister(transactionProvider)
     teamLogs.info("Purring-jobb ferdig")
-    println("Purring-jobb ferdig")
 }
 
 internal fun sendPurringerForUtlopteFrister(transactionProvider: TransactionProvider) {
@@ -34,24 +33,18 @@ internal fun sendPurringerForUtlopteFrister(transactionProvider: TransactionProv
         val now = Instant.now()
         dialogRepository
             .finnIkkeLukkedeDialoger()
-            .also { println("Fant ${it.size} ikke-lukkede dialoger") }
             .filter { dialog ->
                 dialog.status == Dialogstatus.ForespørselSendt &&
                     !dialog.harFåttSvar() &&
                     dialog.frist() <= now
-            }.also { println("Sender purring for ${it.size} dialoger") }
-            .forEach { dialog ->
-                teamLogs
-                    .info("Sender purring for dialog ${dialog.conversationRef.value}")
-                    .also { println("Sender purring for dialog ${dialog.conversationRef.value}") }
+            }.forEach { dialog ->
+                teamLogs.info("Sender purring for dialog ${dialog.conversationRef.value}")
                 dialog.sendPurring()
                 val events = dialog.events()
                 dialogRepository.lagre(dialog)
                 events.forEach {
                     outbox.nyMelding(
-                        OutboxMelding.nyDialogmeldingFraNav(it).also {
-                            println("nymelding i outbox")
-                        },
+                        OutboxMelding.nyDialogmeldingFraNav(it),
                     )
                 }
             }
