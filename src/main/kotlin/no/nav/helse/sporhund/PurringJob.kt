@@ -13,7 +13,14 @@ fun main() {
     val env = System.getenv()
     val dbConfig =
         DbConfig(
-            jdbcUrl = env.getValue("DATABASE_PURRING_JDBC_URL"),
+            jdbcUrl =
+                String.format(
+                    "jdbc:postgresql:///%s?cloudSqlInstance=%s:%s:%s&socketFactory=com.google.cloud.sql.postgres.SocketFactory",
+                    env.getValue("DATABASE_PURRING_DATABASE"),
+                    env.getValue("GCP_TEAM_PROJECT_ID"),
+                    env.getValue("DATABASE_REGION"),
+                    env.getValue("DATABASE_INSTANCE"),
+                ),
             username = env.getValue("DATABASE_PURRING_USERNAME"),
             password = env.getValue("DATABASE_PURRING_PASSWORD"),
         )
