@@ -39,3 +39,8 @@ spec:
           kind: Project
           name: tbd-dev-7ff9
         role: roles/cloudsql.client
+  env:
+    - name: DATABASE_REGION
+      value: "europe-north1"
+    - name: DATABASE_INSTANCE
+      value: "sporhund"
