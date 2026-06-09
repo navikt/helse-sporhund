@@ -12,7 +12,6 @@ import java.time.Instant
 fun main() {
     val env = System.getenv()
     val cloudSqlInstance = "${env.getValue("GCP_TEAM_PROJECT_ID")}:${env.getValue("DATABASE_REGION")}:${env.getValue("DATABASE_INSTANCE")}"
-    println("Connecting with cloudSqlInstance=$cloudSqlInstance, database=${env.getValue("DATABASE_PURRING_DATABASE")}")
     val dbConfig =
         DbConfig(
             jdbcUrl = "jdbc:postgresql:///${env.getValue("DATABASE_PURRING_DATABASE")}?cloudSqlInstance=$cloudSqlInstance&socketFactory=com.google.cloud.sql.postgres.SocketFactory",

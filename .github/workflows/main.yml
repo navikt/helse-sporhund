@@ -51,12 +51,12 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: deploy/dev.yml
+          RESOURCE: .nais/dev.yml
           IMAGE: ${{ needs.build.outputs.image }}
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: deploy/purring-job.yml
+          RESOURCE: .nais/purring-job.yml, .nais/dev-db-policy.yml
           IMAGE: ${{ needs.build.outputs.image }}
 #
 #  deployProd:
