@@ -13,7 +13,7 @@ fun main() {
     val env = System.getenv()
     val dbConfig =
         DbConfig(
-            jdbcUrl = env.getValue("DATABASE_JDBC_URL"),
+            jdbcUrl = env.getValue("DATABASE_PURRING_JDBC_URL"),
             username = env.getValue("DATABASE_PURRING_USERNAME"),
             password = env.getValue("DATABASE_PURRING_PASSWORD"),
         )

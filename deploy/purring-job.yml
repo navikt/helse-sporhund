@@ -25,12 +25,12 @@ spec:
       destinations:
         - id: elastic
         - id: loki
+  envFrom:
+    - secret: google-sql-sporhund-sporhund-purring-494b7001
   gcp:
-    sqlInstances:
-      - type: POSTGRES_17
-        tier: db-custom-1-3840
-        databases:
-          - name: sporhund
-            envVarPrefix: DATABASE
-            users:
-              - name: purring
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+          name: tbd-dev-7ff9
+        role: roles/cloudsql.client
