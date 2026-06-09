@@ -7,7 +7,7 @@ spec:
   egress:
     - to:
         - ipBlock:
-            cidr: 100.71.4.133/32
+            cidr: 34.88.143.189/32
   podSelector:
     matchLabels:
       dbPolicyUser: purring
