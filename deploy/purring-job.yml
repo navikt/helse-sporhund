@@ -16,10 +16,10 @@ spec:
     - no.nav.helse.sporhund.PurringJobKt
   resources:
     limits:
-      memory: 256Mi
+      memory: 512Mi
     requests:
       cpu: 10m
-      memory: 128Mi
+      memory: 256Mi
   observability:
     logging:
       destinations:
