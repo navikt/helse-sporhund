@@ -5,7 +5,7 @@ metadata:
   namespace: tbd
   labels:
     team: tbd
-    db: sporhund
+    dbPolicyUser: purring
 spec:
   image: {{image}}
   schedule: "0 0 * * *"
