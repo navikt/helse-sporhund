@@ -1,5 +1,7 @@
 package no.nav.helse.sporhund.infrastructure.api
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.Instant
 import java.util.*
 
@@ -50,6 +52,12 @@ data class ApiVedlegg(
     val url: String,
 )
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "avsender")
+@JsonSubTypes(
+    JsonSubTypes.Type(value = ApiDialogmelding.FraBehandler::class, name = "BEHANDLER"),
+    JsonSubTypes.Type(value = ApiDialogmelding.FraNav::class, name = "NAV"),
+    JsonSubTypes.Type(value = ApiDialogmelding.FraSystem::class, name = "SYSTEM"),
+)
 sealed class ApiDialogmelding {
     abstract val fagomrade: ApiFagomrade
     abstract val meldingstype: ApiDialogmeldingType
