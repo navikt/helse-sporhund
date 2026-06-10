@@ -9,43 +9,41 @@ import no.nav.helse.sporhund.domain.NyDialogmeldingFraNavEvent
 import no.nav.helse.sporhund.domain.testhelpers.lagBehandlerRef
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.db.testhelpers.DbTest
-import org.junit.jupiter.api.Assertions.assertEquals
 import java.util.*
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PgOutboxTest : DbTest() {
     @Test
-    fun `kan lagre og hente outbox-meldinger`() {
-        // given
-        val outbox = sessionContext.outbox
+    fun `kan lagre og hente outbox-meldinger`() =
+        test {
+            // when
+            outbox.nyMelding(nyOutboxMelding())
+            val funnet = outbox.meldinger<NyDialogmeldingFraNav>()
 
-        // when
-        outbox.nyMelding(nyOutboxMelding())
-        val funnet = outbox.meldinger<NyDialogmeldingFraNav>()
-
-        // then
-        assertEquals(1, funnet.size)
-    }
+            // then
+            assertEquals(1, funnet.size)
+        }
 
     @Test
-    fun `henter kun usendte meldinger`() {
-        // given
-        val outbox = sessionContext.outbox
-        val meldingSomErSendt = nyOutboxMelding()
-        val meldingSomIkkeErSendt = nyOutboxMelding()
+    fun `henter kun usendte meldinger`() =
+        test {
+            // given
+            val meldingSomErSendt = nyOutboxMelding()
+            val meldingSomIkkeErSendt = nyOutboxMelding()
 
-        outbox.nyMelding(meldingSomErSendt)
-        outbox.meldingSendt(meldingSomErSendt.id)
-        outbox.nyMelding(meldingSomIkkeErSendt)
+            outbox.nyMelding(meldingSomErSendt)
+            outbox.meldingSendt(meldingSomErSendt.id)
+            outbox.nyMelding(meldingSomIkkeErSendt)
 
-        // when
-        val funnet = outbox.meldinger<NyDialogmeldingFraNav>()
+            // when
+            val funnet = outbox.meldinger<NyDialogmeldingFraNav>()
 
-        // then
-        assertTrue(funnet.none { it.id == meldingSomErSendt.id })
-        assertTrue(funnet.any { it.id == meldingSomIkkeErSendt.id })
-    }
+            // then
+            assertTrue(funnet.none { it.id == meldingSomErSendt.id })
+            assertTrue(funnet.any { it.id == meldingSomIkkeErSendt.id })
+        }
 
     private fun nyOutboxMelding(): NyDialogmeldingFraNav =
         OutboxMelding.nyDialogmeldingFraNav(
