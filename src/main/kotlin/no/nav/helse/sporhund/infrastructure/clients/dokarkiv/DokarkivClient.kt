@@ -6,26 +6,22 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpRequestTimeoutException
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.preparePatch
-import io.ktor.client.request.preparePost
-import io.ktor.client.request.preparePut
-import io.ktor.client.request.setBody
+import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.runBlocking
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.sporhund.application.KnyttInnkommendeJournalpost
 import no.nav.helse.sporhund.application.MeldingTilBehandlerPdfInput
 import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
 import no.nav.helse.sporhund.application.PdfProvider
-import no.nav.helse.sporhund.application.logg.logg
-import no.nav.helse.sporhund.application.logg.teamLogs
+import no.nav.helse.sporhund.application.logg.loggError
+import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
+import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import java.time.ZoneId
 import javax.net.ssl.SSLHandshakeException
 import kotlin.io.encoding.Base64
@@ -76,7 +72,7 @@ class DokarkivClient(
                 .preparePost("${dokarkivConfig.baseUrl}/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=true") {
                     bearerAuth(accessTokenProvider.machineToken(dokarkivConfig.scope))
                     contentType(ContentType.Application.Json)
-                    setBody(journalpostPayload)
+                    setBody(objectMapper.writeValueAsString(journalpostPayload))
                 }.executeRetry(avbryt = { it::class !in forsøkPåNy }) {
                     håndterPostJournalpostResponse(it, journalpostPayload)
                 }
@@ -95,16 +91,11 @@ class DokarkivClient(
                     bearerAuth(accessTokenProvider.machineToken(dokarkivConfig.scope))
                 }.executeRetry(avbryt = { it::class !in forsøkPåNy }) {
                     when (it.status.value) {
-                        in (200 until 300) -> logg.info("Journalpost $journalpostId feilregistrert")
+                        in (200 until 300) -> loggInfo("Journalpost med journalpostId=$journalpostId feilregistrert")
 
                         else -> {
                             val error = it.body<String>()
-                            logg.error("Feil fra Dokarkiv ved feilregistrering av journalpost: {}", keyValue("response", error))
-                            teamLogs.error(
-                                "Feil fra Dokarkiv ved feilregistrering av journalpost: {}, {}",
-                                keyValue("journalpostId", journalpostId),
-                                keyValue("response", error),
-                            )
+                            loggError("Feil fra Dokarkiv ved feilregistrering av journalpost med journalpostId=$journalpostId: response=$error")
                             throw DokarkivClientException("Feil fra Dokarkiv ved feilregistrering av journalpost: $error")
                         }
                     }
@@ -117,25 +108,26 @@ class DokarkivClient(
         fagsakId: String,
         identitetsnummer: Identitetsnummer,
     ) {
-        val payload = KnyttTilAnnenSakPayload(fagsakId = fagsakId, bruker = Bruker(id = identitetsnummer.value))
         runBlocking {
             httpClient
                 .preparePut("${dokarkivConfig.baseUrl}/rest/journalpostapi/v1/journalpost/$journalpostId/knyttTilAnnenSak") {
                     bearerAuth(accessTokenProvider.machineToken(dokarkivConfig.scope))
                     contentType(ContentType.Application.Json)
-                    setBody(payload)
+                    setBody(
+                        objectMapper.writeValueAsString(
+                            KnyttTilAnnenSakPayload(
+                                fagsakId = fagsakId,
+                                bruker = Bruker(id = identitetsnummer.value),
+                            ),
+                        ),
+                    )
                 }.executeRetry(avbryt = { it::class !in forsøkPåNy }) {
                     when (it.status.value) {
-                        in (200 until 300) -> logg.info("Journalpost $journalpostId knyttet til sak $fagsakId")
+                        in (200 until 300) -> loggInfo("Journalpost med journalpostId=$journalpostId knyttet til sak med fagsakId=$fagsakId")
 
                         else -> {
                             val error = it.body<String>()
-                            logg.error("Feil fra Dokarkiv ved knytting av journalpost til annen sak: {}", keyValue("response", error))
-                            teamLogs.error(
-                                "Feil fra Dokarkiv ved knytting av journalpost til annen sak: {}, {}",
-                                keyValue("journalpostId", journalpostId),
-                                keyValue("response", error),
-                            )
+                            loggError("Feil fra Dokarkiv ved knytting av journalpost med journalpostId=$journalpostId til annen sak: response=$error")
                             throw DokarkivClientException("Feil fra Dokarkiv ved knytting av journalpost til annen sak: $error")
                         }
                     }
@@ -151,7 +143,7 @@ class DokarkivClient(
             in (200 until 300) -> true
 
             409 -> {
-                logg.info(
+                loggInfo(
                     "Fikk HTTP 409 (Conflict) fra Dokarkiv ved journalføring," +
                         " går videre ettersom dette skal bety at noe allerede er journalført knyttet til denne dialogmeldingen" +
                         " (eksternReferanseId ${journalpostPayload.eksternReferanseId})",
@@ -161,12 +153,7 @@ class DokarkivClient(
 
             else -> {
                 val error = response.body<String>()
-                logg.error("Feil fra Dokarkiv: {}", keyValue("response", error))
-                teamLogs.error(
-                    "Feil fra Dokarkiv: {}, {}",
-                    keyValue(journalpostPayload.bruker.idType, journalpostPayload.bruker.id),
-                    keyValue("response", error),
-                )
+                loggError("Feil fra Dokarkiv: response=$error", "identitetsnummer" to journalpostPayload.bruker.id)
                 throw DokarkivClientException("Feil fra Dokarkiv: $error")
             }
         }
