@@ -1,25 +1,8 @@
 package no.nav.helse.sporhund.infrastructure.api.mapping
 
 import no.nav.helse.sporhund.application.PersonPseudoId
-import no.nav.helse.sporhund.domain.Behandler
-import no.nav.helse.sporhund.domain.BehandlerRef
-import no.nav.helse.sporhund.domain.Dialog
-import no.nav.helse.sporhund.domain.Dialogmelding
-import no.nav.helse.sporhund.domain.Dialogstatus
-import no.nav.helse.sporhund.domain.Dialogtype
-import no.nav.helse.sporhund.domain.Fagområde
-import no.nav.helse.sporhund.domain.Navn
-import no.nav.helse.sporhund.infrastructure.api.ApiBehandler
-import no.nav.helse.sporhund.infrastructure.api.ApiBehandlerKategori
-import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
-import no.nav.helse.sporhund.infrastructure.api.ApiDialogOppsummering
-import no.nav.helse.sporhund.infrastructure.api.ApiDialogmelding
-import no.nav.helse.sporhund.infrastructure.api.ApiDialogmeldingOppgave
-import no.nav.helse.sporhund.infrastructure.api.ApiDialogmeldingStatus
-import no.nav.helse.sporhund.infrastructure.api.ApiDialogmeldingType
-import no.nav.helse.sporhund.infrastructure.api.ApiFagomrade
-import no.nav.helse.sporhund.infrastructure.api.ApiLegekontor
-import no.nav.helse.sporhund.infrastructure.api.ApiNavn
+import no.nav.helse.sporhund.domain.*
+import no.nav.helse.sporhund.infrastructure.api.*
 
 fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
     val (opprinneligBehandler, opprinneligBehandlerRef) = this.opprinneligBehandler()
@@ -56,33 +39,45 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
         status = status.tilApiDialogmeldingStatus(),
         dialogmeldinger =
             meldinger.map { dialogmelding ->
-                ApiDialogmelding(
-                    fagomrade = this.tilApiFagomrade(),
-                    meldingstype = this.tilApiDialogmeldingType(),
-                    melding = dialogmelding.melding,
-                    sendtTidspunkt = dialogmelding.tidspunkt,
-                    avsender =
-                        when (dialogmelding) {
-                            is Dialogmelding.FraBehandler -> ApiDialogmelding.Avsender.BEHANDLER
-                            is Dialogmelding.FraNav -> ApiDialogmelding.Avsender.NAV
-                            is Dialogmelding.FraSystem -> ApiDialogmelding.Avsender.SYSTEM
-                        },
-                    msgId =
-                        when (dialogmelding) {
-                            is Dialogmelding.FraBehandler -> dialogmelding.id.value
-                            is Dialogmelding.FraNav -> dialogmelding.id.value.toString()
-                            is Dialogmelding.FraSystem -> dialogmelding.id.value.toString()
-                        },
-                    antallVedlegg =
-                        when (dialogmelding) {
-                            is Dialogmelding.FraBehandler -> dialogmelding.antallVedlegg
-                            is Dialogmelding.FraNav -> 0
-                            is Dialogmelding.FraSystem -> 0
-                        },
-                )
+                dialogmelding.tilApiDialogmelding(tilApiFagomrade(), tilApiDialogmeldingType())
             },
     )
 }
+
+private fun Dialogmelding<*>.tilApiDialogmelding(
+    fagomrade: ApiFagomrade,
+    meldingstype: ApiDialogmeldingType,
+): ApiDialogmelding =
+    when (this) {
+        is Dialogmelding.FraBehandler ->
+            ApiDialogmelding.FraBehandler(
+                fagomrade = fagomrade,
+                meldingstype = meldingstype,
+                melding = this.melding,
+                msgId = this.id.value,
+                sendtTidspunkt = this.tidspunkt,
+                antallVedlegg = this.antallVedlegg,
+            )
+
+        is Dialogmelding.FraNav ->
+            ApiDialogmelding.FraNav(
+                fagomrade = fagomrade,
+                meldingstype = meldingstype,
+                melding = this.melding,
+                msgId = this.id.value.toString(),
+                sendtTidspunkt = this.tidspunkt,
+                saksbehandler = this.saksbehandler.value,
+            )
+
+        is Dialogmelding.FraSystem ->
+            ApiDialogmelding.FraSystem(
+                fagomrade = fagomrade,
+                meldingstype = meldingstype,
+                melding = this.melding,
+                msgId = this.id.value.toString(),
+                sendtTidspunkt = this.tidspunkt,
+            )
+    }
 
 private fun Dialogstatus.tilApiDialogmeldingStatus(): ApiDialogmeldingStatus =
     when (this) {
