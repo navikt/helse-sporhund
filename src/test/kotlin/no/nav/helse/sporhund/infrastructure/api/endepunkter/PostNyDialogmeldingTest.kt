@@ -8,7 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
-import no.nav.helse.sporhund.application.OpprettJournalpost
+import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.*
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
@@ -63,7 +63,7 @@ class PostNyDialogmeldingTest : EndepunktTest() {
             val opprettet = response.body<ApiDialogDetails>()
             assertNotNull(opprettet.conversationRef)
             assertOutboxContains<NyDialogmeldingFraNav>()
-            assertOutboxContains<OpprettJournalpost>()
+            assertOutboxContains<OpprettUtgåendeJournalpost>()
         }
 
     @Test

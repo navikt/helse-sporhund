@@ -1,6 +1,7 @@
 package no.nav.helse.sporhund.infrastructure.kafka
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.domain.*
@@ -34,16 +35,17 @@ private fun SvarFraBehandler.MedConversationRef.håndterSvarMedConversationRef(
 ) {
     transactionProvider.transaction {
         val dialog = dialogRepository.finnDialog(conversationRef) ?: return@transaction
-        dialog.nyMelding(
+        val fraBehandler =
             Dialogmelding.FraBehandler.ny(
                 meldingId = meldingId,
                 tidspunkt = tidspunktMottattNav,
                 melding = tekst,
                 behandler = behandler,
                 antallVedlegg = antallVedlegg,
-            ),
-        )
+            )
+        dialog.nyMelding(fraBehandler)
         dialogRepository.lagre(dialog)
+        outbox.nyMelding(OutboxMelding.knyttInnkommendeJournalpost(fraBehandler.id.value, dialog))
         loggInfo("Knytter meldingen til dialog")
     }
 }
@@ -59,6 +61,7 @@ private fun DialogmeldingFraBehandlerKafkaDto.svarFraBehandlerMedConversationRef
         antallVedlegg = this.antallVedlegg,
         tidspunktMottattNav = this.mottattTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toInstant(),
         meldingId = this.msgId,
+        journalpostId = this.journalpostId,
     )
 }
 

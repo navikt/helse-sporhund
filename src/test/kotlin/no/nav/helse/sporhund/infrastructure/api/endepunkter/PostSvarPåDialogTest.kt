@@ -9,7 +9,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
-import no.nav.helse.sporhund.application.OpprettJournalpost
+import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
@@ -49,7 +49,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
             assertEquals(dialog.conversationRef.value, oppdatert.conversationRef)
             assertEquals(2, oppdatert.dialogmeldinger.size)
             assertOutboxContains<NyDialogmeldingFraNav>()
-            assertOutboxContains<OpprettJournalpost>()
+            assertOutboxContains<OpprettUtgåendeJournalpost>()
         }
 
     @Test

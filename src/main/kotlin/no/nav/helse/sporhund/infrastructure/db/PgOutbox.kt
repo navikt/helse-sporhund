@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
+import no.nav.helse.sporhund.application.KnyttInnkommendeJournalpost
 import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
-import no.nav.helse.sporhund.application.OpprettJournalpost
+import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
 import no.nav.helse.sporhund.application.Outbox
 import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.OutboxMeldingId
@@ -30,9 +31,37 @@ class PgOutbox(
                         tekst = melding.nyDialogmeldingFraNavEvent.tekst,
                         erPurring = melding.nyDialogmeldingFraNavEvent.erPurring,
                     )
-                is OpprettJournalpost ->
-                    OpprettJournalpostDto(
+                is OpprettUtgåendeJournalpost ->
+                    OpprettUtgåendeJournalpostDto(
                         outboxMeldingId = melding.id.value,
+                        conversationRef = melding.conversationRef.value,
+                        meldingId = melding.meldingId.value,
+                        tekst = melding.tekst,
+                        avsenderIdent = melding.avsender.ident.value,
+                        avsenderNavn = melding.avsender.navn,
+                        mottaker = BehandlerDto.fra(melding.mottaker),
+                        gjelder = melding.gjelder.value,
+                        tidspunkt = melding.tidspunkt,
+                        fagområde =
+                            when (melding.fagområde) {
+                                Fagområde.EnkeltståendeBehandlingsdager -> "EnkeltståendeBehandlingsdager"
+                                Fagområde.Tilbakedatering -> "Tilbakedatering"
+                                Fagområde.Yrkesskade -> "Yrkesskade"
+                                Fagområde.Bestridelse -> "Bestridelse"
+                            },
+                        dialogtype =
+                            when (melding.dialogtype) {
+                                Dialogtype.Journalnotat -> "Journalnotat"
+                                Dialogtype.MedisinskeOpplysninger -> "MedisinskeOpplysninger"
+                                Dialogtype.EkstraUttalelserFraLege -> "EkstraUttalelserFraLege"
+                                Dialogtype.SpesialistErklæring -> "SpesialistErklæring"
+                                Dialogtype.UtvidetSpesialistErklæring -> "UtvidetSpesialistErklæring"
+                            },
+                    )
+                is KnyttInnkommendeJournalpost ->
+                    KnyttInnkommendeJournalpostDto(
+                        outboxMeldingId = melding.id.value,
+                        journalpostId = melding.journalpostId,
                         conversationRef = melding.conversationRef.value,
                     )
             }
@@ -64,9 +93,44 @@ class PgOutbox(
                                 erPurring = dto.erPurring,
                             ),
                     )
-                is OpprettJournalpostDto ->
-                    OpprettJournalpost(
+                is OpprettUtgåendeJournalpostDto ->
+                    OpprettUtgåendeJournalpost(
                         id = OutboxMeldingId(dto.outboxMeldingId),
+                        conversationRef = ConversationRef(dto.conversationRef),
+                        meldingId = DialogmeldingId(dto.meldingId),
+                        tekst = dto.tekst,
+                        avsender =
+                            Saksbehandler(
+                                id = SaksbehandlerOid(UUID.fromString("00000000-0000-0000-0000-000000000000")),
+                                navn = dto.avsenderNavn,
+                                epost = "",
+                                ident = NavIdent(dto.avsenderIdent),
+                            ),
+                        mottaker = dto.mottaker.tilDomene(),
+                        gjelder = Identitetsnummer.fraString(dto.gjelder),
+                        tidspunkt = dto.tidspunkt,
+                        fagområde =
+                            when (dto.fagområde) {
+                                "EnkeltståendeBehandlingsdager" -> Fagområde.EnkeltståendeBehandlingsdager
+                                "Tilbakedatering" -> Fagområde.Tilbakedatering
+                                "Yrkesskade" -> Fagområde.Yrkesskade
+                                "Bestridelse" -> Fagområde.Bestridelse
+                                else -> error("Ukjent fagområde: ${dto.fagområde}")
+                            },
+                        dialogtype =
+                            when (dto.dialogtype) {
+                                "Journalnotat" -> Dialogtype.Journalnotat
+                                "MedisinskeOpplysninger" -> Dialogtype.MedisinskeOpplysninger
+                                "EkstraUttalelserFraLege" -> Dialogtype.EkstraUttalelserFraLege
+                                "SpesialistErklæring" -> Dialogtype.SpesialistErklæring
+                                "UtvidetSpesialistErklæring" -> Dialogtype.UtvidetSpesialistErklæring
+                                else -> error("Ukjent dialogtype: ${dto.dialogtype}")
+                            },
+                    )
+                is KnyttInnkommendeJournalpostDto ->
+                    KnyttInnkommendeJournalpost(
+                        id = OutboxMeldingId(dto.outboxMeldingId),
+                        journalpostId = dto.journalpostId,
                         conversationRef = ConversationRef(dto.conversationRef),
                     )
             }
@@ -83,7 +147,8 @@ class PgOutbox(
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
     @JsonSubTypes(
         JsonSubTypes.Type(value = NyDialogmeldingFraNavDto::class, name = "NyDialogmeldingFraNav"),
-        JsonSubTypes.Type(value = OpprettJournalpostDto::class, name = "OpprettJournalpost"),
+        JsonSubTypes.Type(value = OpprettUtgåendeJournalpostDto::class, name = "OpprettUtgåendeJournalpost"),
+        JsonSubTypes.Type(value = KnyttInnkommendeJournalpostDto::class, name = "KnyttInnkommendeJournalpost"),
     )
     private sealed interface OutboxMeldingDto {
         val outboxMeldingId: UUID
@@ -99,8 +164,68 @@ class PgOutbox(
         val erPurring: Boolean = false,
     ) : OutboxMeldingDto
 
-    private data class OpprettJournalpostDto(
+    private data class OpprettUtgåendeJournalpostDto(
         override val outboxMeldingId: UUID,
         val conversationRef: UUID,
+        val meldingId: UUID,
+        val tekst: String,
+        val avsenderIdent: String,
+        val avsenderNavn: String,
+        val mottaker: BehandlerDto,
+        val gjelder: String,
+        val tidspunkt: Instant,
+        val fagområde: String,
+        val dialogtype: String,
     ) : OutboxMeldingDto
+
+    private data class KnyttInnkommendeJournalpostDto(
+        override val outboxMeldingId: UUID,
+        val journalpostId: String,
+        val conversationRef: UUID,
+    ) : OutboxMeldingDto
+
+    private data class BehandlerDto(
+        val hprNummer: String,
+        val fornavn: String,
+        val mellomnavn: String?,
+        val etternavn: String,
+        val kontorNavn: String?,
+        val organisasjonsnummer: String?,
+        val adresseGate: String?,
+        val adressePostnummer: String?,
+        val adressePoststed: String?,
+    ) {
+        fun tilDomene() =
+            Behandler(
+                hprNummer = HprNummer(hprNummer),
+                navn = Navn(fornavn = fornavn, mellomnavn = mellomnavn, etternavn = etternavn),
+                kontor =
+                    Kontor(
+                        navn = kontorNavn,
+                        organisasjonsnummer = organisasjonsnummer?.let { Organisasjonsnummer(it) },
+                        adresse =
+                            if (adresseGate != null || adressePostnummer != null || adressePoststed != null) {
+                                Adresse(veiadresse = adresseGate, postnummer = adressePostnummer, poststed = adressePoststed)
+                            } else {
+                                null
+                            },
+                    ),
+                telefonnummer = null,
+            )
+
+        companion object {
+            fun fra(behandler: Behandler) =
+                BehandlerDto(
+                    hprNummer = behandler.hprNummer.value,
+                    fornavn = behandler.navn.fornavn,
+                    mellomnavn = behandler.navn.mellomnavn,
+                    etternavn = behandler.navn.etternavn,
+                    kontorNavn = behandler.kontor.navn,
+                    organisasjonsnummer = behandler.kontor.organisasjonsnummer?.value,
+                    adresseGate = behandler.kontor.adresse?.veiadresse,
+                    adressePostnummer = behandler.kontor.adresse?.postnummer,
+                    adressePoststed = behandler.kontor.adresse?.poststed,
+                )
+        }
+    }
 }

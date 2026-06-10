@@ -62,10 +62,11 @@ fun Route.postSvarPåDialogRoute(
                     )
                     dialogRepository.lagre(dialog)
                     val events = dialog.events()
+                    val melding = dialog.nyesteMeldingFraNav()
                     events.forEach {
                         outbox.nyMelding(OutboxMelding.nyDialogmeldingFraNav(it))
-                        outbox.nyMelding(OutboxMelding.opprettJournalpost(it.conversationRef))
                     }
+                    outbox.nyMelding(OutboxMelding.opprettUtgåendeJournalpost(melding, dialog, saksbehandler))
                     dialog
                 }
             if (oppdatertDialog != null) {

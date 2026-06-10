@@ -1,8 +1,17 @@
 package no.nav.helse.sporhund.application
 
+import no.nav.helse.sporhund.domain.Behandler
 import no.nav.helse.sporhund.domain.ConversationRef
+import no.nav.helse.sporhund.domain.Dialog
+import no.nav.helse.sporhund.domain.Dialogmelding
+import no.nav.helse.sporhund.domain.DialogmeldingId
+import no.nav.helse.sporhund.domain.Dialogtype
+import no.nav.helse.sporhund.domain.Fagområde
+import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.domain.NyDialogmeldingFraNavEvent
-import java.util.UUID
+import no.nav.helse.sporhund.domain.Saksbehandler
+import java.time.Instant
+import java.util.*
 import kotlin.reflect.KClass
 
 interface Outbox {
@@ -30,11 +39,31 @@ sealed interface OutboxMelding {
                 nyDialogmeldingFraNavEvent = nyDialogmeldingFraNavEvent,
             )
 
-        fun opprettJournalpost(conversationRef: ConversationRef) =
-            OpprettJournalpost(
-                id = OutboxMeldingId(UUID.randomUUID()),
-                conversationRef = conversationRef,
-            )
+        fun opprettUtgåendeJournalpost(
+            melding: Dialogmelding.FraNav,
+            dialog: Dialog,
+            avsender: Saksbehandler,
+        ) = OpprettUtgåendeJournalpost(
+            id = OutboxMeldingId(UUID.randomUUID()),
+            conversationRef = dialog.conversationRef,
+            meldingId = melding.id,
+            tekst = melding.melding,
+            avsender = avsender,
+            mottaker = melding.behandler,
+            gjelder = dialog.identitetsnummer,
+            tidspunkt = melding.tidspunkt,
+            fagområde = dialog.fagområde,
+            dialogtype = dialog.dialogtype,
+        )
+
+        fun knyttInnkommendeJournalpost(
+            journalpostId: String,
+            dialog: Dialog,
+        ) = KnyttInnkommendeJournalpost(
+            id = OutboxMeldingId(UUID.randomUUID()),
+            journalpostId = journalpostId,
+            conversationRef = dialog.conversationRef,
+        )
     }
 }
 
@@ -43,7 +72,21 @@ data class NyDialogmeldingFraNav(
     val nyDialogmeldingFraNavEvent: NyDialogmeldingFraNavEvent,
 ) : OutboxMelding
 
-data class OpprettJournalpost(
+data class OpprettUtgåendeJournalpost(
     override val id: OutboxMeldingId,
+    val conversationRef: ConversationRef,
+    val meldingId: DialogmeldingId<UUID>,
+    val tekst: String,
+    val avsender: Saksbehandler,
+    val mottaker: Behandler,
+    val gjelder: Identitetsnummer,
+    val tidspunkt: Instant,
+    val fagområde: Fagområde,
+    val dialogtype: Dialogtype,
+) : OutboxMelding
+
+data class KnyttInnkommendeJournalpost(
+    override val id: OutboxMeldingId,
+    val journalpostId: String,
     val conversationRef: ConversationRef,
 ) : OutboxMelding
