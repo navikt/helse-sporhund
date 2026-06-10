@@ -108,8 +108,6 @@ class Dialog private constructor(
 
     fun frist(): Instant = førsteMeldingFraNav().tidspunkt + Duration.ofDays(21)
 
-    fun opprettetTidspunkt(): Instant = førsteMelding().tidspunkt
-
     fun antallVedleggTotalt() = meldinger.filterIsInstance<Dialogmelding.FraBehandler>().sumOf { it.antallVedlegg }
 
     fun harFåttSvar(): Boolean = meldinger.any { it is Dialogmelding.FraBehandler }
@@ -130,8 +128,6 @@ class Dialog private constructor(
             )
         }
     }
-
-    private fun førsteMelding() = meldinger.first()
 
     fun nyesteMeldingFraNav(): Dialogmelding.FraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().last()
 
