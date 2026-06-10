@@ -25,6 +25,9 @@ import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
 import no.nav.helse.sporhund.infrastructure.api.auth.configureJwtAuthentication
 import no.nav.helse.sporhund.infrastructure.api.configureOpenApiPlugin
 import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.AccessTokenProviderConfig
+import no.nav.helse.sporhund.infrastructure.clients.dokarkiv.DokarkivClient
+import no.nav.helse.sporhund.infrastructure.clients.dokarkiv.DokarkivConfig
+import no.nav.helse.sporhund.infrastructure.clients.dokarkiv.JournalførerJobb
 import no.nav.helse.sporhund.infrastructure.clients.padm2.Padm2Client
 import no.nav.helse.sporhund.infrastructure.clients.padm2.Padm2Config
 import no.nav.helse.sporhund.infrastructure.clients.personpseudoid.PersonPseudoIdConfig
@@ -102,15 +105,22 @@ fun main() {
             baseUrl = env.getValue("SPRINTER_BASE_URL"),
         )
 
+    val dokarkivConfig =
+        DokarkivConfig(
+            baseUrl = env.getValue("DOKARKIV_BASE_URL"),
+            scope = env.getValue("DOKARKIV_SCOPE"),
+        )
+
     app(
         kafkaConfig = kafkaConfig,
         dbConfig = dbConfig,
         azureAdConfig = azureAdConfig,
         personPseudoIdConfig = personPseudoIdConfig,
-        accessTokenProviderConfig = accessTokenProviderConfig,
         populasjonstilgangskontrollConfig = populasjonstilgangskontrollConfig,
+        accessTokenProviderConfig = accessTokenProviderConfig,
         padm2Config = padm2Config,
         sprinterConfig = sprinterConfig,
+        dokarkivConfig = dokarkivConfig,
     )
 }
 
@@ -122,9 +132,10 @@ fun app(
     populasjonstilgangskontrollConfig: PopulasjonstilgangskontrollConfig,
     accessTokenProviderConfig: AccessTokenProviderConfig,
     padm2Config: Padm2Config,
+    sprinterConfig: SprinterConfig,
+    dokarkivConfig: DokarkivConfig,
     port: Int = 8080,
     additionalRoutes: Routing.() -> Unit = { },
-    sprinterConfig: SprinterConfig,
 ) {
     val factory = ConsumerProducerFactory(kafkaConfig.aivenConfig)
     val running = AtomicBoolean(false)
@@ -159,6 +170,10 @@ fun app(
 
     val pdfProvider = SprinterClient(sprinterConfig)
 
+    val dokarkivClient = DokarkivClient(dokarkivConfig, pdfProvider, accessTokenProvider)
+
+    val journalførerJobb = JournalførerJobb(running, transactionProvider, dokarkivClient)
+
     val tilgangsmaskinenClient =
         TilgangsmaskinenClient(
             scope = populasjonstilgangskontrollConfig.scope,
@@ -168,6 +183,7 @@ fun app(
 
     var producerJob: Job? = null
     var consumerJob: Job? = null
+    var journalførerJob: Job? = null
     naisApp(
         meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         objectMapper = objectMapper,
@@ -185,6 +201,7 @@ fun app(
                         loggError("Feil i coroutine, terminerer appen", throwable)
                         it.engine.stop()
                     }
+                journalførerJob = launch(exceptionHandler) { journalførerJobb.start() }
                 consumerJob = launch(exceptionHandler) { kafkaConsumer.start() }
                 producerJob = launch(exceptionHandler) { kafkaProducer.start() }
             }
@@ -193,6 +210,7 @@ fun app(
                 runBlocking {
                     consumerJob?.join()
                     producerJob?.join()
+                    journalførerJob?.join()
                 }
             }
 

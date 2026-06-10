@@ -7,6 +7,8 @@ import no.nav.helse.sporhund.domain.testhelpers.lagSaksbehandler
 import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
 import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.AccessTokenProviderConfig
 import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.testhelpers.MockTexasServer
+import no.nav.helse.sporhund.infrastructure.clients.dokarkiv.DokarkivConfig
+import no.nav.helse.sporhund.infrastructure.clients.dokarkiv.testhelpers.MockDokarkivServer
 import no.nav.helse.sporhund.infrastructure.clients.padm2.Padm2Config
 import no.nav.helse.sporhund.infrastructure.clients.personpseudoid.testhelpers.TestcontainersValkey
 import no.nav.helse.sporhund.infrastructure.clients.populasjonstilgangskontroll.PopulasjonstilgangskontrollConfig
@@ -29,6 +31,7 @@ fun main() {
     val mockTexasServer = MockTexasServer()
     val mockTilgangsmaskinenServer = MockTilgangsmaskinenServer()
     val mockSprinterServer = MockSprinterServer()
+    val mockDokarkivServer = MockDokarkivServer()
 
     val saksbehandler = lagSaksbehandler()
 
@@ -69,6 +72,7 @@ fun main() {
             mockTexasServer.stop()
             mockTilgangsmaskinenServer.stop()
             mockSprinterServer.stop()
+            mockDokarkivServer.stop()
         },
     )
 
@@ -108,7 +112,11 @@ fun main() {
             SprinterConfig(
                 baseUrl = mockSprinterServer.baseUrl,
             ),
+        dokarkivConfig =
+            DokarkivConfig(
+                baseUrl = mockDokarkivServer.baseUrl,
+                scope = "local-dokarkiv-scope",
+            ),
         port = 8282,
-        additionalRoutes = { addAdditionalRoutings(this) },
-    )
+    ) { addAdditionalRoutings(this) }
 }

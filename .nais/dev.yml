@@ -71,6 +71,8 @@ spec:
         - application: padm2
           namespace: teamsykefravr
         - application: sprinter
+      external:
+        - host: dokarkiv-q2.dev-fss-pub.nais.io
   gcp:
     sqlInstances:
       - type: POSTGRES_17
@@ -102,3 +104,7 @@ spec:
       value: api://dev-gcp.teamsykefravr.padm2/.default
     - name: SPRINTER_BASE_URL
       value: http://sprinter
+    - name: DOKARKIV_BASE_URL
+      value: https://dokarkiv-q2.dev-fss-pub.nais.io
+    - name: DOKARKIV_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
