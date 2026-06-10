@@ -73,6 +73,9 @@ class Dialog private constructor(
             Vi kan ikke se å ha mottatt svar på vår forespørsel og ber om at denne besvares snarest.
 
             Hvis opplysningene er sendt oss i løpet av de siste dagene, kan du se bort fra denne meldingen.
+            
+            Med vennlig hilsen
+            Nav arbeid og ytelser sykepenger
             """.trimIndent()
         val purringMelding =
             Dialogmelding.FraSystem.ny(
