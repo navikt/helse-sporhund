@@ -8,6 +8,7 @@ import no.nav.helse.sporhund.domain.DialogmeldingId
 import no.nav.helse.sporhund.domain.Dialogtype
 import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
+import no.nav.helse.sporhund.domain.Navn
 import no.nav.helse.sporhund.domain.NyDialogmeldingFraNavEvent
 import no.nav.helse.sporhund.domain.Saksbehandler
 import java.time.Instant
@@ -51,6 +52,7 @@ sealed interface OutboxMelding {
             avsender = avsender,
             mottaker = melding.behandler,
             gjelder = dialog.identitetsnummer,
+            søkernavn = dialog.søkernavn,
             tidspunkt = melding.tidspunkt,
             fagområde = dialog.fagområde,
             dialogtype = dialog.dialogtype,
@@ -80,6 +82,7 @@ data class OpprettUtgåendeJournalpost(
     val avsender: Saksbehandler,
     val mottaker: Behandler,
     val gjelder: Identitetsnummer,
+    val søkernavn: Navn,
     val tidspunkt: Instant,
     val fagområde: Fagområde,
     val dialogtype: Dialogtype,

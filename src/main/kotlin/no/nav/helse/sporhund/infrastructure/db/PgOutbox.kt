@@ -41,6 +41,9 @@ class PgOutbox(
                         avsenderNavn = melding.avsender.navn,
                         mottaker = BehandlerDto.fra(melding.mottaker),
                         gjelder = melding.gjelder.value,
+                        søkerFornavn = melding.søkernavn.fornavn,
+                        søkerMellomnavn = melding.søkernavn.mellomnavn,
+                        søkerEtternavn = melding.søkernavn.etternavn,
                         tidspunkt = melding.tidspunkt,
                         fagområde =
                             when (melding.fagområde) {
@@ -108,6 +111,12 @@ class PgOutbox(
                             ),
                         mottaker = dto.mottaker.tilDomene(),
                         gjelder = Identitetsnummer.fraString(dto.gjelder),
+                        søkernavn =
+                            Navn(
+                                fornavn = dto.søkerFornavn,
+                                mellomnavn = dto.søkerMellomnavn,
+                                etternavn = dto.søkerEtternavn,
+                            ),
                         tidspunkt = dto.tidspunkt,
                         fagområde =
                             when (dto.fagområde) {
@@ -173,6 +182,9 @@ class PgOutbox(
         val avsenderNavn: String,
         val mottaker: BehandlerDto,
         val gjelder: String,
+        val søkerFornavn: String,
+        val søkerMellomnavn: String?,
+        val søkerEtternavn: String,
         val tidspunkt: Instant,
         val fagområde: String,
         val dialogtype: String,
