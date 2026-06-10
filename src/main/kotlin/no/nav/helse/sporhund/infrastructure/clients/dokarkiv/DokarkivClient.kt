@@ -44,7 +44,6 @@ class DokarkivClient(
         val journalpostPayload =
             JournalpostPayload(
                 tittel = "Dialogmelding - $fagområde",
-                journalpostType = "SYK",
                 bruker =
                     Bruker(
                         id = melding.gjelder.value,
