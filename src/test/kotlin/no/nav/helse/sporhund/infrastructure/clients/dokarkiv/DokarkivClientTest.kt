@@ -44,7 +44,24 @@ class DokarkivClientTest {
 
     @Test
     fun `journalførUtgåendeDialogmelding sender POST til riktig URL`() {
-        val engine = lagMockEngine { respond("", HttpStatusCode.Created, headersOf()) }
+        val engine =
+            lagMockEngine {
+                respond(
+                    """
+                    {
+                      "dokumenter": [
+                        {
+                          "dokumentInfoId": "123"
+                        }
+                      ],
+                      "journalpostId": "en-id",
+                      "journalpostferdigstilt": true
+                    }
+                    """.trimIndent(),
+                    HttpStatusCode.Created,
+                    headersOf(),
+                )
+            }
         lagDokarkivClient(engine).journalførUtgåendeDialogmelding(lagOpprettUtgåendeJournalpost())
 
         assertEquals(1, engine.requestHistory.size)

@@ -1,5 +1,6 @@
 package no.nav.helse.sporhund.infrastructure.clients.dokarkiv
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import com.github.navikt.tbd_libs.retry.retry
 import io.ktor.client.HttpClient
@@ -9,6 +10,7 @@ import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.HttpStatement
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
@@ -139,7 +141,11 @@ class DokarkivClient(
         journalpostPayload: JournalpostPayload,
     ): Boolean =
         when (response.status.value) {
-            in (200 until 300) -> true
+            in (200 until 300) -> {
+                val response = objectMapper.readValue<DokarkivPostJournalpostResponse>(response.bodyAsText())
+                loggInfo("Journalpost opprettet. Respons fra dokarkiv: journalpostId=${response.journalpostId}, ferdigstilt=${response.journalpostferdigstilt}")
+                true
+            }
 
             409 -> {
                 loggInfo(
@@ -169,6 +175,16 @@ class DokarkivClient(
             block: suspend (response: HttpResponse) -> T,
         ) = retry(avbryt = avbryt) { execute { block(it) } }
     }
+}
+
+private data class DokarkivPostJournalpostResponse(
+    val dokumenter: List<DokumentInfo>,
+    val journalpostId: String,
+    val journalpostferdigstilt: Boolean,
+) {
+    data class DokumentInfo(
+        val dokumentInfoId: String,
+    )
 }
 
 private data class KnyttTilAnnenSakPayload(

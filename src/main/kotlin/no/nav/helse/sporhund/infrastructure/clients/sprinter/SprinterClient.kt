@@ -12,7 +12,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.application.MeldingTilBehandlerPdfInput
 import no.nav.helse.sporhund.application.PdfProvider
-import no.nav.helse.sporhund.application.logg.teamLogs
+import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 
 class SprinterClient(
@@ -24,15 +24,17 @@ class SprinterClient(
             produserPdfBytes(
                 url = "${sprinterConfig.baseUrl}/api/v1/genpdf/sporhund/melding_til_behandler",
                 input = meldingTilBehandlerPdfInput,
+                conversationRef = meldingTilBehandlerPdfInput.conversationRef,
             )
         }
 
     private suspend fun produserPdfBytes(
         url: String,
         input: Any,
+        conversationRef: String,
     ): ByteArray {
         val body = objectMapper.writeValueAsString(input)
-        teamLogs.info("Payload til PDF-generering: $body")
+        loggInfo("Genererer PDF for conversationRef=$conversationRef", "body" to body)
         return retry {
             httpClient
                 .preparePost(url) {
