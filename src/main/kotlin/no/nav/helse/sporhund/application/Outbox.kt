@@ -65,6 +65,7 @@ sealed interface OutboxMelding {
             id = OutboxMeldingId(UUID.randomUUID()),
             journalpostId = journalpostId,
             conversationRef = dialog.conversationRef,
+            identitetsnummer = dialog.identitetsnummer,
         )
     }
 }
@@ -92,4 +93,5 @@ data class KnyttInnkommendeJournalpost(
     override val id: OutboxMeldingId,
     val journalpostId: String,
     val conversationRef: ConversationRef,
+    val identitetsnummer: Identitetsnummer,
 ) : OutboxMelding

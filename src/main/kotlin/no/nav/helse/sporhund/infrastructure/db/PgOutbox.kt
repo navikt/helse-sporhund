@@ -66,6 +66,7 @@ class PgOutbox(
                         outboxMeldingId = melding.id.value,
                         journalpostId = melding.journalpostId,
                         conversationRef = melding.conversationRef.value,
+                        identitetsnummer = melding.identitetsnummer.value,
                     )
             }
         asSQL(
@@ -141,6 +142,7 @@ class PgOutbox(
                         id = OutboxMeldingId(dto.outboxMeldingId),
                         journalpostId = dto.journalpostId,
                         conversationRef = ConversationRef(dto.conversationRef),
+                        identitetsnummer = Identitetsnummer.fraString(dto.identitetsnummer),
                     )
             }
         }.filterIsInstance(type.java)
@@ -194,6 +196,7 @@ class PgOutbox(
         override val outboxMeldingId: UUID,
         val journalpostId: String,
         val conversationRef: UUID,
+        val identitetsnummer: String,
     ) : OutboxMeldingDto
 
     private data class BehandlerDto(
