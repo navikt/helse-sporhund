@@ -27,7 +27,6 @@ import no.nav.helse.sporhund.application.logg.teamLogs
 import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import javax.net.ssl.SSLHandshakeException
 import kotlin.io.encoding.Base64
 
@@ -229,8 +228,6 @@ private data class JournalpostPayload(
     }
 }
 
-private val tidspunktFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(ZoneId.of("Europe/Oslo"))
-
 private fun OpprettUtgåendeJournalpost.tilPdfInput() =
     MeldingTilBehandlerPdfInput(
         conversationRef = conversationRef.value.toString(),
@@ -254,7 +251,7 @@ private fun OpprettUtgåendeJournalpost.tilPdfInput() =
                             ),
                     ),
             ),
-        tidspunkt = tidspunktFormatter.format(tidspunkt),
+        tidspunkt = tidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
         gjelder =
             MeldingTilBehandlerPdfInput.Gjelder(
                 fødselsnummer = gjelder.value,

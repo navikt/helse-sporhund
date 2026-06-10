@@ -2,6 +2,7 @@ package no.nav.helse.sporhund.application
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
+import java.time.LocalDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -31,7 +32,7 @@ class MeldingTilBehandlerPdfInputSerializationTest {
                                 ),
                         ),
                 ),
-            tidspunkt = "2026-06-10T12:00:00",
+            tidspunkt = LocalDateTime.of(2026, 6, 10, 12, 0),
             gjelder =
                 MeldingTilBehandlerPdfInput.Gjelder(
                     fødselsnummer = "12345678901",

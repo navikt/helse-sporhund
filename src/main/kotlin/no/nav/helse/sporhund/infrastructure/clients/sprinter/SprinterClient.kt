@@ -17,9 +17,8 @@ import no.nav.helse.sporhund.infrastructure.db.objectMapper
 
 class SprinterClient(
     val sprinterConfig: SprinterConfig,
+    private val httpClient: HttpClient = HttpClient(CIO),
 ) : PdfProvider {
-    private val httpClient: HttpClient = HttpClient(CIO)
-
     override fun genererPdf(meldingTilBehandlerPdfInput: MeldingTilBehandlerPdfInput): ByteArray =
         runBlocking {
             produserPdfBytes(
