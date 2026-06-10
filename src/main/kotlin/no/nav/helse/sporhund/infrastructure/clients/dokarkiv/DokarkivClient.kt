@@ -50,6 +50,11 @@ class DokarkivClient(
                     Bruker(
                         id = melding.gjelder.value,
                     ),
+                avsenderMottaker =
+                    AvsenderMottaker(
+                        melding.mottaker.navn.fulltNavn(),
+                        id = melding.mottaker.hprNummer.value,
+                    ),
                 sak =
                     JournalpostPayload.Sak(
                         fagsakId = melding.conversationRef.value.toString(),
@@ -201,9 +206,16 @@ private data class Bruker(
     val idType: String = "FNR",
 )
 
+private data class AvsenderMottaker(
+    val navn: String,
+    val idType: String = "HPRNR",
+    val id: String,
+)
+
 private data class JournalpostPayload(
     val tittel: String,
     val journalpostType: String = "UTGAAENDE",
+    val avsenderMottaker: AvsenderMottaker,
     val tema: String = "SYK",
     val behandlingstema: String = "ab0061",
     val journalfoerendeEnhet: String = "9999",

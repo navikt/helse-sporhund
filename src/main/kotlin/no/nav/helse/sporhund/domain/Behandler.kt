@@ -11,7 +11,9 @@ data class Navn(
     val fornavn: String,
     val mellomnavn: String?,
     val etternavn: String,
-)
+) {
+    fun fulltNavn(): String = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
+}
 
 data class Kontor(
     val navn: String?,
