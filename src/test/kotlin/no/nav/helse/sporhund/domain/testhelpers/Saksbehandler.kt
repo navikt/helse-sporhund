@@ -19,7 +19,7 @@ fun lagSaksbehandler(
         },
     epost: String = navn.split(" ").joinToString(".").lowercase() + "@nav.no",
     navIdent: String =
-        navn.also { println(it) }.substringAfterLast(' ').first() + "${
+        navn.substringAfterLast(' ').first() + "${
             Random.nextInt(
                 from = 200_000,
                 until = 999_999,
