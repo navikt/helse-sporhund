@@ -1,5 +1,7 @@
 package no.nav.helse.sporhund.application
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 interface PdfProvider {
     fun genererPdf(meldingTilBehandlerPdfInput: MeldingTilBehandlerPdfInput): ByteArray
 }
@@ -15,7 +17,7 @@ data class MeldingTilBehandlerPdfInput(
     val melding: String,
 ) {
     data class Fra(
-        val NAVIdent: String,
+        @field:JsonProperty("NAVIdent") @get:JsonProperty("NAVIdent") val NAVIdent: String,
         val navn: String,
     )
 
