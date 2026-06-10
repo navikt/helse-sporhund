@@ -66,6 +66,8 @@ class Dialog private constructor(
                 .format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
         val purringTekst =
             """
+            Hei,    
+                
             Vi viser til tidligere forespørsel av $opprinneligDato angående din pasient.
 
             Vi kan ikke se å ha mottatt svar på vår forespørsel og ber om at denne besvares snarest.
