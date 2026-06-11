@@ -2,11 +2,12 @@ package no.nav.helse.sporhund.infrastructure.api.endepunkter
 
 import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.github.smiley4.ktoropenapi.get
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.response.respond
-import io.ktor.server.routing.Route
+import io.ktor.http.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.application.logg.Auditlogger.auditlogge
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.conversationRef
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogDetails
@@ -40,7 +41,12 @@ fun Route.getDialogmeldingRoute(
             }
         }
     }) {
-        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) {
+        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, saksbehandler ->
+            auditlogge(
+                saksbehandler,
+                identitetsnummer,
+                "Saksbehandler med Nav-ident=${saksbehandler.ident.value} gjør oppslag på person for å hente ut dialogmeldinger",
+            )
             val conversationRef = call.conversationRef()
             val dialog =
                 transactionProvider.transaction {

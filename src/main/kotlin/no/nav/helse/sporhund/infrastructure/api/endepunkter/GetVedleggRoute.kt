@@ -2,18 +2,17 @@ package no.nav.helse.sporhund.infrastructure.api.endepunkter
 
 import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.github.smiley4.ktoropenapi.get
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.response.respond
-import io.ktor.server.response.respondBytes
-import io.ktor.server.routing.Route
+import io.ktor.http.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.VedleggProvider
+import no.nav.helse.sporhund.application.logg.Auditlogger.auditlogge
 import no.nav.helse.sporhund.application.logg.teamLogs
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.infrastructure.api.medPerson
-import java.util.UUID
+import java.util.*
 
 fun Route.getVedleggRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
@@ -47,7 +46,12 @@ fun Route.getVedleggRoute(
             }
         }
     }) {
-        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer ->
+        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, saksbehandler ->
+            auditlogge(
+                saksbehandler,
+                identitetsnummer,
+                "Saksbehandler: $saksbehandler, henter ut vedlegg angående dialogmelding for person: $identitetsnummer",
+            )
             val msgId = requireNotNull(call.parameters["msgId"])
             val index =
                 call.parameters["index"]?.toIntOrNull()

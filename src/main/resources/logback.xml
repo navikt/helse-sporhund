@@ -21,6 +21,19 @@
         </encoder>
     </appender>
 
+    <appender name="auditLogger" class="com.papertrailapp.logback.Syslog4jAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>%d{MMM dd yyyy HH:mm:ss.SSS zzz} %level CEF:0|Vedtaksløsning for sykepenger|Sporhund|1.0|audit:access|personoppslag|%level|%msg%n</pattern>
+        </layout>
+
+        <syslogConfig class="org.productivity.java.syslog4j.impl.net.tcp.TCPNetSyslogConfig">
+            <host>audit.nais</host>
+            <port>6514</port>
+            <ident>sporhund</ident>
+            <maxMessageLength>128000</maxMessageLength>
+        </syslogConfig>
+    </appender>
+
     <logger name="tjenestekall" level="TRACE" additivity="false">
         <appender-ref ref="team-logs"/>
     </logger>

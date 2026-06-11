@@ -2,10 +2,10 @@ package no.nav.helse.sporhund.infrastructure.api.endepunkter
 
 import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.github.smiley4.ktoropenapi.post
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.routing.Route
+import io.ktor.http.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
@@ -22,7 +22,6 @@ import no.nav.helse.sporhund.infrastructure.api.ApiNyDialogmelding
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilBehandler
 import no.nav.helse.sporhund.infrastructure.api.medPerson
-import no.nav.helse.sporhund.infrastructure.api.saksbehandler
 
 fun Route.postNyDialogmeldingRoute(
     personPseudoIdProvider: PersonPseudoIdProvider,
@@ -46,13 +45,11 @@ fun Route.postNyDialogmeldingRoute(
             }
         }
     }) {
-        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) {
-            val saksbehandler = call.saksbehandler()
-
+        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, saksbehandler ->
             val apiDialogmelding = call.receive<ApiNyDialogmelding>()
             val dialog =
                 transactionProvider.transaction {
-                    val dialog = apiDialogmelding.tilDialog(it, saksbehandler)
+                    val dialog = apiDialogmelding.tilDialog(identitetsnummer, saksbehandler)
                     dialogRepository.lagre(dialog)
                     val events = dialog.events()
                     val melding = dialog.nyesteMeldingFraNav()

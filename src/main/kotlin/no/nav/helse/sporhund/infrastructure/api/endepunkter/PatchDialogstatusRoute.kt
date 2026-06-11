@@ -43,7 +43,7 @@ fun Route.patchDialogstatusRoute(
             }
         }
     }) {
-        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer ->
+        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, _ ->
             val statusOppdatering = call.receive<ApiOppdaterDialogStatus>()
             val conversationRef = call.conversationRef()
             val oppdatertDialog =

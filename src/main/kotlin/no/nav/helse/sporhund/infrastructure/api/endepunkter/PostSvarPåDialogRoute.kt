@@ -42,8 +42,7 @@ fun Route.postSvarPåDialogRoute(
             }
         }
     }) {
-        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) {
-            val saksbehandler = call.saksbehandler()
+        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { _, saksbehandler ->
             val conversationRef = call.conversationRef()
             val svar = call.receive<ApiSvarPaDialog>()
             val oppdatertDialog =

@@ -32,10 +32,10 @@ fun Route.getDialogmeldingerRoute(
             }
         }
     }) {
-        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) {
+        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, _ ->
             val dialoger =
                 transactionProvider.transaction {
-                    dialogRepository.finnDialoger(it)
+                    dialogRepository.finnDialoger(identitetsnummer)
                 }
             call.respond(dialoger.map { dialog -> dialog.tilApiDialogmeldingerOversikt() })
         }

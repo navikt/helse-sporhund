@@ -8,14 +8,16 @@ import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingContext
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
+import no.nav.helse.sporhund.application.logg.Auditlogger.auditloggeManglendeTilgang
 import no.nav.helse.sporhund.application.logg.loggError
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.domain.Identitetsnummer
+import no.nav.helse.sporhund.domain.Saksbehandler
 
 suspend fun RoutingContext.medPerson(
     personPseudoIdProvider: PersonPseudoIdProvider,
     populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
-    block: suspend (identitetsnummer: Identitetsnummer) -> Unit,
+    block: suspend (identitetsnummer: Identitetsnummer, saksbehandler: Saksbehandler) -> Unit,
 ) {
     val pseudoId = call.personPseudoId()
     val identitetsnummer =
@@ -31,6 +33,7 @@ suspend fun RoutingContext.medPerson(
             return call.respond(HttpStatusCode.NotFound)
         }
         is TilgangskontrollResultat.ManglerTilgang -> {
+            auditloggeManglendeTilgang(saksbehandler, identitetsnummer)
             loggInfo("Saksbehandler har ikke tilgang til personen", "identitetsnummer" to identitetsnummer.value, "tilgangSomMangler" to result.tilgangSomMangler.name)
             return call.respond(HttpStatusCode.Forbidden)
         }
@@ -42,5 +45,5 @@ suspend fun RoutingContext.medPerson(
             return call.respond(HttpStatusCode.InternalServerError)
         }
     }
-    block(identitetsnummer)
+    block(identitetsnummer, saksbehandler)
 }
