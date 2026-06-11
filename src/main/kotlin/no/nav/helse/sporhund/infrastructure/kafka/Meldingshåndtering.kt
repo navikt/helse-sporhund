@@ -45,7 +45,7 @@ private fun SvarFraBehandler.MedConversationRef.håndterSvarMedConversationRef(
             )
         dialog.nyMelding(fraBehandler)
         dialogRepository.lagre(dialog)
-        outbox.nyMelding(OutboxMelding.knyttInnkommendeJournalpost(fraBehandler.id.value, dialog))
+        outbox.nyMelding(OutboxMelding.knyttInnkommendeJournalpost(journalpostId, dialog))
         loggInfo("Knytter meldingen til dialog")
     }
 }
