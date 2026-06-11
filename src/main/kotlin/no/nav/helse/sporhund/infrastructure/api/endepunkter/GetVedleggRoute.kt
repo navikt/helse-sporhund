@@ -50,7 +50,7 @@ fun Route.getVedleggRoute(
             auditlogge(
                 saksbehandler,
                 identitetsnummer,
-                "Saksbehandler: $saksbehandler, henter ut vedlegg angående dialogmelding for person: $identitetsnummer",
+                "Saksbehandler henter ut vedlegg i dialogmelding for en person",
             )
             val msgId = requireNotNull(call.parameters["msgId"])
             val index =

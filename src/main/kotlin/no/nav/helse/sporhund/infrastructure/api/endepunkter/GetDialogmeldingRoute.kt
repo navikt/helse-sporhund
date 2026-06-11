@@ -45,7 +45,7 @@ fun Route.getDialogmeldingRoute(
             auditlogge(
                 saksbehandler,
                 identitetsnummer,
-                "Saksbehandler med Nav-ident=${saksbehandler.ident.value} gjør oppslag på person for å hente ut dialogmeldinger",
+                "Saksbehandler gjør oppslag på person for å hente ut dialogmeldinger",
             )
             val conversationRef = call.conversationRef()
             val dialog =
