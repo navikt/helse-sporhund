@@ -28,7 +28,7 @@ internal object Auditlogger {
         saksbehandler: Saksbehandler,
         identitetsnummer: Identitetsnummer,
     ) {
-        logg(Level.WARN, saksbehandler, identitetsnummer.value, "", " flexString1=Deny")
+        logg(Level.WARN, saksbehandler, identitetsnummer.value, "Saksbehandler har ikke tilgang til personen", " flexString1=Deny")
     }
 
     private fun logg(
