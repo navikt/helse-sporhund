@@ -72,7 +72,7 @@ spec:
           namespace: teamsykefravr
         - application: sprinter
       external:
-        - host: dokarkiv-q2.dev-fss-pub.nais.io
+        - host: dokarkiv.dev-fss-pub.nais.io
   gcp:
     sqlInstances:
       - type: POSTGRES_17
@@ -105,6 +105,6 @@ spec:
     - name: SPRINTER_BASE_URL
       value: http://sprinter
     - name: DOKARKIV_BASE_URL
-      value: https://dokarkiv-q2.dev-fss-pub.nais.io
+      value: https://dokarkiv.dev-fss-pub.nais.io
     - name: DOKARKIV_SCOPE
       value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
