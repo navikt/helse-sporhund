@@ -124,6 +124,8 @@ class Dialog private constructor(
 
     private fun førsteMeldingFraNav(): Dialogmelding.FraNav = meldinger.filterIsInstance<Dialogmelding.FraNav>().first()
 
+    fun meldingFinnes(dialogmeldingId: DialogmeldingId<*>): Boolean = meldinger.any { it.id == dialogmeldingId }
+
     companion object {
         fun ny(
             identitetsnummer: Identitetsnummer,

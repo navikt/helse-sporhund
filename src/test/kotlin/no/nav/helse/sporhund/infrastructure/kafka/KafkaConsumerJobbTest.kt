@@ -15,7 +15,7 @@ import kotlin.test.assertNotNull
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-class KafkaConsumerTest {
+class KafkaConsumerJobbTest {
     private val kafka = TestcontainersKafka("test-kafka")
     private val consumerProducerFactory = ConsumerProducerFactory(kafka.config)
     private val dialogmeldingFraBehandlerTopic = "dialogmelding-fra-behandler-topic"
@@ -23,7 +23,7 @@ class KafkaConsumerTest {
     private val transactionProvider = InMemoryTransactionProvider()
     val readyToConsume = AtomicBoolean(true)
     private val consumer =
-        KafkaConsumer(
+        KafkaConsumerJobb(
             topics =
                 ReadTopics(
                     dialogmeldingFraBehandlerTopic,

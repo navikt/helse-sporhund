@@ -37,8 +37,8 @@ import no.nav.helse.sporhund.infrastructure.db.DbConfig
 import no.nav.helse.sporhund.infrastructure.db.PgTransactionProvider
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaConfig
-import no.nav.helse.sporhund.infrastructure.kafka.KafkaConsumer
-import no.nav.helse.sporhund.infrastructure.kafka.KafkaProducer
+import no.nav.helse.sporhund.infrastructure.kafka.KafkaConsumerJobb
+import no.nav.helse.sporhund.infrastructure.kafka.KafkaProducerJobb
 import no.nav.helse.sporhund.infrastructure.kafka.ReadTopics
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -137,16 +137,16 @@ fun app(
 
     val transactionProvider = PgTransactionProvider(dataSourceBuilder.build())
     val personPseudoIdProvider = ValkeyPersonPseudoIdProvider(personPseudoIdConfig)
-    val kafkaConsumer =
-        KafkaConsumer(
+    val kafkaConsumerJobb =
+        KafkaConsumerJobb(
             topics = kafkaConfig.readTopics,
             consumerGroupId = System.getenv("KAFKA_CONSUMER_GROUP_ID") ?: "local-group",
             readyToConsume = running,
             consumerProducerFactory = factory,
             transactionProvider = transactionProvider,
         )
-    val kafkaProducer =
-        KafkaProducer(
+    val kafkaProducerJobb =
+        KafkaProducerJobb(
             dialogmeldingFraNayTopic = kafkaConfig.writeTopic,
             readyToProduce = running,
             consumerProducerFactory = factory,
@@ -195,8 +195,8 @@ fun app(
                         it.engine.stop()
                     }
                 journalførerJob = launch(exceptionHandler) { journalførerJobb.start() }
-                consumerJob = launch(exceptionHandler) { kafkaConsumer.start() }
-                producerJob = launch(exceptionHandler) { kafkaProducer.start() }
+                consumerJob = launch(exceptionHandler) { kafkaConsumerJobb.start() }
+                producerJob = launch(exceptionHandler) { kafkaProducerJobb.start() }
             }
             this.monitor.subscribe(ApplicationStopping) {
                 running.set(false)

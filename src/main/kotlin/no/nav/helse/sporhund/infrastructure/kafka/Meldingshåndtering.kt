@@ -11,7 +11,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.time.ZoneId
 import java.util.*
 
-fun KafkaConsumer.håndterSvarFraBehandler(
+fun KafkaConsumerJobb.håndterSvarFraBehandler(
     transactionProvider: TransactionProvider,
     record: ConsumerRecord<String, String>,
 ) {
@@ -43,6 +43,7 @@ private fun SvarFraBehandler.MedConversationRef.håndterSvarMedConversationRef(
                 behandler = behandler,
                 antallVedlegg = antallVedlegg,
             )
+        if (dialog.meldingFinnes(fraBehandler.id)) return@transaction loggInfo("Melding med id=$meldingId finnes allerede i dialogen, forsøker ikke å legge den til på nytt")
         dialog.nyMelding(fraBehandler)
         dialogRepository.lagre(dialog)
         outbox.nyMelding(OutboxMelding.knyttInnkommendeJournalpost(journalpostId, dialog))
