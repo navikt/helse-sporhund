@@ -27,7 +27,6 @@ class KafkaConsumerTest {
             topics =
                 ReadTopics(
                     dialogmeldingFraBehandlerTopic,
-                    "et-status-topic",
                 ),
             consumerGroupId = "test-consumer",
             readyToConsume = readyToConsume,

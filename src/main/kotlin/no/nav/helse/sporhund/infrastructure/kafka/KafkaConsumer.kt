@@ -32,7 +32,6 @@ class KafkaConsumer(
                 consumer.poll(readyToConsume::get) { records ->
                     records.forEach { record ->
                         if (record.topic() == topics.dialogmeldingFraBehandlerTopic) this.håndterSvarFraBehandler(transactionProvider, record)
-                        // lytt på og oppdater status
                         // lytt på melding fra behandler og knytt til dialog
                         consumer.commitSync()
                     }
