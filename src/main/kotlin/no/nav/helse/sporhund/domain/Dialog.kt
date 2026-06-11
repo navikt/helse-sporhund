@@ -25,21 +25,12 @@ enum class Fagområde {
     Bestridelse,
 }
 
-enum class Dialogtype {
-    Journalnotat,
-    MedisinskeOpplysninger,
-    EkstraUttalelserFraLege,
-    SpesialistErklæring,
-    UtvidetSpesialistErklæring,
-}
-
 class Dialog private constructor(
     val conversationRef: ConversationRef,
     val identitetsnummer: Identitetsnummer,
     val søkernavn: Navn,
     status: Dialogstatus,
     val fagområde: Fagområde,
-    val dialogtype: Dialogtype,
     meldinger: List<Dialogmelding<*>>,
 ) {
     var status: Dialogstatus = status
@@ -139,7 +130,6 @@ class Dialog private constructor(
             søkernavn: Navn,
             melding: Dialogmelding.FraNav,
             fagområde: Fagområde,
-            dialogtype: Dialogtype,
         ): Dialog =
             Dialog(
                 conversationRef = ConversationRef(UUID.randomUUID()),
@@ -148,7 +138,6 @@ class Dialog private constructor(
                 meldinger = emptyList(),
                 status = Dialogstatus.ForespørselSendt,
                 fagområde = fagområde,
-                dialogtype = dialogtype,
             ).also { it.nyMelding(melding) }
 
         fun fraLagring(
@@ -158,8 +147,7 @@ class Dialog private constructor(
             meldinger: List<Dialogmelding<*>>,
             status: Dialogstatus,
             fagområde: Fagområde,
-            dialogtype: Dialogtype,
-        ): Dialog = Dialog(conversationRef, identitetsnummer, søkernavn, status, fagområde, dialogtype, meldinger)
+        ): Dialog = Dialog(conversationRef, identitetsnummer, søkernavn, status, fagområde, meldinger)
     }
 }
 

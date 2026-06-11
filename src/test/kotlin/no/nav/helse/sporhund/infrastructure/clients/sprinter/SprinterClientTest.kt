@@ -1,11 +1,9 @@
 package no.nav.helse.sporhund.infrastructure.clients.sprinter
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.TextContent
-import io.ktor.http.headersOf
+import io.ktor.client.*
+import io.ktor.client.engine.mock.*
+import io.ktor.http.*
+import io.ktor.http.content.*
 import no.nav.helse.sporhund.application.MeldingTilBehandlerPdfInput
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import java.time.LocalDateTime
@@ -45,7 +43,6 @@ class SprinterClientTest {
                     fødselsnummer = "01010112345",
                     navn = "Mia Cathrine Svendsen",
                 ),
-            meldingstype = "Ekstra uttalelser fra lege",
             fagområde = "Bestridelse",
             melding = "Hei, vedlagt finner dere den forespurte dokumentasjonen. Jeg har lagt ved relevant journaldokumentasjon og vurdering av pasientens tilstand. Ta gjerne kontakt dersom dere trenger ytterligere opplysninger.",
         )
@@ -73,7 +70,6 @@ class SprinterClientTest {
         assertNotNull(node["til"], "Mangler felt: til")
         assertNotNull(node["tidspunkt"], "Mangler felt: tidspunkt")
         assertNotNull(node["gjelder"], "Mangler felt: gjelder")
-        assertNotNull(node["meldingstype"], "Mangler felt: meldingstype")
         assertNotNull(node["fagområde"], "Mangler felt: fagområde")
         assertNotNull(node["melding"], "Mangler felt: melding")
     }

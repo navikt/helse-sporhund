@@ -28,7 +28,6 @@ class PgDialogRepositoryTest : DbTest() {
             assertEquals(dialog.conversationRef, funnet.conversationRef)
             assertEquals(dialog.identitetsnummer, funnet.identitetsnummer)
             assertEquals(dialog.fagområde, funnet.fagområde)
-            assertEquals(dialog.dialogtype, funnet.dialogtype)
             assertEquals(dialog.søkernavn, funnet.søkernavn)
             assertEquals(1, funnet.meldinger.size)
             val lagret = funnet.meldinger.first()

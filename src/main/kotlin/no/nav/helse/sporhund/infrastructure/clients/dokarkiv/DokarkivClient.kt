@@ -273,7 +273,6 @@ private fun OpprettUtgåendeJournalpost.tilPdfInput() =
                 fødselsnummer = gjelder.value,
                 navn = søkernavn.let { "${it.fornavn}${it.mellomnavn?.let { m -> " $m" } ?: ""} ${it.etternavn}" },
             ),
-        meldingstype = dialogtype.name,
         fagområde = fagområde.name,
         melding = tekst,
     )

@@ -1,18 +1,10 @@
 package no.nav.helse.sporhund.infrastructure.db
 
-import no.nav.helse.sporhund.application.KnyttInnkommendeJournalpost
-import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
-import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
-import no.nav.helse.sporhund.application.OutboxMelding
-import no.nav.helse.sporhund.application.meldinger
+import no.nav.helse.sporhund.application.*
 import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.DialogmeldingId
 import no.nav.helse.sporhund.domain.NyDialogmeldingFraNavEvent
-import no.nav.helse.sporhund.domain.testhelpers.lagBehandlerRef
-import no.nav.helse.sporhund.domain.testhelpers.lagDialog
-import no.nav.helse.sporhund.domain.testhelpers.lagFraNavMelding
-import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
-import no.nav.helse.sporhund.domain.testhelpers.lagSaksbehandler
+import no.nav.helse.sporhund.domain.testhelpers.*
 import no.nav.helse.sporhund.infrastructure.db.testhelpers.DbTest
 import java.util.*
 import kotlin.test.Test
@@ -70,7 +62,6 @@ class PgOutboxTest : DbTest() {
                 assertEquals(melding.behandler.hprNummer, mottaker.hprNummer)
                 assertEquals(dialog.identitetsnummer, gjelder)
                 assertEquals(dialog.fagområde, fagområde)
-                assertEquals(dialog.dialogtype, dialogtype)
             }
         }
 
@@ -78,7 +69,13 @@ class PgOutboxTest : DbTest() {
     fun `OpprettUtgåendeJournalpost filtreres ikke ut av andre meldingstyper`() =
         test {
             outbox.nyMelding(nyOutboxMelding())
-            outbox.nyMelding(OutboxMelding.opprettUtgåendeJournalpost(lagFraNavMelding(), lagDialog(), lagSaksbehandler()))
+            outbox.nyMelding(
+                OutboxMelding.opprettUtgåendeJournalpost(
+                    lagFraNavMelding(),
+                    lagDialog(),
+                    lagSaksbehandler(),
+                ),
+            )
 
             assertEquals(0, outbox.meldinger<OpprettUtgåendeJournalpost>().count { false })
             assertEquals(1, outbox.meldinger<NyDialogmeldingFraNav>().size)
@@ -108,7 +105,12 @@ class PgOutboxTest : DbTest() {
             val jourpostIdFraKafkamelding = UUID.randomUUID()
 
             outbox.nyMelding(nyOutboxMelding())
-            outbox.nyMelding(OutboxMelding.knyttInnkommendeJournalpost(jourpostIdFraKafkamelding.toString(), lagDialog()))
+            outbox.nyMelding(
+                OutboxMelding.knyttInnkommendeJournalpost(
+                    jourpostIdFraKafkamelding.toString(),
+                    lagDialog(),
+                ),
+            )
 
             assertEquals(1, outbox.meldinger<NyDialogmeldingFraNav>().size)
             assertEquals(0, outbox.meldinger<OpprettUtgåendeJournalpost>().size)

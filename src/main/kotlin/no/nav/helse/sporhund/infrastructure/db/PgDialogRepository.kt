@@ -61,7 +61,6 @@ class PgDialogRepository(
         val søkernavn: NavnDto,
         val meldinger: List<DialogmeldingDto>,
         val status: DialogstatusDto,
-        val dialogtype: DialogtypeDto,
         val fagområde: FagområdeDto,
     ) {
         fun tilDomene(): Dialog =
@@ -70,7 +69,6 @@ class PgDialogRepository(
                 identitetsnummer = identitetsnummer.tilDomene(),
                 meldinger = meldinger.map { it.tilDomene() },
                 status = status.tilDomene(),
-                dialogtype = dialogtype.tilDomene(),
                 fagområde = fagområde.tilDomene(),
                 søkernavn = søkernavn.tilDomene(),
             )
@@ -82,7 +80,6 @@ class PgDialogRepository(
                     identitetsnummer = IdentitetsnummerDto.fraIdentitetsnummer(dialog.identitetsnummer),
                     meldinger = dialog.meldinger.map { DialogmeldingDto.fraDialogmelding(it) },
                     status = DialogstatusDto.fraDialogstatus(dialog.status),
-                    dialogtype = DialogtypeDto.fraDialogtype(dialog.dialogtype),
                     fagområde = FagområdeDto.fraDialogtype(dialog.fagområde),
                     søkernavn =
                         NavnDto(
@@ -177,35 +174,6 @@ class PgDialogRepository(
                     Fagområde.Tilbakedatering -> Tilbakedatering
                     Fagområde.Yrkesskade -> Yrkesskade
                     Fagområde.Bestridelse -> Bestridelse
-                }
-        }
-    }
-
-    private enum class DialogtypeDto {
-        Journalnotat,
-        MedisinskeOpplysninger,
-        EkstraUttalelserFraLege,
-        SpesialistErklæring,
-        UtvidetSpesialistErklæring,
-        ;
-
-        fun tilDomene(): Dialogtype =
-            when (this) {
-                Journalnotat -> Dialogtype.Journalnotat
-                MedisinskeOpplysninger -> Dialogtype.MedisinskeOpplysninger
-                EkstraUttalelserFraLege -> Dialogtype.EkstraUttalelserFraLege
-                SpesialistErklæring -> Dialogtype.SpesialistErklæring
-                UtvidetSpesialistErklæring -> Dialogtype.UtvidetSpesialistErklæring
-            }
-
-        companion object {
-            fun fraDialogtype(dialogtype: Dialogtype): DialogtypeDto =
-                when (dialogtype) {
-                    Dialogtype.Journalnotat -> Journalnotat
-                    Dialogtype.MedisinskeOpplysninger -> MedisinskeOpplysninger
-                    Dialogtype.EkstraUttalelserFraLege -> EkstraUttalelserFraLege
-                    Dialogtype.SpesialistErklæring -> SpesialistErklæring
-                    Dialogtype.UtvidetSpesialistErklæring -> UtvidetSpesialistErklæring
                 }
         }
     }

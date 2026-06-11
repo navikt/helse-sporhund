@@ -61,14 +61,12 @@ data class ApiVedlegg(
 )
 sealed class ApiDialogmelding {
     abstract val fagomrade: ApiFagomrade
-    abstract val meldingstype: ApiDialogmeldingType
     abstract val melding: String
     abstract val msgId: String
     abstract val sendtTidspunkt: Instant
 
     data class FraBehandler(
         override val fagomrade: ApiFagomrade,
-        override val meldingstype: ApiDialogmeldingType,
         override val melding: String,
         override val msgId: String,
         override val sendtTidspunkt: Instant,
@@ -77,7 +75,6 @@ sealed class ApiDialogmelding {
 
     data class FraNav(
         override val fagomrade: ApiFagomrade,
-        override val meldingstype: ApiDialogmeldingType,
         override val melding: String,
         override val msgId: String,
         override val sendtTidspunkt: Instant,
@@ -86,7 +83,6 @@ sealed class ApiDialogmelding {
 
     data class FraSystem(
         override val fagomrade: ApiFagomrade,
-        override val meldingstype: ApiDialogmeldingType,
         override val melding: String,
         override val msgId: String,
         override val sendtTidspunkt: Instant,
@@ -106,7 +102,6 @@ data class ApiDialogOppsummering(
     val conversationRef: UUID,
     val behandler: ApiBehandler,
     val fagomrade: ApiFagomrade,
-    val meldingstype: ApiDialogmeldingType,
     val sisteAktivitetTidspunkt: Instant,
     val antallMeldinger: Int,
     val antallVedlegg: Int,
@@ -127,7 +122,6 @@ data class ApiDialogmeldingOppgave(
     val fristTidspunkt: Instant,
     val fagomrade: ApiFagomrade,
     val soker: ApiNavn,
-    val meldingstype: ApiDialogmeldingType,
     val status: ApiDialogmeldingStatus,
 )
 
@@ -140,19 +134,10 @@ enum class ApiFagomrade {
     BESTRIDELSE,
 }
 
-enum class ApiDialogmeldingType {
-    JOURNALNOTAT,
-    MEDISINSKE_OPPLYSNINGER,
-    EKSTRA_UTTALELSER_FRA_LEGE,
-    SPESIALISTERKLAERING,
-    UTVIDET_SPESIALISTERKLAERING,
-}
-
 data class ApiNyDialogmelding(
     val behandler: ApiBehandler,
     val sokernavn: ApiNavn,
     val fagomrade: ApiFagomrade,
-    val meldingstype: ApiDialogmeldingType,
     val melding: String,
 )
 

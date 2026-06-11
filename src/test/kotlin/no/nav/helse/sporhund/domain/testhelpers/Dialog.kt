@@ -9,7 +9,6 @@ fun lagDialog(
     søkernavn: Navn = lagNavn(),
     status: Dialogstatus = Dialogstatus.ForespørselSendt,
     melding: Dialogmelding.FraNav = lagFraNavMelding(),
-    dialogtype: Dialogtype = Dialogtype.MedisinskeOpplysninger,
     fagområde: Fagområde = Fagområde.EnkeltståendeBehandlingsdager,
 ): Dialog =
     Dialog.fraLagring(
@@ -18,7 +17,6 @@ fun lagDialog(
         søkernavn = søkernavn,
         meldinger = listOf(melding),
         status = status,
-        dialogtype = dialogtype,
         fagområde = fagområde,
     )
 

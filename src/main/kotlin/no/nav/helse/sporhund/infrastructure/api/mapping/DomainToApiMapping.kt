@@ -10,7 +10,6 @@ fun Dialog.tilApiDialogmeldingerOversikt(): ApiDialogOppsummering {
         conversationRef = conversationRef.value,
         behandler = opprinneligBehandler.tilApiBehandler(opprinneligBehandlerRef),
         fagomrade = this.tilApiFagomrade(),
-        meldingstype = this.tilApiDialogmeldingType(),
         sisteAktivitetTidspunkt = this.nyesteMeldingFraNav().tidspunkt,
         antallMeldinger = meldinger.size,
         antallVedlegg = this.antallVedleggTotalt(),
@@ -25,7 +24,6 @@ fun Dialog.tilApiDialogmeldingOppgave(personPseudoId: PersonPseudoId): ApiDialog
         sisteAktivitetTidspunkt = this.nyesteMelding().tidspunkt,
         fristTidspunkt = this.frist(),
         fagomrade = this.tilApiFagomrade(),
-        meldingstype = this.tilApiDialogmeldingType(),
         soker = this.søkernavn.tilApiNavn(),
         status = status.tilApiDialogmeldingStatus(),
     )
@@ -39,20 +37,18 @@ fun Dialog.tilApiDialogDetails(): ApiDialogDetails {
         status = status.tilApiDialogmeldingStatus(),
         dialogmeldinger =
             meldinger.map { dialogmelding ->
-                dialogmelding.tilApiDialogmelding(tilApiFagomrade(), tilApiDialogmeldingType())
+                dialogmelding.tilApiDialogmelding(tilApiFagomrade())
             },
     )
 }
 
 private fun Dialogmelding<*>.tilApiDialogmelding(
     fagomrade: ApiFagomrade,
-    meldingstype: ApiDialogmeldingType,
 ): ApiDialogmelding =
     when (this) {
         is Dialogmelding.FraBehandler ->
             ApiDialogmelding.FraBehandler(
                 fagomrade = fagomrade,
-                meldingstype = meldingstype,
                 melding = this.melding,
                 msgId = this.id.value,
                 sendtTidspunkt = this.tidspunkt,
@@ -62,7 +58,6 @@ private fun Dialogmelding<*>.tilApiDialogmelding(
         is Dialogmelding.FraNav ->
             ApiDialogmelding.FraNav(
                 fagomrade = fagomrade,
-                meldingstype = meldingstype,
                 melding = this.melding,
                 msgId = this.id.value.toString(),
                 sendtTidspunkt = this.tidspunkt,
@@ -72,7 +67,6 @@ private fun Dialogmelding<*>.tilApiDialogmelding(
         is Dialogmelding.FraSystem ->
             ApiDialogmelding.FraSystem(
                 fagomrade = fagomrade,
-                meldingstype = meldingstype,
                 melding = this.melding,
                 msgId = this.id.value.toString(),
                 sendtTidspunkt = this.tidspunkt,
@@ -93,15 +87,6 @@ private fun Dialog.tilApiFagomrade(): ApiFagomrade =
         Fagområde.Tilbakedatering -> ApiFagomrade.TILBAKEDATERING
         Fagområde.Yrkesskade -> ApiFagomrade.YRKESSKADE
         Fagområde.Bestridelse -> ApiFagomrade.BESTRIDELSE
-    }
-
-private fun Dialog.tilApiDialogmeldingType(): ApiDialogmeldingType =
-    when (this.dialogtype) {
-        Dialogtype.Journalnotat -> ApiDialogmeldingType.JOURNALNOTAT
-        Dialogtype.MedisinskeOpplysninger -> ApiDialogmeldingType.MEDISINSKE_OPPLYSNINGER
-        Dialogtype.EkstraUttalelserFraLege -> ApiDialogmeldingType.EKSTRA_UTTALELSER_FRA_LEGE
-        Dialogtype.SpesialistErklæring -> ApiDialogmeldingType.SPESIALISTERKLAERING
-        Dialogtype.UtvidetSpesialistErklæring -> ApiDialogmeldingType.UTVIDET_SPESIALISTERKLAERING
     }
 
 private fun Behandler.tilApiBehandler(

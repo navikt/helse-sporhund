@@ -52,14 +52,6 @@ class PgOutbox(
                                 Fagområde.Yrkesskade -> "Yrkesskade"
                                 Fagområde.Bestridelse -> "Bestridelse"
                             },
-                        dialogtype =
-                            when (melding.dialogtype) {
-                                Dialogtype.Journalnotat -> "Journalnotat"
-                                Dialogtype.MedisinskeOpplysninger -> "MedisinskeOpplysninger"
-                                Dialogtype.EkstraUttalelserFraLege -> "EkstraUttalelserFraLege"
-                                Dialogtype.SpesialistErklæring -> "SpesialistErklæring"
-                                Dialogtype.UtvidetSpesialistErklæring -> "UtvidetSpesialistErklæring"
-                            },
                     )
                 is KnyttInnkommendeJournalpost ->
                     KnyttInnkommendeJournalpostDto(
@@ -127,15 +119,6 @@ class PgOutbox(
                                 "Bestridelse" -> Fagområde.Bestridelse
                                 else -> error("Ukjent fagområde: ${dto.fagområde}")
                             },
-                        dialogtype =
-                            when (dto.dialogtype) {
-                                "Journalnotat" -> Dialogtype.Journalnotat
-                                "MedisinskeOpplysninger" -> Dialogtype.MedisinskeOpplysninger
-                                "EkstraUttalelserFraLege" -> Dialogtype.EkstraUttalelserFraLege
-                                "SpesialistErklæring" -> Dialogtype.SpesialistErklæring
-                                "UtvidetSpesialistErklæring" -> Dialogtype.UtvidetSpesialistErklæring
-                                else -> error("Ukjent dialogtype: ${dto.dialogtype}")
-                            },
                     )
                 is KnyttInnkommendeJournalpostDto ->
                     KnyttInnkommendeJournalpost(
@@ -189,7 +172,6 @@ class PgOutbox(
         val søkerEtternavn: String,
         val tidspunkt: Instant,
         val fagområde: String,
-        val dialogtype: String,
     ) : OutboxMeldingDto
 
     private data class KnyttInnkommendeJournalpostDto(

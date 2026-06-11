@@ -1,12 +1,8 @@
 package no.nav.helse.sporhund.infrastructure.api.endepunkter
 
-import io.ktor.client.call.body
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
 import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
@@ -51,7 +47,6 @@ class PostNyDialogmeldingTest : EndepunktTest() {
                         ),
                     fagomrade = ApiFagomrade.TILBAKEDATERING,
                     melding = "Jeg trenger informasjon om pasienten",
-                    meldingstype = ApiDialogmeldingType.JOURNALNOTAT,
                 )
 
             val response =

@@ -12,13 +12,11 @@ import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.domain.BehandlerRef
 import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
-import no.nav.helse.sporhund.domain.Dialogtype
 import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.domain.Navn
 import no.nav.helse.sporhund.domain.Saksbehandler
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
-import no.nav.helse.sporhund.infrastructure.api.ApiDialogmeldingType
 import no.nav.helse.sporhund.infrastructure.api.ApiFagomrade
 import no.nav.helse.sporhund.infrastructure.api.ApiNyDialogmelding
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogDetails
@@ -95,13 +93,5 @@ private fun ApiNyDialogmelding.tilDialog(
                 ApiFagomrade.TILBAKEDATERING -> Fagområde.Tilbakedatering
                 ApiFagomrade.YRKESSKADE -> Fagområde.Yrkesskade
                 ApiFagomrade.BESTRIDELSE -> Fagområde.Bestridelse
-            },
-        dialogtype =
-            when (meldingstype) {
-                ApiDialogmeldingType.JOURNALNOTAT -> Dialogtype.Journalnotat
-                ApiDialogmeldingType.MEDISINSKE_OPPLYSNINGER -> Dialogtype.MedisinskeOpplysninger
-                ApiDialogmeldingType.EKSTRA_UTTALELSER_FRA_LEGE -> Dialogtype.EkstraUttalelserFraLege
-                ApiDialogmeldingType.SPESIALISTERKLAERING -> Dialogtype.SpesialistErklæring
-                ApiDialogmeldingType.UTVIDET_SPESIALISTERKLAERING -> Dialogtype.UtvidetSpesialistErklæring
             },
     )

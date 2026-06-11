@@ -13,7 +13,6 @@ data class MeldingTilBehandlerPdfInput(
     val til: Til,
     val tidspunkt: LocalDateTime,
     val gjelder: Gjelder,
-    val meldingstype: String,
     val fagområde: String,
     val melding: String,
 ) {

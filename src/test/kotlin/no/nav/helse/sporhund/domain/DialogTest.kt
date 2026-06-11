@@ -23,7 +23,6 @@ class DialogTest {
                         melding = "En melding",
                     ),
                 fagområde = Fagområde.EnkeltståendeBehandlingsdager,
-                dialogtype = Dialogtype.MedisinskeOpplysninger,
             )
         val events = dialog.events()
         assertEquals(1, events.size)

@@ -38,7 +38,6 @@ class MeldingTilBehandlerPdfInputSerializationTest {
                     fødselsnummer = "12345678901",
                     navn = "Pasient Pasientsen",
                 ),
-            meldingstype = "DIALOG_NOTAT",
             fagområde = "Sykepenger",
             melding = "Hei, dette er en test.",
         )

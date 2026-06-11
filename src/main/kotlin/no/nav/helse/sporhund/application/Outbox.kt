@@ -1,16 +1,6 @@
 package no.nav.helse.sporhund.application
 
-import no.nav.helse.sporhund.domain.Behandler
-import no.nav.helse.sporhund.domain.ConversationRef
-import no.nav.helse.sporhund.domain.Dialog
-import no.nav.helse.sporhund.domain.Dialogmelding
-import no.nav.helse.sporhund.domain.DialogmeldingId
-import no.nav.helse.sporhund.domain.Dialogtype
-import no.nav.helse.sporhund.domain.Fagområde
-import no.nav.helse.sporhund.domain.Identitetsnummer
-import no.nav.helse.sporhund.domain.Navn
-import no.nav.helse.sporhund.domain.NyDialogmeldingFraNavEvent
-import no.nav.helse.sporhund.domain.Saksbehandler
+import no.nav.helse.sporhund.domain.*
 import java.time.Instant
 import java.util.*
 import kotlin.reflect.KClass
@@ -55,7 +45,6 @@ sealed interface OutboxMelding {
             søkernavn = dialog.søkernavn,
             tidspunkt = melding.tidspunkt,
             fagområde = dialog.fagområde,
-            dialogtype = dialog.dialogtype,
         )
 
         fun knyttInnkommendeJournalpost(
@@ -86,7 +75,6 @@ data class OpprettUtgåendeJournalpost(
     val søkernavn: Navn,
     val tidspunkt: Instant,
     val fagområde: Fagområde,
-    val dialogtype: Dialogtype,
 ) : OutboxMelding
 
 data class KnyttInnkommendeJournalpost(
