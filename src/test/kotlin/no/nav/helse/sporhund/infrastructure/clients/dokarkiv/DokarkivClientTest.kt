@@ -86,11 +86,11 @@ class DokarkivClientTest {
     }
 
     @Test
-    fun `feilregistrerOgKnyttJournalpost sender PATCH og deretter PUT`() {
-        val engine = lagMockEngine { respond("", HttpStatusCode.OK, headersOf()) }
+    fun `feilregistrerOgKnyttJournalpost sender PATCH, så PUT, deretter PATCH`() {
+        val engine = lagMockEngine { respond("""{ "nyJournalpostId": 12344512 }""", HttpStatusCode.OK, headersOf()) }
         lagDokarkivClient(engine).feilregistrerOgKnyttJournalpost(lagKnyttInnkommendeJournalpost("JP-123"))
 
-        assertEquals(2, engine.requestHistory.size)
+        assertEquals(3, engine.requestHistory.size)
         assertEquals(HttpMethod.Patch, engine.requestHistory[0].method)
         assertEquals(
             "/rest/journalpostapi/v1/journalpost/JP-123/feilregistrer/feilregistrerSakstilknytning",
@@ -100,6 +100,11 @@ class DokarkivClientTest {
         assertEquals(
             "/rest/journalpostapi/v1/journalpost/JP-123/knyttTilAnnenSak",
             engine.requestHistory[1].url.encodedPath,
+        )
+        assertEquals(HttpMethod.Patch, engine.requestHistory[2].method)
+        assertEquals(
+            "/rest/journalpostapi/v1/journalpost/12344512/ferdigstill",
+            engine.requestHistory[2].url.encodedPath,
         )
     }
 
