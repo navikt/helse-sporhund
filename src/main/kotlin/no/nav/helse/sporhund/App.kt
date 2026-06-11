@@ -51,7 +51,6 @@ import kotlin.time.Duration.Companion.seconds
 const val DIALOGMELDING_FRA_NAY_TOPIC = "teamsykefravr.isdialogmelding-behandler-dialogmelding-bestilling"
 const val DIALOGMELDING_STATUS_TOPIC = "teamsykefravr.behandler-dialogmelding-status"
 const val DIALOGMELDING_FRA_BEHANDLER_TOPIC = "teamsykefravr.dialogmelding"
-const val LEGEERKLÆRING_TOPIC = "teamsykmelding.legeerklaering"
 
 fun main() {
     val env = System.getenv()
@@ -62,7 +61,6 @@ fun main() {
                 ReadTopics(
                     dialogmeldingFraBehandlerTopic = DIALOGMELDING_FRA_BEHANDLER_TOPIC,
                     dialogmeldingStatusTopic = DIALOGMELDING_STATUS_TOPIC,
-                    legeerklæringTopic = DIALOGMELDING_STATUS_TOPIC, // TODO: Endre tilbake til legeerklæring-topicet når vi har fått tilgang
                 ),
             writeTopic = DIALOGMELDING_FRA_NAY_TOPIC,
         )

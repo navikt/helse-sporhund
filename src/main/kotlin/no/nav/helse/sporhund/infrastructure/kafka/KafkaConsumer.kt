@@ -34,7 +34,6 @@ class KafkaConsumer(
                         if (record.topic() == topics.dialogmeldingFraBehandlerTopic) this.håndterSvarFraBehandler(transactionProvider, record)
                         // lytt på og oppdater status
                         // lytt på melding fra behandler og knytt til dialog
-                        // lytt på legeerklæringer og knytt til dialog
                         consumer.commitSync()
                     }
                 }

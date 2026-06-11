@@ -80,7 +80,6 @@ fun main() {
         ReadTopics(
             dialogmeldingFraBehandlerTopic = DIALOGMELDING_FRA_BEHANDLER_TOPIC,
             dialogmeldingStatusTopic = DIALOGMELDING_STATUS_TOPIC,
-            legeerklæringTopic = LEGEERKLÆRING_TOPIC,
         )
 
     app(

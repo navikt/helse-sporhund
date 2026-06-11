@@ -28,7 +28,5 @@ Sporhund konsumerer dialogmeldinger fra behandler fra følgende topics:
 
 `teamsykefravr.melding-fra-behandler` - for å motta dialogmeldinger sendt fra behandler
 
-`teamsykmelding.legeerklaering` - for å motta legeerklæringer sendt fra behandler
-
 ## Henvendelser
 Sporhund eies og forvaltes av Team SAS (Saksbehandling av Sykepenger). Vi kan nås på slack #sykepenger-værsågod
