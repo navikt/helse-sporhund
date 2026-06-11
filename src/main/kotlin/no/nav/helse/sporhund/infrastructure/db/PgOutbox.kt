@@ -200,7 +200,7 @@ class PgOutbox(
     ) : OutboxMeldingDto
 
     private data class BehandlerDto(
-        val hprNummer: String,
+        val hprNummer: Int,
         val fornavn: String,
         val mellomnavn: String?,
         val etternavn: String,

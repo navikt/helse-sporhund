@@ -14,6 +14,7 @@ import no.nav.helse.sporhund.infrastructure.api.*
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedToken
 import java.util.*
+import kotlin.random.Random.Default.nextInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -46,6 +47,7 @@ class PostNyDialogmeldingTest : EndepunktTest() {
                                     poststed = "Oslo",
                                 ),
                             telefonnummer = "22334455",
+                            hprNummer = nextInt(1_000_000, 999_999_999),
                         ),
                     fagomrade = ApiFagomrade.TILBAKEDATERING,
                     melding = "Jeg trenger informasjon om pasienten",

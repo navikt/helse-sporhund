@@ -54,7 +54,7 @@ private fun DialogmeldingFraBehandlerKafkaDto.svarFraBehandlerMedConversationRef
     val forespørselssvar = checkNotNull(this.dialogmelding.foresporselFraSaksbehandlerForesporselSvar)
     return SvarFraBehandler.MedConversationRef(
         conversationRef = ConversationRef(UUID.fromString(checkNotNull(this.conversationRef))),
-        hprNummer = HprNummer(checkNotNull(this.legehpr)),
+        hprNummer = HprNummer(checkNotNull(this.legehpr).toInt()),
         identitetsnummerSykmeldt = Identitetsnummer.fraString(this.personIdentPasient),
         behandler = this.tilBehandler(),
         tekst = forespørselssvar.tekstNotatInnhold,
@@ -76,7 +76,7 @@ private fun String.tilNavn(): Navn {
 
 private fun DialogmeldingFraBehandlerKafkaDto.tilBehandler(): Behandler =
     Behandler(
-        hprNummer = HprNummer(checkNotNull(this.legehpr)),
+        hprNummer = HprNummer(checkNotNull(this.legehpr).toInt()),
         navn = this.dialogmelding.navnHelsepersonell.tilNavn(),
         kontor =
             Kontor(

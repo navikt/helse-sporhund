@@ -6,7 +6,7 @@ import no.nav.helse.sporhund.infrastructure.api.ApiNyDialogmelding
 fun ApiNyDialogmelding.tilBehandler(): Behandler {
     val legekontor = this.behandler.legekontor
     return Behandler(
-        HprNummer(behandler.id),
+        HprNummer(behandler.hprNummer),
         navn =
             Navn(
                 fornavn = this.behandler.navn.fornavn,

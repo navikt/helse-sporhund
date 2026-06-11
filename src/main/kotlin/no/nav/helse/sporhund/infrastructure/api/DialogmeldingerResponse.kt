@@ -38,6 +38,7 @@ data class ApiLegekontor(
 
 data class ApiBehandler(
     val id: String,
+    val hprNummer: Int,
     val navn: ApiNavn,
     val type: ApiBehandlerType?,
     val kategori: ApiBehandlerKategori,

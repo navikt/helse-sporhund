@@ -109,6 +109,7 @@ private fun Behandler.tilApiBehandler(
 ): ApiBehandler =
     ApiBehandler(
         id = behandlerRef.value,
+        hprNummer = this.hprNummer.value,
         navn =
             ApiNavn(
                 fornavn = navn.fornavn,

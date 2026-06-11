@@ -318,7 +318,7 @@ class PgDialogRepository(
     }
 
     private data class BehandlerDto(
-        val hprNummer: String,
+        val hprNummer: Int,
         val navn: NavnDto,
         val kontor: KontorDto,
         val telefonnummer: String?,

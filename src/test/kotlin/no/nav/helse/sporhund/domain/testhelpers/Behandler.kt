@@ -9,7 +9,7 @@ import kotlin.random.Random
 
 fun lagBehandlerRef() = BehandlerRef(UUID.randomUUID().toString())
 
-fun lagHprNummer() = HprNummer(Random.nextInt(1_000_000, 9_999_999).toString())
+fun lagHprNummer() = HprNummer(Random.nextInt(1_000_000, 999_999_999))
 
 fun lagTelefonnummer() = Telefonnummer(Random.nextInt(100_000_000, 999_999_999).toString())
 

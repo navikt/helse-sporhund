@@ -53,7 +53,9 @@ class DokarkivClient(
                 avsenderMottaker =
                     AvsenderMottaker(
                         melding.mottaker.navn.fulltNavn(),
-                        id = melding.mottaker.hprNummer.value,
+                        id =
+                            melding.mottaker.hprNummer.value
+                                .toString(),
                     ),
                 sak =
                     JournalpostPayload.Sak(
