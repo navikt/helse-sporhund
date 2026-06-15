@@ -64,7 +64,7 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .nais/dev.yml,.nais/dev-db-policy.yml
           IMAGE: ${{ needs.build.outputs.image }}
-          VARS: deploy/entra-id-vars.yml
+          VARS: .nais/entra-id-vars.yml
 #
 #  deployProd:
 #    name: deploy to prod
