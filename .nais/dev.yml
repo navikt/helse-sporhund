@@ -48,15 +48,12 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
-      allowAllUsers: true
-#        extra:
-#          - "NAVident"
-#        groups:
-#          - id: {{ENTRAID_UUID_KODE_7_DEV}}
-#          - id: {{ENTRAID_UUID_SPEIL_BESLUTTERE_DEV}}
-#          - id: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
-#          - id: {{ENTRAID_UUID_SPEIL_STIKKPROVE_DEV}}
-#          - id: {{ENTRAID_UUID_SPEIL_LESETILGANG_DEV}}
+      claims:
+        extra:
+          - "NAVident"
+        groups:
+          - id: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+          - id: {{ENTRAID_UUID_SPEIL_LESETILGANG_DEV}}
   accessPolicy:
     inbound:
       rules:
@@ -108,3 +105,7 @@ spec:
       value: https://dokarkiv.dev-fss-pub.nais.io
     - name: DOKARKIV_SCOPE
       value: api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default
+    - name: TILGANG_SKRIV
+      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+    - name: TILGANG_LES
+      value: {{ENTRAID_UUID_SPEIL_LESETILGANG_DEV}}

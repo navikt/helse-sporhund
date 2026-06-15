@@ -5,17 +5,18 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.github.smiley4.ktoropenapi.OpenApi
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.install
-import io.ktor.server.auth.authentication
-import io.ktor.server.auth.jwt.jwt
-import io.ktor.server.routing.routing
-import io.ktor.server.testing.ApplicationTestBuilder
+import io.ktor.client.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import io.ktor.server.routing.*
+import io.ktor.server.testing.*
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.VedleggProvider
+import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.sporhund.domain.NavIdent
 import no.nav.helse.sporhund.domain.Saksbehandler
 import no.nav.helse.sporhund.domain.SaksbehandlerOid
@@ -34,6 +35,7 @@ fun ApplicationTestBuilder.setupTestApp(
     transactionProvider: TransactionProvider,
     mockOAuth2Server: MockOAuth2Server,
     populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
+    tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
     vedleggProvider: VedleggProvider = VedleggProvider { emptyList() },
 ) {
     val azureAdConfig =
@@ -54,7 +56,7 @@ fun ApplicationTestBuilder.setupTestApp(
         }
         authentication {
             jwt("oidc") {
-                configureJwtAuthentication(azureAdConfig)
+                configureJwtAuthentication(azureAdConfig, tilgangsgrupperTilTilganger)
             }
         }
         routing {
@@ -82,7 +84,10 @@ fun lagTestSaksbehandler() =
         ident = NavIdent("T123456"),
     )
 
-fun MockOAuth2Server.utstedToken(saksbehandler: Saksbehandler): String =
+fun MockOAuth2Server.utstedToken(
+    saksbehandler: Saksbehandler,
+    groups: List<UUID> = emptyList(),
+): String =
     issueToken(
         issuerId = TEST_ISSUER_ID,
         audience = TEST_CLIENT_ID,
@@ -93,5 +98,16 @@ fun MockOAuth2Server.utstedToken(saksbehandler: Saksbehandler): String =
                 "preferred_username" to saksbehandler.epost,
                 "oid" to saksbehandler.id.value.toString(),
                 "name" to saksbehandler.navn,
+                "groups" to groups.map { it.toString() },
             ),
     ).serialize()
+
+fun MockOAuth2Server.utstedTokenMedLesTilgang(
+    saksbehandler: Saksbehandler,
+    tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
+): String = utstedToken(saksbehandler, tilgangsgrupperTilTilganger.lesetilgang)
+
+fun MockOAuth2Server.utstedTokenMedSkrivTilgang(
+    saksbehandler: Saksbehandler,
+    tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
+): String = utstedToken(saksbehandler, tilgangsgrupperTilTilganger.skrivetilgang)

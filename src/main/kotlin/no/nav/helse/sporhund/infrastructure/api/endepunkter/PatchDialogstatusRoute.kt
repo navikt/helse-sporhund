@@ -8,9 +8,11 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.ApiOppdaterDialogStatus
 import no.nav.helse.sporhund.infrastructure.api.conversationRef
+import no.nav.helse.sporhund.infrastructure.api.krevTilgang
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.medPerson
 
@@ -43,22 +45,24 @@ fun Route.patchDialogstatusRoute(
             }
         }
     }) {
-        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, _ ->
-            val statusOppdatering = call.receive<ApiOppdaterDialogStatus>()
-            val conversationRef = call.conversationRef()
-            val oppdatertDialog =
-                transactionProvider.transaction {
-                    val dialog = dialogRepository.finnDialog(conversationRef) ?: return@transaction null
-                    if (dialog.identitetsnummer != identitetsnummer) return@transaction null
-                    if (statusOppdatering.ferdigstilt) dialog.ferdigstill() else dialog.gjenåpne()
-                    dialogRepository.lagre(dialog)
-                    dialog
-                }
+        krevTilgang(Tilgang.Skriv) {
+            medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, _ ->
+                val statusOppdatering = call.receive<ApiOppdaterDialogStatus>()
+                val conversationRef = call.conversationRef()
+                val oppdatertDialog =
+                    transactionProvider.transaction {
+                        val dialog = dialogRepository.finnDialog(conversationRef) ?: return@transaction null
+                        if (dialog.identitetsnummer != identitetsnummer) return@transaction null
+                        if (statusOppdatering.ferdigstilt) dialog.ferdigstill() else dialog.gjenåpne()
+                        dialogRepository.lagre(dialog)
+                        dialog
+                    }
 
-            if (oppdatertDialog != null) {
-                call.respond(HttpStatusCode.OK, oppdatertDialog.tilApiDialogDetails())
-            } else {
-                call.respond(HttpStatusCode.NotFound)
+                if (oppdatertDialog != null) {
+                    call.respond(HttpStatusCode.OK, oppdatertDialog.tilApiDialogDetails())
+                } else {
+                    call.respond(HttpStatusCode.NotFound)
+                }
             }
         }
     }

@@ -11,6 +11,7 @@ import no.nav.helse.sporhund.application.meldinger
 import no.nav.helse.sporhund.domain.Saksbehandler
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.lagTestSaksbehandler
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.setupTestApp
+import no.nav.helse.sporhund.tilgangskontroll.tilgangsgrupperTilTilganger
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -22,10 +23,11 @@ abstract class EndepunktTest {
     protected val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
     protected val transactionProvider = InMemoryTransactionProvider()
     protected val populasjonstilgangskontrollProvider = InMemoryPopulasjonstilgangskontrollProvider()
+    protected val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()
     protected var vedleggProvider: VedleggProvider = VedleggProvider { emptyList() }
 
     fun ApplicationTestBuilder.setupDefaultTestApp() {
-        setupTestApp(personPseudoIdProvider, transactionProvider, mockOAuth2Server, populasjonstilgangskontrollProvider, vedleggProvider)
+        setupTestApp(personPseudoIdProvider, transactionProvider, mockOAuth2Server, populasjonstilgangskontrollProvider, tilgangsgrupperTilTilganger, vedleggProvider)
     }
 
     protected inline fun <reified T : OutboxMelding> assertOutboxContains() {

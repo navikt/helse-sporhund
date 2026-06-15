@@ -58,6 +58,13 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .nais/purring-job.yml, .nais/dev-db-policy.yml
           IMAGE: ${{ needs.build.outputs.image }}
+      - uses: actions/checkout@v6
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/dev.yml,.nais/dev-db-policy.yml
+          IMAGE: ${{ needs.build.outputs.image }}
+          VARS: deploy/entra-id-vars.yml
 #
 #  deployProd:
 #    name: deploy to prod
@@ -71,5 +78,12 @@ jobs:
 #      - uses: nais/deploy/actions/deploy@v2
 #        env:
 #          CLUSTER: prod-gcp
-#          RESOURCE: deploy/prod.yml
+#          RESOURCE: .nais/prod.yml
 #          IMAGE: ${{ needs.build.outputs.image }}
+#                  - uses: actions/checkout@v6
+#      - uses: nais/deploy/actions/deploy@v2
+#        env:
+#            CLUSTER: prod-gcp
+#            RESOURCE: .nais/prod.yml,.nais/prod-db-policy.yml
+#            IMAGE: ${{ needs.build.outputs.image }}
+#            VARS: deploy/entra-id-vars.yml

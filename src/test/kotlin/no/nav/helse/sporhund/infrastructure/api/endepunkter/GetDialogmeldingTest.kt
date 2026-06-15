@@ -9,7 +9,7 @@ import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
-import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedToken
+import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedTokenMedLesTilgang
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,7 +27,7 @@ class GetDialogmeldingTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
+            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
 
             val response =
                 client.get(
@@ -46,7 +46,7 @@ class GetDialogmeldingTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
+            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
 
             val response =
                 client.get(
@@ -65,7 +65,7 @@ class GetDialogmeldingTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
+            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
 
             val response =
                 client.get(

@@ -2,17 +2,17 @@ package no.nav.helse.sporhund.infrastructure.api
 
 import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.request.httpMethod
-import io.ktor.server.request.uri
-import io.ktor.server.response.respond
-import io.ktor.server.routing.RoutingContext
+import io.ktor.http.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.logg.Auditlogger.auditloggeManglendeTilgang
 import no.nav.helse.sporhund.application.logg.loggError
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.domain.Saksbehandler
+import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 
 suspend fun RoutingContext.medPerson(
     personPseudoIdProvider: PersonPseudoIdProvider,
@@ -23,7 +23,10 @@ suspend fun RoutingContext.medPerson(
     val identitetsnummer =
         personPseudoIdProvider.hentIdentitetsnummer(pseudoId) ?: return call.respond(HttpStatusCode.NotFound)
     val saksbehandler = call.saksbehandler()
-    loggInfo("Saksbehandler med Nav-ident=${saksbehandler.ident.value} gjør oppslag på person", "identitetsnummer" to identitetsnummer.value)
+    loggInfo(
+        "Saksbehandler med Nav-ident=${saksbehandler.ident.value} gjør oppslag på person",
+        "identitetsnummer" to identitetsnummer.value,
+    )
     loggInfo("Kall: ${call.request.httpMethod.value} ${call.request.uri}")
     val result = populasjonstilgangskontrollProvider.kontrollerTilgang(call.accessToken(), identitetsnummer.value)
 
@@ -32,18 +35,40 @@ suspend fun RoutingContext.medPerson(
             loggInfo("Personen ble ikke funnet", "identitetsnummer" to identitetsnummer.value)
             return call.respond(HttpStatusCode.NotFound)
         }
+
         is TilgangskontrollResultat.ManglerTilgang -> {
             auditloggeManglendeTilgang(saksbehandler, identitetsnummer)
-            loggInfo("Saksbehandler har ikke tilgang til personen", "identitetsnummer" to identitetsnummer.value, "tilgangSomMangler" to result.tilgangSomMangler.name)
+            loggInfo(
+                "Saksbehandler har ikke tilgang til personen",
+                "identitetsnummer" to identitetsnummer.value,
+                "tilgangSomMangler" to result.tilgangSomMangler.name,
+            )
             return call.respond(HttpStatusCode.Forbidden)
         }
+
         TilgangskontrollResultat.Ok -> {
             loggInfo("Saksbehandler har tilgang til personen", "identitetsnummer" to identitetsnummer.value)
         }
+
         is TilgangskontrollResultat.UventetFeil -> {
-            loggError("En uventet feil oppsto", "identitetsnummer" to identitetsnummer.value, "menneskeligLesbarForklaring" to result.menneskeligLesbarForklaring)
+            loggError(
+                "En uventet feil oppsto",
+                "identitetsnummer" to identitetsnummer.value,
+                "menneskeligLesbarForklaring" to result.menneskeligLesbarForklaring,
+            )
             return call.respond(HttpStatusCode.InternalServerError)
         }
     }
     block(identitetsnummer, saksbehandler)
+}
+
+suspend fun RoutingContext.krevTilgang(
+    tilgang: Tilgang,
+    block: suspend () -> Unit,
+) {
+    if (tilgang !in call.tilganger()) {
+        loggInfo("Saksbehandler mangler tilgang", "tilgang" to tilgang.name)
+        return call.respond(HttpStatusCode.Forbidden)
+    }
+    block()
 }

@@ -10,6 +10,7 @@ import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.domain.Dialogmelding
+import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 import no.nav.helse.sporhund.infrastructure.api.*
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogDetails
 
@@ -42,36 +43,38 @@ fun Route.postSvarPåDialogRoute(
             }
         }
     }) {
-        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { _, saksbehandler ->
-            val conversationRef = call.conversationRef()
-            val svar = call.receive<ApiSvarPaDialog>()
-            val oppdatertDialog =
-                transactionProvider.transaction {
-                    val dialog =
-                        dialogRepository.finnDialog(conversationRef)
-                            ?: return@transaction null
-                    val nyesteFraNav = dialog.nyesteMeldingFraNav()
-                    dialog.nyMelding(
-                        Dialogmelding.FraNav.ny(
-                            saksbehandler.ident,
-                            nyesteFraNav.behandler,
-                            nyesteFraNav.behandlerRef,
-                            svar.melding,
-                        ),
-                    )
-                    dialogRepository.lagre(dialog)
-                    val events = dialog.events()
-                    val melding = dialog.nyesteMeldingFraNav()
-                    events.forEach {
-                        outbox.nyMelding(OutboxMelding.nyDialogmeldingFraNav(it))
+        krevTilgang(Tilgang.Skriv) {
+            medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { _, saksbehandler ->
+                val conversationRef = call.conversationRef()
+                val svar = call.receive<ApiSvarPaDialog>()
+                val oppdatertDialog =
+                    transactionProvider.transaction {
+                        val dialog =
+                            dialogRepository.finnDialog(conversationRef)
+                                ?: return@transaction null
+                        val nyesteFraNav = dialog.nyesteMeldingFraNav()
+                        dialog.nyMelding(
+                            Dialogmelding.FraNav.ny(
+                                saksbehandler.ident,
+                                nyesteFraNav.behandler,
+                                nyesteFraNav.behandlerRef,
+                                svar.melding,
+                            ),
+                        )
+                        dialogRepository.lagre(dialog)
+                        val events = dialog.events()
+                        val melding = dialog.nyesteMeldingFraNav()
+                        events.forEach {
+                            outbox.nyMelding(OutboxMelding.nyDialogmeldingFraNav(it))
+                        }
+                        outbox.nyMelding(OutboxMelding.opprettUtgåendeJournalpost(melding, dialog, saksbehandler))
+                        dialog
                     }
-                    outbox.nyMelding(OutboxMelding.opprettUtgåendeJournalpost(melding, dialog, saksbehandler))
-                    dialog
+                if (oppdatertDialog != null) {
+                    call.respond(HttpStatusCode.Created, oppdatertDialog.tilApiDialogDetails())
+                } else {
+                    call.respond(HttpStatusCode.NotFound)
                 }
-            if (oppdatertDialog != null) {
-                call.respond(HttpStatusCode.Created, oppdatertDialog.tilApiDialogDetails())
-            } else {
-                call.respond(HttpStatusCode.NotFound)
             }
         }
     }

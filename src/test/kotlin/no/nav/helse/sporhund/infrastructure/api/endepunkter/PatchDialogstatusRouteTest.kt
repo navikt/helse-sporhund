@@ -14,7 +14,7 @@ import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.ApiOppdaterDialogStatus
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
-import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedToken
+import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedTokenMedSkrivTilgang
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,7 +31,7 @@ class PatchDialogstatusRouteTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
+            val token = mockOAuth2Server.utstedTokenMedSkrivTilgang(saksbehandler, tilgangsgrupperTilTilganger)
 
             val response =
                 client.patch("/api/personer/${pseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}") {
@@ -62,7 +62,7 @@ class PatchDialogstatusRouteTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
+            val token = mockOAuth2Server.utstedTokenMedSkrivTilgang(saksbehandler, tilgangsgrupperTilTilganger)
 
             val response =
                 client.patch("/api/personer/${pseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}") {
@@ -91,7 +91,7 @@ class PatchDialogstatusRouteTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
+            val token = mockOAuth2Server.utstedTokenMedSkrivTilgang(saksbehandler, tilgangsgrupperTilTilganger)
 
             val response =
                 client.patch("/api/personer/${UUID.randomUUID()}/dialogmeldinger/${dialog.conversationRef.value}") {
@@ -114,7 +114,7 @@ class PatchDialogstatusRouteTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
+            val token = mockOAuth2Server.utstedTokenMedSkrivTilgang(saksbehandler, tilgangsgrupperTilTilganger)
 
             val response =
                 client.patch("/api/personer/${feilPseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}") {

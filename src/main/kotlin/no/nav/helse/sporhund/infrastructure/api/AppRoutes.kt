@@ -3,9 +3,8 @@ package no.nav.helse.sporhund.infrastructure.api
 import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.github.smiley4.ktoropenapi.openApi
 import io.github.smiley4.ktorswaggerui.swaggerUI
-import io.ktor.server.auth.authenticate
-import io.ktor.server.routing.Routing
-import io.ktor.server.routing.route
+import io.ktor.server.auth.*
+import io.ktor.server.routing.*
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.VedleggProvider
@@ -32,7 +31,12 @@ fun Routing.appRoutes(
             postNyDialogmeldingRoute(personPseudoIdProvider, populasjonstilgangskontrollProvider, transactionProvider)
             postSvarPåDialogRoute(personPseudoIdProvider, populasjonstilgangskontrollProvider, transactionProvider)
             patchDialogstatusRoute(personPseudoIdProvider, populasjonstilgangskontrollProvider, transactionProvider)
-            getVedleggRoute(personPseudoIdProvider, populasjonstilgangskontrollProvider, transactionProvider, vedleggProvider)
+            getVedleggRoute(
+                personPseudoIdProvider,
+                populasjonstilgangskontrollProvider,
+                transactionProvider,
+                vedleggProvider,
+            )
         }
     }
 }

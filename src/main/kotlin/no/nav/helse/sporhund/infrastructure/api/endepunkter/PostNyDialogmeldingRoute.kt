@@ -16,9 +16,11 @@ import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.domain.Navn
 import no.nav.helse.sporhund.domain.Saksbehandler
+import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.ApiFagomrade
 import no.nav.helse.sporhund.infrastructure.api.ApiNyDialogmelding
+import no.nav.helse.sporhund.infrastructure.api.krevTilgang
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilBehandler
 import no.nav.helse.sporhund.infrastructure.api.medPerson
@@ -45,22 +47,24 @@ fun Route.postNyDialogmeldingRoute(
             }
         }
     }) {
-        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, saksbehandler ->
-            val apiDialogmelding = call.receive<ApiNyDialogmelding>()
-            val dialog =
-                transactionProvider.transaction {
-                    val dialog = apiDialogmelding.tilDialog(identitetsnummer, saksbehandler)
-                    dialogRepository.lagre(dialog)
-                    val events = dialog.events()
-                    val melding = dialog.nyesteMeldingFraNav()
-                    events.forEach {
-                        outbox.nyMelding(OutboxMelding.nyDialogmeldingFraNav(it))
+        krevTilgang(Tilgang.Skriv) {
+            medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, saksbehandler ->
+                val apiDialogmelding = call.receive<ApiNyDialogmelding>()
+                val dialog =
+                    transactionProvider.transaction {
+                        val dialog = apiDialogmelding.tilDialog(identitetsnummer, saksbehandler)
+                        dialogRepository.lagre(dialog)
+                        val events = dialog.events()
+                        val melding = dialog.nyesteMeldingFraNav()
+                        events.forEach {
+                            outbox.nyMelding(OutboxMelding.nyDialogmeldingFraNav(it))
+                        }
+                        outbox.nyMelding(OutboxMelding.opprettUtgåendeJournalpost(melding, dialog, saksbehandler))
+                        return@transaction dialog
                     }
-                    outbox.nyMelding(OutboxMelding.opprettUtgåendeJournalpost(melding, dialog, saksbehandler))
-                    return@transaction dialog
-                }
 
-            call.respond(HttpStatusCode.Created, dialog.tilApiDialogDetails())
+                call.respond(HttpStatusCode.Created, dialog.tilApiDialogDetails())
+            }
         }
     }
 }

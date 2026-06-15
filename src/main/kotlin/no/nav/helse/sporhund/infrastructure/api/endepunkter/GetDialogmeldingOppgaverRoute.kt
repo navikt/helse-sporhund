@@ -6,7 +6,9 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogmeldingOppgave
+import no.nav.helse.sporhund.infrastructure.api.krevTilgang
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogmeldingOppgave
 
 fun Route.getDialogmeldingOppgaverRoute(
@@ -23,15 +25,17 @@ fun Route.getDialogmeldingOppgaverRoute(
             }
         }
     }) {
-        val dialoger =
-            transactionProvider.transaction {
-                dialogRepository.finnIkkeLukkedeDialoger()
-            }
-        call.respond(
-            dialoger.map { dialog ->
-                val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(dialog.identitetsnummer)
-                dialog.tilApiDialogmeldingOppgave(personPseudoId)
-            },
-        )
+        krevTilgang(Tilgang.Les) {
+            val dialoger =
+                transactionProvider.transaction {
+                    dialogRepository.finnIkkeLukkedeDialoger()
+                }
+            call.respond(
+                dialoger.map { dialog ->
+                    val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(dialog.identitetsnummer)
+                    dialog.tilApiDialogmeldingOppgave(personPseudoId)
+                },
+            )
+        }
     }
 }

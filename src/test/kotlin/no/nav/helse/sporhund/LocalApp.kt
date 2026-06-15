@@ -1,8 +1,7 @@
 package no.nav.helse.sporhund
 
-import io.ktor.server.response.respond
-import io.ktor.server.routing.Routing
-import io.ktor.server.routing.get
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.helse.sporhund.domain.testhelpers.lagSaksbehandler
 import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
 import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.AccessTokenProviderConfig
@@ -19,6 +18,7 @@ import no.nav.helse.sporhund.infrastructure.db.testhelpers.TestcontainersDatabas
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaConfig
 import no.nav.helse.sporhund.infrastructure.kafka.ReadTopics
 import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.TestcontainersKafka
+import no.nav.helse.sporhund.tilgangskontroll.tilgangsgrupperTilTilganger
 import no.nav.security.mock.oauth2.MockOAuth2Server
 
 fun main() {
@@ -34,6 +34,7 @@ fun main() {
     val mockDokarkivServer = MockDokarkivServer()
 
     val saksbehandler = lagSaksbehandler()
+    val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()
 
     fun localToken(): String =
         mockOAuth2Server
@@ -47,6 +48,7 @@ fun main() {
                         "preferred_username" to saksbehandler.epost,
                         "oid" to saksbehandler.id.value.toString(),
                         "name" to saksbehandler.navn,
+                        "groups" to tilgangsgrupperTilTilganger.skrivetilgang.map { it.toString() },
                     ),
             ).serialize()
 
@@ -96,6 +98,7 @@ fun main() {
                 scope = "test-scope",
                 baseUrl = mockTilgangsmaskinenServer.baseUrl,
             ),
+        tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
         accessTokenProviderConfig =
             AccessTokenProviderConfig(
                 tokenEndpoint = mockTexasServer.tokenEndpoint,

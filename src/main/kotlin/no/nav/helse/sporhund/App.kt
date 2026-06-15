@@ -17,6 +17,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.application.logg.loggError
+import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.sporhund.infrastructure.api.appRoutes
 import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
 import no.nav.helse.sporhund.infrastructure.api.auth.configureJwtAuthentication
@@ -42,6 +43,7 @@ import no.nav.helse.sporhund.infrastructure.kafka.KafkaProducerJobb
 import no.nav.helse.sporhund.infrastructure.kafka.ReadTopics
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
 
@@ -82,6 +84,11 @@ fun main() {
             scope = env.getValue("TILGANGSMASKINEN_SCOPE"),
             baseUrl = env.getValue("TILGANGSMASKINEN_BASE_URL"),
         )
+    val tilgangsgrupperTilTilganger =
+        TilgangsgrupperTilTilganger(
+            skrivetilgang = env.getUUIDList("TILGANG_SKRIV"),
+            lesetilgang = env.getUUIDList("TILGANG_LES"),
+        )
     val accessTokenProviderConfig =
         AccessTokenProviderConfig(
             tokenEndpoint = env.getValue("NAIS_TOKEN_ENDPOINT"),
@@ -110,6 +117,7 @@ fun main() {
         azureAdConfig = azureAdConfig,
         personPseudoIdConfig = personPseudoIdConfig,
         populasjonstilgangskontrollConfig = populasjonstilgangskontrollConfig,
+        tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
         accessTokenProviderConfig = accessTokenProviderConfig,
         padm2Config = padm2Config,
         sprinterConfig = sprinterConfig,
@@ -123,6 +131,7 @@ fun app(
     azureAdConfig: AzureAdConfig,
     personPseudoIdConfig: PersonPseudoIdConfig,
     populasjonstilgangskontrollConfig: PopulasjonstilgangskontrollConfig,
+    tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
     accessTokenProviderConfig: AccessTokenProviderConfig,
     padm2Config: Padm2Config,
     sprinterConfig: SprinterConfig,
@@ -211,7 +220,7 @@ fun app(
 
             authentication {
                 jwt("oidc") {
-                    configureJwtAuthentication(azureAdConfig)
+                    configureJwtAuthentication(azureAdConfig, tilgangsgrupperTilTilganger)
                 }
             }
 
@@ -222,3 +231,5 @@ fun app(
         },
     ).start(wait = true)
 }
+
+private fun Map<String, String>.getUUIDList(key: String): List<UUID> = this[key]?.split(",")?.map { UUID.fromString(it.trim()) } ?: emptyList()

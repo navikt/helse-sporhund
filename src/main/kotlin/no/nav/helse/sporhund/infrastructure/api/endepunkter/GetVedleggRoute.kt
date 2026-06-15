@@ -11,6 +11,8 @@ import no.nav.helse.sporhund.application.VedleggProvider
 import no.nav.helse.sporhund.application.logg.Auditlogger.auditlogge
 import no.nav.helse.sporhund.application.logg.teamLogs
 import no.nav.helse.sporhund.domain.Dialogmelding
+import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
+import no.nav.helse.sporhund.infrastructure.api.krevTilgang
 import no.nav.helse.sporhund.infrastructure.api.medPerson
 import java.util.*
 
@@ -46,42 +48,44 @@ fun Route.getVedleggRoute(
             }
         }
     }) {
-        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, saksbehandler ->
-            auditlogge(
-                saksbehandler,
-                identitetsnummer,
-                "Saksbehandler henter ut vedlegg i dialogmelding for en person",
-            )
-            val msgId = requireNotNull(call.parameters["msgId"])
-            val index =
-                call.parameters["index"]?.toIntOrNull()
-                    ?: return@medPerson call.respond(HttpStatusCode.BadRequest)
+        krevTilgang(Tilgang.Les) {
+            medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, saksbehandler ->
+                auditlogge(
+                    saksbehandler,
+                    identitetsnummer,
+                    "Saksbehandler henter ut vedlegg i dialogmelding for en person",
+                )
+                val msgId = requireNotNull(call.parameters["msgId"])
+                val index =
+                    call.parameters["index"]?.toIntOrNull()
+                        ?: return@medPerson call.respond(HttpStatusCode.BadRequest)
 
-            val msgUuid =
-                runCatching { UUID.fromString(msgId) }.getOrElse {
-                    teamLogs.error("msgId er ikke en UUID, msgId=$msgId")
+                val msgUuid =
+                    runCatching { UUID.fromString(msgId) }.getOrElse {
+                        teamLogs.error("msgId er ikke en UUID, msgId=$msgId")
+                        return@medPerson call.respond(HttpStatusCode.NotFound)
+                    }
+
+                val melding =
+                    transactionProvider.transaction {
+                        dialogRepository
+                            .finnDialoger(identitetsnummer)
+                            .flatMap { it.meldinger }
+                            .filterIsInstance<Dialogmelding.FraBehandler>()
+                            .firstOrNull { it.id.value == msgId }
+                    }
+
+                if (melding == null) {
+                    teamLogs.error("Melding med id $msgId ikke funnet for person med identitetsnummer $identitetsnummer")
                     return@medPerson call.respond(HttpStatusCode.NotFound)
                 }
 
-            val melding =
-                transactionProvider.transaction {
-                    dialogRepository
-                        .finnDialoger(identitetsnummer)
-                        .flatMap { it.meldinger }
-                        .filterIsInstance<Dialogmelding.FraBehandler>()
-                        .firstOrNull { it.id.value == msgId }
-                }
+                val bytes =
+                    vedleggProvider.hentVedlegg(msgUuid).getOrNull(index)
+                        ?: return@medPerson call.respond(HttpStatusCode.NotFound)
 
-            if (melding == null) {
-                teamLogs.error("Melding med id $msgId ikke funnet for person med identitetsnummer $identitetsnummer")
-                return@medPerson call.respond(HttpStatusCode.NotFound)
+                call.respondBytes(bytes, ContentType.Application.Pdf)
             }
-
-            val bytes =
-                vedleggProvider.hentVedlegg(msgUuid).getOrNull(index)
-                    ?: return@medPerson call.respond(HttpStatusCode.NotFound)
-
-            call.respondBytes(bytes, ContentType.Application.Pdf)
         }
     }
 }

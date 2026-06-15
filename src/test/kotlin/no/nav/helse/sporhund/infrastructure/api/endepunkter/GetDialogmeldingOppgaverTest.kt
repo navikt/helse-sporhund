@@ -1,16 +1,15 @@
 package no.nav.helse.sporhund.infrastructure.api.endepunkter
 
-import io.ktor.client.call.body
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.get
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.testApplication
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.server.testing.*
 import no.nav.helse.sporhund.domain.Dialogstatus
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogmeldingOppgave
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogmeldingStatus
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
-import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedToken
+import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedTokenMedLesTilgang
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -22,7 +21,7 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
+            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
 
             val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }
 
@@ -39,7 +38,7 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
+            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
 
             val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }
 
@@ -58,7 +57,7 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
+            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
 
             val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }
 
@@ -77,7 +76,7 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
+            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
 
             val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }
 
@@ -95,8 +94,9 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
-            val oppgaver = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
+            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val oppgaver =
+                client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
 
             assertEquals(ApiDialogmeldingStatus.SENDT, oppgaver.first().status)
         }
@@ -109,8 +109,9 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
-            val oppgaver = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
+            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val oppgaver =
+                client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
 
             assertEquals(ApiDialogmeldingStatus.PURRING_SENDT, oppgaver.first().status)
         }
@@ -123,8 +124,9 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
-            val oppgaver = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
+            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val oppgaver =
+                client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
 
             assertEquals(ApiDialogmeldingStatus.MOTTATT, oppgaver.first().status)
         }
@@ -138,8 +140,9 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
-            val oppgaver = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
+            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val oppgaver =
+                client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
 
             val oppgave = oppgaver.first()
             assertEquals(dialog.conversationRef.value, oppgave.conversationRef)

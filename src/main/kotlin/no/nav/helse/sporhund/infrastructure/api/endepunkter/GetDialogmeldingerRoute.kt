@@ -7,7 +7,9 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogOppsummering
+import no.nav.helse.sporhund.infrastructure.api.krevTilgang
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogmeldingerOversikt
 import no.nav.helse.sporhund.infrastructure.api.medPerson
 
@@ -32,12 +34,14 @@ fun Route.getDialogmeldingerRoute(
             }
         }
     }) {
-        medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, _ ->
-            val dialoger =
-                transactionProvider.transaction {
-                    dialogRepository.finnDialoger(identitetsnummer)
-                }
-            call.respond(dialoger.map { dialog -> dialog.tilApiDialogmeldingerOversikt() })
+        krevTilgang(Tilgang.Les) {
+            medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, _ ->
+                val dialoger =
+                    transactionProvider.transaction {
+                        dialogRepository.finnDialoger(identitetsnummer)
+                    }
+                call.respond(dialoger.map { dialog -> dialog.tilApiDialogmeldingerOversikt() })
+            }
         }
     }
 }

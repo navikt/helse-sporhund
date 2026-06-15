@@ -8,7 +8,7 @@ import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.*
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
-import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedToken
+import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedTokenMedSkrivTilgang
 import java.util.*
 import kotlin.random.Random.Default.nextInt
 import kotlin.test.Test
@@ -23,7 +23,7 @@ class PostNyDialogmeldingTest : EndepunktTest() {
             val pseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer)
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedToken(saksbehandler)
+            val token = mockOAuth2Server.utstedTokenMedSkrivTilgang(saksbehandler, tilgangsgrupperTilTilganger)
 
             val nyDialogmelding =
                 ApiNyDialogmelding(
