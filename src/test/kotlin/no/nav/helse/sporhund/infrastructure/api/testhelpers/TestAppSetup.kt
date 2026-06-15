@@ -16,6 +16,7 @@ import io.ktor.server.testing.*
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.VedleggProvider
+import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.sporhund.domain.NavIdent
 import no.nav.helse.sporhund.domain.Saksbehandler
@@ -36,6 +37,7 @@ fun ApplicationTestBuilder.setupTestApp(
     mockOAuth2Server: MockOAuth2Server,
     populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
     tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
+    tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     vedleggProvider: VedleggProvider = VedleggProvider { emptyList() },
 ) {
     val azureAdConfig =
@@ -56,7 +58,11 @@ fun ApplicationTestBuilder.setupTestApp(
         }
         authentication {
             jwt("oidc") {
-                configureJwtAuthentication(azureAdConfig, tilgangsgrupperTilTilganger)
+                configureJwtAuthentication(
+                    azureAdConfig = azureAdConfig,
+                    tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
+                )
             }
         }
         routing {
@@ -105,9 +111,11 @@ fun MockOAuth2Server.utstedToken(
 fun MockOAuth2Server.utstedTokenMedLesTilgang(
     saksbehandler: Saksbehandler,
     tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
-): String = utstedToken(saksbehandler, tilgangsgrupperTilTilganger.lesetilgang)
+    tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
+): String = utstedToken(saksbehandler, tilgangsgrupperTilTilganger.lesetilgang + tilgangsgrupperTilBrukerroller.dialogmelding)
 
 fun MockOAuth2Server.utstedTokenMedSkrivTilgang(
     saksbehandler: Saksbehandler,
     tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
-): String = utstedToken(saksbehandler, tilgangsgrupperTilTilganger.skrivetilgang)
+    tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
+): String = utstedToken(saksbehandler, tilgangsgrupperTilTilganger.skrivetilgang + tilgangsgrupperTilBrukerroller.dialogmelding)

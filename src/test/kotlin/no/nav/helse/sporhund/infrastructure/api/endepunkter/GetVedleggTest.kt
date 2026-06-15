@@ -1,17 +1,16 @@
 package no.nav.helse.sporhund.infrastructure.api.endepunkter
 
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsBytes
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.testApplication
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.server.testing.*
 import no.nav.helse.sporhund.application.VedleggProvider
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagFraBehandlerMelding
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedTokenMedLesTilgang
-import java.util.UUID
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -35,7 +34,12 @@ class GetVedleggTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.get(
@@ -65,7 +69,12 @@ class GetVedleggTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.get(
@@ -101,7 +110,12 @@ class GetVedleggTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.get(
@@ -129,7 +143,12 @@ class GetVedleggTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.get(
@@ -145,7 +164,12 @@ class GetVedleggTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.get(
@@ -167,7 +191,12 @@ class GetVedleggTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.get(

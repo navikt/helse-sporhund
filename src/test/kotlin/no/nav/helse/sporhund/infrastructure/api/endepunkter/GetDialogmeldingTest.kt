@@ -1,10 +1,9 @@
 package no.nav.helse.sporhund.infrastructure.api.endepunkter
 
-import io.ktor.client.call.body
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.get
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.testApplication
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.server.testing.*
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
@@ -27,7 +26,12 @@ class GetDialogmeldingTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.get(
@@ -46,7 +50,12 @@ class GetDialogmeldingTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.get(
@@ -65,7 +74,12 @@ class GetDialogmeldingTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.get(

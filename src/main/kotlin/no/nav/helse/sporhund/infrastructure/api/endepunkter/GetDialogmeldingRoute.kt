@@ -8,10 +8,11 @@ import io.ktor.server.routing.*
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.Auditlogger.auditlogge
+import no.nav.helse.sporhund.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.conversationRef
-import no.nav.helse.sporhund.infrastructure.api.krevTilgang
+import no.nav.helse.sporhund.infrastructure.api.krevTilgangOgRolle
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.medPerson
 
@@ -43,7 +44,7 @@ fun Route.getDialogmeldingRoute(
             }
         }
     }) {
-        krevTilgang(Tilgang.Les) {
+        krevTilgangOgRolle(påkrevdTilgang = Tilgang.Les, påkrevdRolle = Brukerrolle.Dialogmelding) {
             medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, saksbehandler ->
                 auditlogge(
                     saksbehandler,

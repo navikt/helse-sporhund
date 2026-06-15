@@ -17,6 +17,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.application.logg.loggError
+import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.sporhund.infrastructure.api.appRoutes
 import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
@@ -89,6 +90,10 @@ fun main() {
             skrivetilgang = env.getUUIDList("TILGANG_SKRIV"),
             lesetilgang = env.getUUIDList("TILGANG_LES"),
         )
+    val tilgangsgrupperTilBrukeroller =
+        TilgangsgrupperTilBrukerroller(
+            dialogmelding = env.getUUIDList("ROLLE_DIALOGMELDING"),
+        )
     val accessTokenProviderConfig =
         AccessTokenProviderConfig(
             tokenEndpoint = env.getValue("NAIS_TOKEN_ENDPOINT"),
@@ -118,6 +123,7 @@ fun main() {
         personPseudoIdConfig = personPseudoIdConfig,
         populasjonstilgangskontrollConfig = populasjonstilgangskontrollConfig,
         tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
+        tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukeroller,
         accessTokenProviderConfig = accessTokenProviderConfig,
         padm2Config = padm2Config,
         sprinterConfig = sprinterConfig,
@@ -132,6 +138,7 @@ fun app(
     personPseudoIdConfig: PersonPseudoIdConfig,
     populasjonstilgangskontrollConfig: PopulasjonstilgangskontrollConfig,
     tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
+    tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     accessTokenProviderConfig: AccessTokenProviderConfig,
     padm2Config: Padm2Config,
     sprinterConfig: SprinterConfig,
@@ -220,7 +227,11 @@ fun app(
 
             authentication {
                 jwt("oidc") {
-                    configureJwtAuthentication(azureAdConfig, tilgangsgrupperTilTilganger)
+                    configureJwtAuthentication(
+                        azureAdConfig = azureAdConfig,
+                        tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
+                        tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
+                    )
                 }
             }
 

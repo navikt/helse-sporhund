@@ -11,8 +11,9 @@ import no.nav.helse.sporhund.application.VedleggProvider
 import no.nav.helse.sporhund.application.logg.Auditlogger.auditlogge
 import no.nav.helse.sporhund.application.logg.teamLogs
 import no.nav.helse.sporhund.domain.Dialogmelding
+import no.nav.helse.sporhund.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
-import no.nav.helse.sporhund.infrastructure.api.krevTilgang
+import no.nav.helse.sporhund.infrastructure.api.krevTilgangOgRolle
 import no.nav.helse.sporhund.infrastructure.api.medPerson
 import java.util.*
 
@@ -48,7 +49,7 @@ fun Route.getVedleggRoute(
             }
         }
     }) {
-        krevTilgang(Tilgang.Les) {
+        krevTilgangOgRolle(påkrevdTilgang = Tilgang.Les, påkrevdRolle = Brukerrolle.Dialogmelding) {
             medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, saksbehandler ->
                 auditlogge(
                     saksbehandler,

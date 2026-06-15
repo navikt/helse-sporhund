@@ -1,13 +1,9 @@
 package no.nav.helse.sporhund.infrastructure.api.endepunkter
 
-import io.ktor.client.call.body
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.patch
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
-import io.ktor.server.testing.testApplication
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.server.testing.*
 import no.nav.helse.sporhund.domain.Dialogstatus
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
@@ -31,7 +27,12 @@ class PatchDialogstatusRouteTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedSkrivTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedSkrivTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.patch("/api/personer/${pseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}") {
@@ -62,7 +63,12 @@ class PatchDialogstatusRouteTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedSkrivTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedSkrivTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.patch("/api/personer/${pseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}") {
@@ -91,7 +97,12 @@ class PatchDialogstatusRouteTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedSkrivTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedSkrivTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.patch("/api/personer/${UUID.randomUUID()}/dialogmeldinger/${dialog.conversationRef.value}") {
@@ -114,7 +125,12 @@ class PatchDialogstatusRouteTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedSkrivTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedSkrivTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response =
                 client.patch("/api/personer/${feilPseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}") {

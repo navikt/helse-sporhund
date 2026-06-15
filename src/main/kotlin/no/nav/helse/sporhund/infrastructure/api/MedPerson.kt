@@ -12,6 +12,7 @@ import no.nav.helse.sporhund.application.logg.loggError
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.domain.Saksbehandler
+import no.nav.helse.sporhund.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 
 suspend fun RoutingContext.medPerson(
@@ -62,12 +63,17 @@ suspend fun RoutingContext.medPerson(
     block(identitetsnummer, saksbehandler)
 }
 
-suspend fun RoutingContext.krevTilgang(
-    tilgang: Tilgang,
+suspend fun RoutingContext.krevTilgangOgRolle(
+    påkrevdTilgang: Tilgang,
+    påkrevdRolle: Brukerrolle,
     block: suspend () -> Unit,
 ) {
-    if (tilgang !in call.tilganger()) {
-        loggInfo("Saksbehandler mangler tilgang", "tilgang" to tilgang.name)
+    if (påkrevdTilgang !in call.tilganger()) {
+        loggInfo("Saksbehandler mangler tilgang", "tilgang" to påkrevdTilgang.name)
+        return call.respond(HttpStatusCode.Forbidden)
+    }
+    if (påkrevdRolle !in call.brukerroller()) {
+        loggInfo("Saksbehandler mangler rolle", "brukerrolle" to påkrevdRolle.name)
         return call.respond(HttpStatusCode.Forbidden)
     }
     block()

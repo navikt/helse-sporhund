@@ -10,6 +10,7 @@ import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.domain.Dialogmelding
+import no.nav.helse.sporhund.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 import no.nav.helse.sporhund.infrastructure.api.*
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogDetails
@@ -43,7 +44,7 @@ fun Route.postSvarPåDialogRoute(
             }
         }
     }) {
-        krevTilgang(Tilgang.Skriv) {
+        krevTilgangOgRolle(påkrevdTilgang = Tilgang.Skriv, påkrevdRolle = Brukerrolle.Dialogmelding) {
             medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { _, saksbehandler ->
                 val conversationRef = call.conversationRef()
                 val svar = call.receive<ApiSvarPaDialog>()

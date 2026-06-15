@@ -23,7 +23,12 @@ class PostNyDialogmeldingTest : EndepunktTest() {
             val pseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer)
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedSkrivTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedSkrivTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val nyDialogmelding =
                 ApiNyDialogmelding(

@@ -18,6 +18,7 @@ import no.nav.helse.sporhund.infrastructure.db.testhelpers.TestcontainersDatabas
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaConfig
 import no.nav.helse.sporhund.infrastructure.kafka.ReadTopics
 import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.TestcontainersKafka
+import no.nav.helse.sporhund.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.sporhund.tilgangskontroll.tilgangsgrupperTilTilganger
 import no.nav.security.mock.oauth2.MockOAuth2Server
 
@@ -35,6 +36,7 @@ fun main() {
 
     val saksbehandler = lagSaksbehandler()
     val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()
+    val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
 
     fun localToken(): String =
         mockOAuth2Server
@@ -99,6 +101,7 @@ fun main() {
                 baseUrl = mockTilgangsmaskinenServer.baseUrl,
             ),
         tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
+        tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
         accessTokenProviderConfig =
             AccessTokenProviderConfig(
                 tokenEndpoint = mockTexasServer.tokenEndpoint,

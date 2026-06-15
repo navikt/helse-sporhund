@@ -5,6 +5,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
+import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.sporhund.domain.NavIdent
 import no.nav.helse.sporhund.domain.Saksbehandler
@@ -18,6 +19,7 @@ private val logger = LoggerFactory.getLogger("JWT-Auth")
 fun JWTAuthenticationProvider.Config.configureJwtAuthentication(
     azureAdConfig: AzureAdConfig,
     tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
+    tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
     val jwkProvider = JwkProviderBuilder(URI(azureAdConfig.jwkProviderUri).toURL()).build()
 
@@ -37,6 +39,7 @@ fun JWTAuthenticationProvider.Config.configureJwtAuthentication(
                 saksbehandler = saksbehandler,
                 accessToken = accessToken,
                 tilganger = tilgangsgrupperTilTilganger.finnTilgangerFraTilgangsgrupper(credentials.groupsAsUuids()),
+                brukerroller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(credentials.groupsAsUuids()),
             )
         } catch (ex: Exception) {
             logger.error("Feil ved validering av JWT", ex)

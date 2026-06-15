@@ -21,7 +21,12 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }
 
@@ -38,7 +43,12 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }
 
@@ -57,7 +67,12 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }
 
@@ -76,7 +91,12 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
 
             val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }
 
@@ -94,7 +114,12 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
             val oppgaver =
                 client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
 
@@ -109,7 +134,12 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
             val oppgaver =
                 client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
 
@@ -124,7 +154,12 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
             val oppgaver =
                 client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
 
@@ -140,7 +175,12 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
             setupDefaultTestApp()
 
             val client = jsonClient()
-            val token = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger)
+            val token =
+                mockOAuth2Server.utstedTokenMedLesTilgang(
+                    saksbehandler,
+                    tilgangsgrupperTilTilganger,
+                    tilgangsgrupperTilBrukerroller,
+                )
             val oppgaver =
                 client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
 

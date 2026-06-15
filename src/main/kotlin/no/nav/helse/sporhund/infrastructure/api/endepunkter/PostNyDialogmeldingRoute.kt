@@ -16,11 +16,12 @@ import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.domain.Navn
 import no.nav.helse.sporhund.domain.Saksbehandler
+import no.nav.helse.sporhund.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.ApiFagomrade
 import no.nav.helse.sporhund.infrastructure.api.ApiNyDialogmelding
-import no.nav.helse.sporhund.infrastructure.api.krevTilgang
+import no.nav.helse.sporhund.infrastructure.api.krevTilgangOgRolle
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilBehandler
 import no.nav.helse.sporhund.infrastructure.api.medPerson
@@ -47,7 +48,7 @@ fun Route.postNyDialogmeldingRoute(
             }
         }
     }) {
-        krevTilgang(Tilgang.Skriv) {
+        krevTilgangOgRolle(påkrevdTilgang = Tilgang.Skriv, påkrevdRolle = Brukerrolle.Dialogmelding) {
             medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, saksbehandler ->
                 val apiDialogmelding = call.receive<ApiNyDialogmelding>()
                 val dialog =

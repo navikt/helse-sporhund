@@ -6,9 +6,10 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogmeldingOppgave
-import no.nav.helse.sporhund.infrastructure.api.krevTilgang
+import no.nav.helse.sporhund.infrastructure.api.krevTilgangOgRolle
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogmeldingOppgave
 
 fun Route.getDialogmeldingOppgaverRoute(
@@ -25,7 +26,7 @@ fun Route.getDialogmeldingOppgaverRoute(
             }
         }
     }) {
-        krevTilgang(Tilgang.Les) {
+        krevTilgangOgRolle(påkrevdTilgang = Tilgang.Les, påkrevdRolle = Brukerrolle.Dialogmelding) {
             val dialoger =
                 transactionProvider.transaction {
                     dialogRepository.finnIkkeLukkedeDialoger()

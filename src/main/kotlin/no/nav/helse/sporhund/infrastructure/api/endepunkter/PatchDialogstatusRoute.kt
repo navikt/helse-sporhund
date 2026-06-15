@@ -8,11 +8,12 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.ApiOppdaterDialogStatus
 import no.nav.helse.sporhund.infrastructure.api.conversationRef
-import no.nav.helse.sporhund.infrastructure.api.krevTilgang
+import no.nav.helse.sporhund.infrastructure.api.krevTilgangOgRolle
 import no.nav.helse.sporhund.infrastructure.api.mapping.tilApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.medPerson
 
@@ -45,7 +46,7 @@ fun Route.patchDialogstatusRoute(
             }
         }
     }) {
-        krevTilgang(Tilgang.Skriv) {
+        krevTilgangOgRolle(påkrevdTilgang = Tilgang.Skriv, påkrevdRolle = Brukerrolle.Dialogmelding) {
             medPerson(personPseudoIdProvider, populasjonstilgangskontrollProvider) { identitetsnummer, _ ->
                 val statusOppdatering = call.receive<ApiOppdaterDialogStatus>()
                 val conversationRef = call.conversationRef()

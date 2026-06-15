@@ -1,16 +1,11 @@
 package no.nav.helse.sporhund.infrastructure.api.endepunkter
 
-import io.ktor.server.testing.ApplicationTestBuilder
-import io.ktor.server.testing.testApplication
-import no.nav.helse.sporhund.application.InMemoryPersonPseudoIdProvider
-import no.nav.helse.sporhund.application.InMemoryPopulasjonstilgangskontrollProvider
-import no.nav.helse.sporhund.application.InMemoryTransactionProvider
-import no.nav.helse.sporhund.application.OutboxMelding
-import no.nav.helse.sporhund.application.VedleggProvider
-import no.nav.helse.sporhund.application.meldinger
+import io.ktor.server.testing.*
+import no.nav.helse.sporhund.application.*
 import no.nav.helse.sporhund.domain.Saksbehandler
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.lagTestSaksbehandler
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.setupTestApp
+import no.nav.helse.sporhund.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.sporhund.tilgangskontroll.tilgangsgrupperTilTilganger
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import kotlin.test.AfterTest
@@ -24,10 +19,19 @@ abstract class EndepunktTest {
     protected val transactionProvider = InMemoryTransactionProvider()
     protected val populasjonstilgangskontrollProvider = InMemoryPopulasjonstilgangskontrollProvider()
     protected val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()
+    protected val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
     protected var vedleggProvider: VedleggProvider = VedleggProvider { emptyList() }
 
     fun ApplicationTestBuilder.setupDefaultTestApp() {
-        setupTestApp(personPseudoIdProvider, transactionProvider, mockOAuth2Server, populasjonstilgangskontrollProvider, tilgangsgrupperTilTilganger, vedleggProvider)
+        setupTestApp(
+            personPseudoIdProvider,
+            transactionProvider,
+            mockOAuth2Server,
+            populasjonstilgangskontrollProvider,
+            tilgangsgrupperTilTilganger,
+            tilgangsgrupperTilBrukerroller,
+            vedleggProvider,
+        )
     }
 
     protected inline fun <reified T : OutboxMelding> assertOutboxContains() {
