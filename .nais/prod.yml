@@ -94,7 +94,7 @@ spec:
       access: readwrite
   env:
     - name: KAFKA_CONSUMER_GROUP_ID
-      value: tbd-sporhund-v1
+      value: tbd-sporhund-v2
     - name: TILGANGSMASKINEN_SCOPE
       value: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
     - name: TILGANGSMASKINEN_BASE_URL
