@@ -20,7 +20,7 @@ class KafkaConsumerJobb(
 ) {
     private val defaultConsumerProperties =
         Properties().apply {
-            this[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
+            this[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "latest"
         }
     private val consumer = consumerProducerFactory.createConsumer(consumerGroupId, defaultConsumerProperties)
 
