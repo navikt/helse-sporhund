@@ -37,28 +37,45 @@ class KafkaConsumerJobbTest {
     @Test
     fun `knytter gyldig innkommende melding til dialog`() {
         // given
+        val dialogSomSkalIgnoreres = lagDialog()
         val dialog = lagDialog()
+        transactionProvider.dialogRepository.lagre(dialogSomSkalIgnoreres)
         transactionProvider.dialogRepository.lagre(dialog)
 
-        // when
+        // melding produsert FØR consumer starter skal ikke leses (auto.offset.reset = latest)
         producer.send(
             ProducerRecord(
                 dialogmeldingFraBehandlerTopic,
-                objectMapper.writeValueAsString(lagDialogmeldingFraBehandlerKafkaDto(conversationRef = dialog.conversationRef.value.toString())),
+                objectMapper.writeValueAsString(lagDialogmeldingFraBehandlerKafkaDto(conversationRef = dialogSomSkalIgnoreres.conversationRef.value.toString())),
             ),
         )
 
-        lesTilEndenAvTopicetOgStoppConsumer()
+        // when
+        lesTilEndenAvTopicetOgStoppConsumer {
+            producer.send(
+                ProducerRecord(
+                    dialogmeldingFraBehandlerTopic,
+                    objectMapper.writeValueAsString(lagDialogmeldingFraBehandlerKafkaDto(conversationRef = dialog.conversationRef.value.toString())),
+                ),
+            )
+        }
 
         // then
+        val ignorert = transactionProvider.dialogRepository.finnDialog(dialogSomSkalIgnoreres.conversationRef)
+        assertNotNull(ignorert)
+        assertEquals(1, ignorert.meldinger.size, "Melding produsert før consumer startet skal ikke ha blitt lest")
+
         val funnet = transactionProvider.dialogRepository.finnDialog(dialog.conversationRef)
         assertNotNull(funnet)
         assertEquals(2, funnet.meldinger.size)
     }
 
-    private fun lesTilEndenAvTopicetOgStoppConsumer() {
+    private fun lesTilEndenAvTopicetOgStoppConsumer(onConsumerReady: () -> Unit = {}) {
         runBlocking {
             val consumerJob = launch(Dispatchers.IO) { consumer.start() }
+
+            kafka.waitForConsumerGroupAssignment("test-consumer")
+            onConsumerReady()
 
             val done = CompletableDeferred<Unit>()
             val watchJob =

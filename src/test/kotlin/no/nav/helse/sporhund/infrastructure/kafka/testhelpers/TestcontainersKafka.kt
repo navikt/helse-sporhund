@@ -46,5 +46,23 @@ class TestcontainersKafka(
         }
     }
 
+    fun waitForConsumerGroupAssignment(
+        consumerGroupId: String,
+        timeoutMs: Long = 10_000,
+    ) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            val members =
+                adminClient
+                    .describeConsumerGroups(listOf(consumerGroupId))
+                    .describedGroups()[consumerGroupId]
+                    ?.get()
+                    ?.members()
+            if (!members.isNullOrEmpty()) return
+            Thread.sleep(100)
+        }
+        error("Consumer group '$consumerGroupId' fikk ikke tildelt partisjoner innen timeout")
+    }
+
     fun stop() = kafka.stop()
 }
