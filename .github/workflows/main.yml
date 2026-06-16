@@ -75,8 +75,8 @@ jobs:
           RESOURCE: .nais/prod.yml
           IMAGE: ${{ needs.build.outputs.image }}
           VARS: .nais/entra-id-vars.yml
-#      - uses: nais/deploy/actions/deploy@v2
-#        env:
-#          CLUSTER: prod-gcp
-#          RESOURCE: .nais/purring-job-prod.yml,.nais/prod-db-policy.yml
-#          IMAGE: ${{ needs.build.outputs.image }}
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/purring-job-prod.yml,.nais/prod-db-policy.yml
+          IMAGE: ${{ needs.build.outputs.image }}

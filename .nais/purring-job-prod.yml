@@ -1,0 +1,47 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  name: sporhund-purring
+  namespace: tbd
+  labels:
+    team: tbd
+    dbPolicyUser: purring
+spec:
+  image: {{image}}
+  schedule: "0 0 * * *"
+  timeZone: "Europe/Oslo"
+  command:
+    - /usr/bin/java
+    - -cp
+    - /app/*
+    - no.nav.helse.sporhund.PurringJobKt
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      cpu: 10m
+      memory: 256Mi
+  observability:
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
+  accessPolicy:
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
+  envFrom:
+    - secret: google-sql-sporhund-sporhund-purring-494b7001
+  gcp:
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+          name: tbd-prod-eacd
+        role: roles/cloudsql.client
+  env:
+    - name: DATABASE_REGION
+      value: "europe-north1"
+    - name: DATABASE_INSTANCE
+      value: "sporhund"
