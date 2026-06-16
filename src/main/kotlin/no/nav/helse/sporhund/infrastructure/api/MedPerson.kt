@@ -29,7 +29,7 @@ suspend fun RoutingContext.medPerson(
         "identitetsnummer" to identitetsnummer.value,
     )
     loggInfo("Kall: ${call.request.httpMethod.value} ${call.request.uri}")
-    val result = populasjonstilgangskontrollProvider.kontrollerTilgang(call.accessToken(), identitetsnummer.value)
+    val result = populasjonstilgangskontrollProvider.kontrollerKjerneTilgang(call.accessToken(), identitetsnummer.value)
 
     when (result) {
         TilgangskontrollResultat.IdentIkkeFunnet -> {
