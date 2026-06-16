@@ -57,27 +57,26 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: .nais/purring-job.yml, .nais/dev-db-policy.yml
+          RESOURCE: .nais/purring-job-dev.yml, .nais/dev-db-policy.yml
           IMAGE: ${{ needs.build.outputs.image }}
-#
-#  deployProd:
-#    name: deploy to prod
-#    needs: build
-#    runs-on: ubuntu-latest
-#    if: ${{ github.ref_name == 'main' }}
-#    permissions:
-#      id-token: write
-#    steps:
-#      - uses: actions/checkout@v6.0.3
+
+  deployProd:
+    name: deploy to prod
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' }}
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6.0.3
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/prod.yml
+          IMAGE: ${{ needs.build.outputs.image }}
+          VARS: .nais/entra-id-vars.yml
 #      - uses: nais/deploy/actions/deploy@v2
 #        env:
 #          CLUSTER: prod-gcp
-#          RESOURCE: .nais/prod.yml
+#          RESOURCE: .nais/purring-job-prod.yml,.nais/prod-db-policy.yml
 #          IMAGE: ${{ needs.build.outputs.image }}
-#                  - uses: actions/checkout@v6
-#      - uses: nais/deploy/actions/deploy@v2
-#        env:
-#            CLUSTER: prod-gcp
-#            RESOURCE: .nais/prod.yml,.nais/prod-db-policy.yml
-#            IMAGE: ${{ needs.build.outputs.image }}
-#            VARS: deploy/entra-id-vars.yml

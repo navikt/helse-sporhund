@@ -1,0 +1,115 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: sporhund
+  namespace: tbd
+  labels:
+    team: tbd
+spec:
+  image: {{image}}
+  port: 8080
+  strategy:
+    type: Recreate
+  startup:
+    path: isready
+    initialDelay: 20
+    periodSeconds: 5
+    failureThreshold: 9
+  liveness:
+    path: isalive
+  readiness:
+    path: isready
+  preStopHook:
+    http:
+      path: /stop
+  resources:
+    limits:
+      memory: 640Mi
+    requests:
+      cpu: 20m
+      memory: 512Mi
+  replicas:
+    min: 2
+    max: 2
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
+  prometheus:
+    enabled: true
+    path: /metrics
+  kafka:
+    pool: nav-prod
+  azure:
+    application:
+      enabled: true
+      tenant: nav.no
+      claims:
+        extra:
+          - "NAVident"
+        groups:
+          - id: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER}}
+          - id: {{ENTRAID_UUID_SPEIL_LESETILGANG}}
+          - id: {{ENTRAID_UUID_SPEIL_DIALOGMELDING}}
+          - id: {{ENTRAID_UUID_NAIS_TBD}}
+  accessPolicy:
+    inbound:
+      rules:
+        - application: speil
+          cluster: prod-gcp
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
+        - application: padm2
+          namespace: teamsykefravr
+        - application: sprinter
+      external:
+        - host: dokarkiv.prod-fss-pub.nais.io
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_17
+        diskAutoresize: true
+        tier: db-custom-1-3840
+        flags:
+          - name: cloudsql.enable_pgaudit
+            value: "true"
+          - name: pgaudit.log
+            value: 'write'
+        databases:
+          - name: sporhund
+            envVarPrefix: DATABASE
+            users:
+              - name: purring
+  valkey:
+    - instance: personpseudoid
+      access: readwrite
+  env:
+    - name: KAFKA_CONSUMER_GROUP_ID
+      value: tbd-sporhund-v1
+    - name: TILGANGSMASKINEN_SCOPE
+      value: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
+    - name: TILGANGSMASKINEN_BASE_URL
+      value: http://populasjonstilgangskontroll.tilgangsmaskin
+    - name: PADM2_BASE_URL
+      value: http://padm2.teamsykefravr
+    - name: PADM2_SCOPE
+      value: api://prod-gcp.teamsykefravr.padm2/.default
+    - name: SPRINTER_BASE_URL
+      value: http://sprinter
+    - name: DOKARKIV_BASE_URL
+      value: https://dokarkiv.prod-fss-pub.nais.io
+    - name: DOKARKIV_SCOPE
+      value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
+    - name: TILGANG_SKRIV
+      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER}}
+    - name: TILGANG_LES
+      value: {{ENTRAID_UUID_SPEIL_LESETILGANG}}
+    - name: ROLLE_DIALOGMELDING
+      value: {{ENTRAID_UUID_SPEIL_DIALOGMELDING}},{{ENTRAID_UUID_NAIS_TBD}}
