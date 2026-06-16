@@ -51,6 +51,7 @@ cloud-sql-postgres-socket-factory = { module = "com.google.cloud.sql:postgres-so
 
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash" }
+logback-syslog4j = "com.papertrailapp:logback-syslog4j:1.0.0"
 
 jackson-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
 jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }

@@ -23,6 +23,7 @@ dependencies {
 
     implementation(libs.logback.classic)
     implementation(libs.logstash.logback.encoder)
+    implementation(libs.logback.syslog4j)
 
     implementation(libs.ktor.server.auth)
     implementation(libs.ktor.server.auth.jwt)
