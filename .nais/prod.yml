@@ -75,7 +75,7 @@ spec:
         - host: dokarkiv.prod-fss-pub.nais.io
   gcp:
     sqlInstances:
-      - type: POSTGRES_17
+      - type: POSTGRES_18
         diskAutoresize: true
         tier: db-custom-1-3840
         flags:
