@@ -75,6 +75,7 @@ class KafkaConsumerJobbTest {
             val consumerJob = launch(Dispatchers.IO) { consumer.start() }
 
             kafka.waitForConsumerGroupAssignment("test-consumer")
+            delay(500.milliseconds) // gi consumer tid til å fullføre første poll og sette posisjon til latest
             onConsumerReady()
 
             val done = CompletableDeferred<Unit>()
