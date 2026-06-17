@@ -96,6 +96,26 @@ class DialogTest {
     }
 
     @Test
+    fun `status settes til SvarMottatt når behandler sender melding`() {
+        val dialog = lagDialog(status = Dialogstatus.ForespørselSendt)
+
+        dialog.nyMelding(lagFraBehandlerMelding())
+
+        assertEquals(Dialogstatus.SvarMottatt, dialog.status)
+    }
+
+    @Test
+    fun `status settes tilbake til ForespørselSendt når Nav sender ny melding etter svar fra behandler`() {
+        val dialog = lagDialog(status = Dialogstatus.ForespørselSendt)
+        dialog.nyMelding(lagFraBehandlerMelding())
+        assertEquals(Dialogstatus.SvarMottatt, dialog.status)
+
+        dialog.nyMelding(lagFraNavMelding())
+
+        assertEquals(Dialogstatus.ForespørselSendt, dialog.status)
+    }
+
+    @Test
     fun `ferdigstill setter status til lukket`() {
         val dialog = lagDialog(status = Dialogstatus.ForespørselSendt)
 

@@ -74,18 +74,7 @@ class Dialog private constructor(
                 behandlerRef = nyesteFraNav.behandlerRef,
                 melding = purringTekst,
             )
-        _meldinger.add(purringMelding)
-        status = Dialogstatus.PurringSendt
-        events.add(
-            NyDialogmeldingFraNavEvent(
-                conversationRef = conversationRef,
-                behandlerRef = purringMelding.behandlerRef,
-                identitetsnummer = identitetsnummer,
-                meldingId = purringMelding.id,
-                tekst = purringMelding.melding,
-                erPurring = true,
-            ),
-        )
+        nyMelding(purringMelding)
     }
 
     fun gjenåpne() {
@@ -107,16 +96,33 @@ class Dialog private constructor(
 
     fun nyMelding(dialogmelding: Dialogmelding<*>) {
         _meldinger.add(dialogmelding)
-        if (dialogmelding is Dialogmelding.FraNav) {
-            events.add(
-                NyDialogmeldingFraNavEvent(
-                    conversationRef = conversationRef,
-                    behandlerRef = dialogmelding.behandlerRef,
-                    identitetsnummer = identitetsnummer,
-                    meldingId = dialogmelding.id,
-                    tekst = dialogmelding.melding,
-                ),
-            )
+        when (dialogmelding) {
+            is Dialogmelding.FraBehandler -> status = Dialogstatus.SvarMottatt
+            is Dialogmelding.FraNav -> {
+                status = Dialogstatus.ForespørselSendt
+                events.add(
+                    NyDialogmeldingFraNavEvent(
+                        conversationRef = conversationRef,
+                        behandlerRef = dialogmelding.behandlerRef,
+                        identitetsnummer = identitetsnummer,
+                        meldingId = dialogmelding.id,
+                        tekst = dialogmelding.melding,
+                    ),
+                )
+            }
+            is Dialogmelding.FraSystem -> {
+                status = Dialogstatus.PurringSendt
+                events.add(
+                    NyDialogmeldingFraNavEvent(
+                        conversationRef = conversationRef,
+                        behandlerRef = dialogmelding.behandlerRef,
+                        identitetsnummer = identitetsnummer,
+                        meldingId = dialogmelding.id,
+                        tekst = dialogmelding.melding,
+                        erPurring = true,
+                    ),
+                )
+            }
         }
     }
 
