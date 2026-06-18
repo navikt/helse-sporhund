@@ -24,29 +24,24 @@ class JournalførerJobb(
         runBlocking {
             while (readyToProduce.get()) {
                 runCatching {
-                    val (opprettUtgåendeJournalposter, innkommendeJournalposter) =
-                        transactionProvider.transaction {
-                            outbox.meldinger<OpprettUtgåendeJournalpost>() to
-                                outbox.meldinger<KnyttInnkommendeJournalpost>()
+                    transactionProvider.transaction {
+                        val opprettUtgåendeJournalposter = outbox.meldinger<OpprettUtgåendeJournalpost>()
+                        val innkommendeJournalposter = outbox.meldinger<KnyttInnkommendeJournalpost>()
+                        if (innkommendeJournalposter.isEmpty() && opprettUtgåendeJournalposter.isEmpty()) {
+                            loggDebug("Journalfører-jobb: Ingen journalposter å journalføre, sover $antallMillisekunderLoopenSover ms")
+                            return@transaction
                         }
-                    if (innkommendeJournalposter.isEmpty() && opprettUtgåendeJournalposter.isEmpty()) {
-                        loggDebug("Journalfører-jobb: Ingen journalposter å journalføre, sover $antallMillisekunderLoopenSover ms")
-                        return@runCatching
-                    }
-                    loggDebug("Journalfører-jobb: Fant ${opprettUtgåendeJournalposter.size} utgående journalposter og ${innkommendeJournalposter.size} innkommende journalposter som skal journalføres")
-                    opprettUtgåendeJournalposter.forEach { melding ->
-                        transactionProvider.transaction {
+                        loggDebug("Journalfører-jobb: Fant ${opprettUtgåendeJournalposter.size} utgående journalposter og ${innkommendeJournalposter.size} innkommende journalposter som skal journalføres")
+                        opprettUtgåendeJournalposter.forEach { melding ->
                             dokarkivClient.journalførUtgåendeDialogmelding(melding)
                             outbox.meldingSendt(melding.id)
                         }
-                    }
-                    innkommendeJournalposter.forEach { melding ->
-                        transactionProvider.transaction {
+                        innkommendeJournalposter.forEach { melding ->
                             dokarkivClient.feilregistrerOgKnyttJournalpost(melding)
                             outbox.meldingSendt(melding.id)
                         }
+                        loggDebug("Journalfører-jobb: Journalført ${opprettUtgåendeJournalposter.size} utgående journalposter og ${innkommendeJournalposter.size} innkommende journalposter")
                     }
-                    loggDebug("Journalfører-jobb: Journalført ${opprettUtgåendeJournalposter.size} utgående journalposter og ${innkommendeJournalposter.size} innkommende journalposter")
                 }.onFailure {
                     loggError(
                         "Journalfører-jobb: Feil ved journalføring, meldinger blir ikke journalført. Meldingene er ikke kvittert ut i outbox-en",
