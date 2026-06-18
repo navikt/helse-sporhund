@@ -3,6 +3,7 @@ package no.nav.helse.sporhund.infrastructure.kafka
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.application.logg.loggDebug
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.domain.*
 import no.nav.helse.sporhund.domain.Dialogmelding
@@ -17,7 +18,7 @@ fun KafkaConsumerJobb.håndterSvarFraBehandler(
 ) {
     val kafkamelding = objectMapper.readValue<DialogmeldingFraBehandlerKafkaDto>(record.value())
     if (!kafkamelding.erRelevant()) {
-        loggInfo("Meldingen er ikke relevant. Ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding))
+        loggDebug("Meldingen er ikke relevant. Ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding))
         return
     }
 
@@ -26,7 +27,7 @@ fun KafkaConsumerJobb.håndterSvarFraBehandler(
         val svarFraBehandler = kafkamelding.svarFraBehandlerMedConversationRef()
         svarFraBehandler.håndterSvarMedConversationRef(transactionProvider)
     } else {
-        loggInfo("conversationRef er null, ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding))
+        loggDebug("conversationRef er null, ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding))
     }
 }
 
