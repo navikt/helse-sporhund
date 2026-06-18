@@ -3,16 +3,13 @@ package no.nav.helse.sporhund.infrastructure.clients.dokarkiv
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import com.github.navikt.tbd_libs.retry.retry
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.HttpStatement
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.application.KnyttInnkommendeJournalpost
@@ -90,7 +87,8 @@ class DokarkivClient(
 
     fun feilregistrerOgKnyttJournalpost(melding: KnyttInnkommendeJournalpost) {
         feilregistrer(melding.journalpostId)
-        val response = knyttTilAnnenSak(melding.journalpostId, melding.conversationRef.value.toString(), melding.identitetsnummer)
+        val response =
+            knyttTilAnnenSak(melding.journalpostId, melding.conversationRef.value.toString(), melding.identitetsnummer)
         ferdigstill(response.nyJournalpostId)
     }
 
@@ -153,6 +151,7 @@ class DokarkivClient(
             httpClient
                 .preparePatch("${dokarkivConfig.baseUrl}/rest/journalpostapi/v1/journalpost/$journalpostId/ferdigstill") {
                     bearerAuth(accessTokenProvider.machineToken(dokarkivConfig.scope))
+                    contentType(ContentType.Application.Json)
                     @Language("JSON")
                     val body = """ { "journalfoerendeEnhet": "9999" } """
                     setBody(body)
@@ -202,7 +201,13 @@ class DokarkivClient(
             feil: String,
         ) : RuntimeException(feil)
 
-        private val forsøkPåNy = setOf(ClosedReceiveChannelException::class, SSLHandshakeException::class, HttpRequestTimeoutException::class, DokarkivClientException::class)
+        private val forsøkPåNy =
+            setOf(
+                ClosedReceiveChannelException::class,
+                SSLHandshakeException::class,
+                HttpRequestTimeoutException::class,
+                DokarkivClientException::class,
+            )
 
         private suspend fun <T> HttpStatement.executeRetry(
             avbryt: (throwable: Throwable) -> Boolean = { false },
