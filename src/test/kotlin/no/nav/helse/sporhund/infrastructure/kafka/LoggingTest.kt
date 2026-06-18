@@ -41,4 +41,28 @@ class LoggingTest {
         assertEquals(dto.dialogmelding.navnHelsepersonell, maskert.dialogmelding.navnHelsepersonell)
         assertEquals(dto.dialogmelding.foresporselFraSaksbehandlerForesporselSvar?.temaKode, maskert.dialogmelding.foresporselFraSaksbehandlerForesporselSvar?.temaKode)
     }
+
+    @Test
+    fun `maskertForesporselSvar - maskerer tekstNotatInnhold i compact JSON`() {
+        val json = """{"tekstNotatInnhold":"sensitiv tekst","annetFelt":"uendret"}"""
+        assertEquals("""{"tekstNotatInnhold":"***","annetFelt":"uendret"}""", json.maskertForesporselSvar())
+    }
+
+    @Test
+    fun `maskertForesporselSvar - maskerer tekstNotatInnhold i pretty-printed JSON`() {
+        val json = """{"tekstNotatInnhold" : "sensitiv tekst","annetFelt":"uendret"}"""
+        assertEquals("""{"tekstNotatInnhold":"***","annetFelt":"uendret"}""", json.maskertForesporselSvar())
+    }
+
+    @Test
+    fun `maskertForesporselSvar - gjør ingenting når feltet ikke finnes`() {
+        val json = """{"annetFelt":"uendret"}"""
+        assertEquals(json, json.maskertForesporselSvar())
+    }
+
+    @Test
+    fun `maskertForesporselSvar - gjør ingenting når JSON er ugyldig`() {
+        val ugyldig = "dette er ikke json"
+        assertEquals(ugyldig, ugyldig.maskertForesporselSvar())
+    }
 }

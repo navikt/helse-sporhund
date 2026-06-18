@@ -9,6 +9,8 @@ fun String.erUuid(): Boolean =
 
 fun DialogmeldingFraBehandlerKafkaDto.erRelevant(): Boolean = (this.conversationRef == null || this.conversationRef.erUuid()) && this.dialogmelding.foresporselFraSaksbehandlerForesporselSvar != null
 
+fun String.maskertForesporselSvar(): String = replace(Regex(""""tekstNotatInnhold"\s*:\s*"[^"]*""""), """"tekstNotatInnhold":"***"""")
+
 fun DialogmeldingFraBehandlerKafkaDto.medMaskertForesporselSvar(): DialogmeldingFraBehandlerKafkaDto =
     copy(
         dialogmelding =

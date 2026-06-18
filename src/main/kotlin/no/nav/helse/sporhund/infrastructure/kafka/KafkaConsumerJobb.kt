@@ -36,7 +36,8 @@ class KafkaConsumerJobb(
                         runCatching {
                             if (record.topic() == topics.dialogmeldingFraBehandlerTopic) this.håndterSvarFraBehandler(transactionProvider, record)
                         }.onFailure {
-                            loggError("Kafka consumer-jobb: feil ved lesing av melding, committer ikke offsets", it, "recordKey" to record.key(), "recordValue" to record.value())
+                            val maskedRecordValue = record.value()?.maskertForesporselSvar()
+                            loggError("Kafka consumer-jobb: feil ved lesing av melding, committer ikke offsets", it, "recordKey" to record.key(), "recordValue" to maskedRecordValue)
                             return@poll
                         }.onSuccess {
                             consumer.commitSync()
