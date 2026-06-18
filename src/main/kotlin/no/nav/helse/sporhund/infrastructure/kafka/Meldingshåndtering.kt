@@ -5,8 +5,14 @@ import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggDebug
 import no.nav.helse.sporhund.application.logg.loggInfo
-import no.nav.helse.sporhund.domain.*
+import no.nav.helse.sporhund.domain.Behandler
+import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.Dialogmelding
+import no.nav.helse.sporhund.domain.HprNummer
+import no.nav.helse.sporhund.domain.Identitetsnummer
+import no.nav.helse.sporhund.domain.Kontor
+import no.nav.helse.sporhund.domain.Navn
+import no.nav.helse.sporhund.domain.Organisasjonsnummer
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.time.ZoneId
@@ -18,16 +24,25 @@ fun KafkaConsumerJobb.håndterSvarFraBehandler(
 ) {
     val kafkamelding = objectMapper.readValue<DialogmeldingFraBehandlerKafkaDto>(record.value())
     if (!kafkamelding.erRelevant()) {
-        loggDebug("Meldingen er ikke relevant. Ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding.medMaskertForesporselSvar()))
+        loggDebug(
+            "Meldingen er ikke relevant. Ignorerer meldingen.",
+            "melding" to objectMapper.writeValueAsString(kafkamelding.medMaskertForesporselSvar()),
+        )
         return
     }
 
     if (kafkamelding.conversationRef != null) {
-        loggInfo("conversationRef er uuid, forsøker å knytte meldingen til dialog", "melding" to objectMapper.writeValueAsString(kafkamelding.medMaskertForesporselSvar()))
+        loggInfo(
+            "conversationRef er uuid, forsøker å knytte meldingen til dialog",
+            "melding" to objectMapper.writeValueAsString(kafkamelding.medMaskertForesporselSvar()),
+        )
         val svarFraBehandler = kafkamelding.svarFraBehandlerMedConversationRef()
         svarFraBehandler.håndterSvarMedConversationRef(transactionProvider)
     } else {
-        loggDebug("conversationRef er null, ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding.medMaskertForesporselSvar()))
+        loggDebug(
+            "conversationRef er null, ignorerer meldingen.",
+            "melding" to objectMapper.writeValueAsString(kafkamelding.medMaskertForesporselSvar()),
+        )
     }
 }
 
@@ -82,8 +97,8 @@ private fun DialogmeldingFraBehandlerKafkaDto.tilBehandler(): Behandler =
         navn = this.dialogmelding.navnHelsepersonell.tilNavn(),
         kontor =
             Kontor(
-                this.legekontorOrgName,
-                Organisasjonsnummer(checkNotNull(this.legekontorOrgNr)),
+                navn = this.legekontorOrgName,
+                organisasjonsnummer = this.legekontorOrgNr?.let { Organisasjonsnummer(it) },
                 adresse = null,
             ),
         telefonnummer = null,
