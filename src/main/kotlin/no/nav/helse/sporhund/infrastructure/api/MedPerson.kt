@@ -28,7 +28,6 @@ suspend fun RoutingContext.medPerson(
         "Saksbehandler med Nav-ident=${saksbehandler.ident.value} gjør oppslag på person",
         "identitetsnummer" to identitetsnummer.value,
     )
-    loggInfo("Kall: ${call.request.httpMethod.value} ${call.request.uri}")
     val result = populasjonstilgangskontrollProvider.kontrollerKjerneTilgang(call.accessToken(), identitetsnummer.value)
 
     when (result) {
