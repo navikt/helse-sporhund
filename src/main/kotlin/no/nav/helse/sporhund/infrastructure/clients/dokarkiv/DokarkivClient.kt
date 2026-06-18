@@ -21,7 +21,6 @@ import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
-import org.intellij.lang.annotations.Language
 import java.time.ZoneId
 import javax.net.ssl.SSLHandshakeException
 import kotlin.io.encoding.Base64
@@ -87,9 +86,7 @@ class DokarkivClient(
 
     fun feilregistrerOgKnyttJournalpost(melding: KnyttInnkommendeJournalpost) {
         feilregistrer(melding.journalpostId)
-        val response =
-            knyttTilAnnenSak(melding.journalpostId, melding.conversationRef.value.toString(), melding.identitetsnummer)
-        ferdigstill(response.nyJournalpostId)
+        knyttTilAnnenSak(melding.journalpostId, melding.conversationRef.value.toString(), melding.identitetsnummer)
     }
 
     private fun feilregistrer(journalpostId: String) {
@@ -115,58 +112,34 @@ class DokarkivClient(
         journalpostId: String,
         fagsakId: String,
         identitetsnummer: Identitetsnummer,
-    ): DokarkivPutKnyttTilAnnenSakResponse =
-        runBlocking {
-            httpClient
-                .preparePut("${dokarkivConfig.baseUrl}/rest/journalpostapi/v1/journalpost/$journalpostId/knyttTilAnnenSak") {
-                    bearerAuth(accessTokenProvider.machineToken(dokarkivConfig.scope))
-                    contentType(ContentType.Application.Json)
-                    setBody(
-                        objectMapper.writeValueAsString(
-                            KnyttTilAnnenSakPayload(
-                                fagsakId = fagsakId,
-                                bruker = Bruker(id = identitetsnummer.value),
-                            ),
+    ) = runBlocking {
+        httpClient
+            .preparePut("${dokarkivConfig.baseUrl}/rest/journalpostapi/v1/journalpost/$journalpostId/knyttTilAnnenSak") {
+                bearerAuth(accessTokenProvider.machineToken(dokarkivConfig.scope))
+                contentType(ContentType.Application.Json)
+                setBody(
+                    objectMapper.writeValueAsString(
+                        KnyttTilAnnenSakPayload(
+                            fagsakId = fagsakId,
+                            bruker = Bruker(id = identitetsnummer.value),
                         ),
-                    )
-                }.executeRetry(avbryt = { it::class !in forsøkPåNy }) {
-                    when (it.status.value) {
-                        in (200 until 300) -> {
-                            val response = objectMapper.readValue<DokarkivPutKnyttTilAnnenSakResponse>(it.bodyAsText())
-                            loggInfo("Journalpost med opprinnelig journalpostId=$journalpostId har fått ny journalpostId=${response.nyJournalpostId} og blitt knyttet til sak med fagsakId=$fagsakId")
-                            response
-                        }
+                    ),
+                )
+            }.executeRetry(avbryt = { it::class !in forsøkPåNy }) {
+                when (it.status.value) {
+                    in (200 until 300) -> {
+                        val response = objectMapper.readValue<DokarkivPutKnyttTilAnnenSakResponse>(it.bodyAsText())
+                        loggInfo("Journalpost med opprinnelig journalpostId=$journalpostId har fått ny journalpostId=${response.nyJournalpostId} og blitt knyttet til sak med fagsakId=$fagsakId")
+                        return@executeRetry
+                    }
 
-                        else -> {
-                            val error = it.body<String>()
-                            loggError("Feil fra Dokarkiv ved knytting av journalpost med journalpostId=$journalpostId til annen sak: response=$error")
-                            throw DokarkivClientException("Feil fra Dokarkiv ved knytting av journalpost til annen sak: $error")
-                        }
+                    else -> {
+                        val error = it.body<String>()
+                        loggError("Feil fra Dokarkiv ved knytting av journalpost med journalpostId=$journalpostId til annen sak: response=$error")
+                        throw DokarkivClientException("Feil fra Dokarkiv ved knytting av journalpost til annen sak: $error")
                     }
                 }
-        }
-
-    private fun ferdigstill(journalpostId: String) {
-        runBlocking {
-            httpClient
-                .preparePatch("${dokarkivConfig.baseUrl}/rest/journalpostapi/v1/journalpost/$journalpostId/ferdigstill") {
-                    bearerAuth(accessTokenProvider.machineToken(dokarkivConfig.scope))
-                    contentType(ContentType.Application.Json)
-                    @Language("JSON")
-                    val body = """ { "journalfoerendeEnhet": "9999" } """
-                    setBody(body)
-                }.executeRetry(avbryt = { it::class !in forsøkPåNy }) {
-                    when (it.status.value) {
-                        in (200 until 300) -> loggInfo("Journalpost med journalpostId=$journalpostId ferdigstilt")
-
-                        else -> {
-                            val error = it.body<String>()
-                            loggError("Feil fra Dokarkiv ved ferdigstilling av journalpost med journalpostId=$journalpostId: response=$error")
-                            throw DokarkivClientException("Feil fra Dokarkiv ved ferdigstilling av journalpost: $error")
-                        }
-                    }
-                }
-        }
+            }
     }
 
     private suspend fun håndterPostJournalpostResponse(
