@@ -307,7 +307,7 @@ private fun OpprettUtgåendeJournalpost.tilPdfInput() =
         gjelder =
             MeldingTilBehandlerPdfInput.Gjelder(
                 fødselsnummer = gjelder.value,
-                navn = søkernavn.let { "${it.fornavn}${it.mellomnavn?.let { m -> " $m" } ?: ""} ${it.etternavn}" },
+                navn = søker.navn.let { "${it.fornavn}${it.mellomnavn?.let { m -> " $m" } ?: ""} ${it.etternavn}" },
             ),
         fagområde =
             when (fagområde) {

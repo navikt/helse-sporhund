@@ -16,6 +16,7 @@ import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.domain.Navn
 import no.nav.helse.sporhund.domain.Saksbehandler
+import no.nav.helse.sporhund.domain.Søker
 import no.nav.helse.sporhund.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
@@ -76,11 +77,15 @@ private fun ApiNyDialogmelding.tilDialog(
 ): Dialog =
     Dialog.ny(
         identitetsnummer = identitetsnummer,
-        søkernavn =
-            Navn(
-                fornavn = sokernavn.fornavn,
-                mellomnavn = sokernavn.mellomnavn,
-                etternavn = sokernavn.etternavn,
+        søker =
+            Søker(
+                navn =
+                    Navn(
+                        fornavn = soker.navn.fornavn,
+                        mellomnavn = soker.navn.mellomnavn,
+                        etternavn = soker.navn.etternavn,
+                    ),
+                fødselsdato = soker.fodselsdato,
             ),
         melding =
             Dialogmelding.FraNav.ny(

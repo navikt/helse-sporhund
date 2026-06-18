@@ -3,6 +3,7 @@ package no.nav.helse.sporhund.infrastructure.api
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.Instant
+import java.time.LocalDate
 import java.util.*
 
 // === Behandler types ===
@@ -21,6 +22,11 @@ enum class ApiBehandlerKategori {
     TANNLEGE,
     PSYKOLOG,
 }
+
+data class ApiSoker(
+    val navn: ApiNavn,
+    val fodselsdato: LocalDate,
+)
 
 data class ApiNavn(
     val fornavn: String,
@@ -121,7 +127,7 @@ data class ApiDialogmeldingOppgave(
     val sisteAktivitetTidspunkt: Instant,
     val fristTidspunkt: Instant,
     val fagomrade: ApiFagomrade,
-    val soker: ApiNavn,
+    val soker: ApiSoker,
     val status: ApiDialogmeldingStatus,
 )
 
@@ -136,7 +142,7 @@ enum class ApiFagomrade {
 
 data class ApiNyDialogmelding(
     val behandler: ApiBehandler,
-    val sokernavn: ApiNavn,
+    val soker: ApiSoker,
     val fagomrade: ApiFagomrade,
     val melding: String,
 )

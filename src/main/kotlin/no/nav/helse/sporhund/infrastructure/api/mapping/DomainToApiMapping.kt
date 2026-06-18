@@ -24,7 +24,7 @@ fun Dialog.tilApiDialogmeldingOppgave(personPseudoId: PersonPseudoId): ApiDialog
         sisteAktivitetTidspunkt = this.nyesteMelding().tidspunkt,
         fristTidspunkt = this.frist(),
         fagomrade = this.tilApiFagomrade(),
-        soker = this.søkernavn.tilApiNavn(),
+        soker = this.søker.tilApiSoker(),
         status = status.tilApiDialogmeldingStatus(),
     )
 
@@ -112,6 +112,12 @@ private fun Behandler.tilApiBehandler(
                 poststed = kontor.adresse?.poststed,
             ),
         telefonnummer = telefonnummer?.value,
+    )
+
+private fun Søker.tilApiSoker(): ApiSoker =
+    ApiSoker(
+        navn = navn.tilApiNavn(),
+        fodselsdato = fødselsdato,
     )
 
 private fun Navn.tilApiNavn(): ApiNavn =

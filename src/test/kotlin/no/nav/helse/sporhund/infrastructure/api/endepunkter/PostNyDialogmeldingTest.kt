@@ -9,6 +9,7 @@ import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.*
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedTokenMedSkrivTilgang
+import java.time.LocalDate
 import java.util.*
 import kotlin.random.Random.Default.nextInt
 import kotlin.test.Test
@@ -32,7 +33,11 @@ class PostNyDialogmeldingTest : EndepunktTest() {
 
             val nyDialogmelding =
                 ApiNyDialogmelding(
-                    sokernavn = ApiNavn(fornavn = "Slapp", mellomnavn = null, etternavn = "Appelsin"),
+                    soker =
+                        ApiSoker(
+                            navn = ApiNavn(fornavn = "Slapp", mellomnavn = null, etternavn = "Appelsin"),
+                            fodselsdato = LocalDate.of(1990, 6, 15),
+                        ),
                     behandler =
                         ApiBehandler(
                             id = "behandler-123",

@@ -7,6 +7,7 @@ import kotliquery.Session
 import no.nav.helse.sporhund.application.DialogRepository
 import no.nav.helse.sporhund.domain.*
 import java.time.Instant
+import java.time.LocalDate
 import java.util.*
 
 class PgDialogRepository(
@@ -58,7 +59,7 @@ class PgDialogRepository(
     private data class DialogDto(
         val conversationRef: UUID,
         val identitetsnummer: IdentitetsnummerDto,
-        val søkernavn: NavnDto,
+        val søker: SøkerDto,
         val meldinger: List<DialogmeldingDto>,
         val status: DialogstatusDto,
         val fagområde: FagområdeDto,
@@ -70,7 +71,7 @@ class PgDialogRepository(
                 meldinger = meldinger.map { it.tilDomene() },
                 status = status.tilDomene(),
                 fagområde = fagområde.tilDomene(),
-                søkernavn = søkernavn.tilDomene(),
+                søker = søker.tilDomene(),
             )
 
         companion object {
@@ -81,12 +82,7 @@ class PgDialogRepository(
                     meldinger = dialog.meldinger.map { DialogmeldingDto.fraDialogmelding(it) },
                     status = DialogstatusDto.fraDialogstatus(dialog.status),
                     fagområde = FagområdeDto.fraDialogtype(dialog.fagområde),
-                    søkernavn =
-                        NavnDto(
-                            fornavn = dialog.søkernavn.fornavn,
-                            mellomnavn = dialog.søkernavn.mellomnavn,
-                            etternavn = dialog.søkernavn.etternavn,
-                        ),
+                    søker = SøkerDto.fraSøker(dialog.søker),
                 )
         }
     }
@@ -274,6 +270,25 @@ class PgDialogRepository(
                         )
                     }
                 }
+        }
+    }
+
+    private data class SøkerDto(
+        val navn: NavnDto,
+        val fødselsdato: LocalDate,
+    ) {
+        fun tilDomene() =
+            Søker(
+                navn = navn.tilDomene(),
+                fødselsdato = fødselsdato,
+            )
+
+        companion object {
+            fun fraSøker(søker: Søker) =
+                SøkerDto(
+                    navn = NavnDto(fornavn = søker.navn.fornavn, mellomnavn = søker.navn.mellomnavn, etternavn = søker.navn.etternavn),
+                    fødselsdato = søker.fødselsdato,
+                )
         }
     }
 

@@ -2,11 +2,12 @@ package no.nav.helse.sporhund.domain.testhelpers
 
 import no.nav.helse.sporhund.domain.*
 import java.time.Instant
+import java.time.LocalDate
 import java.util.*
 
 fun lagDialog(
     identitetsnummer: Identitetsnummer = lagIdentitetsnummer(),
-    søkernavn: Navn = lagNavn(),
+    søker: Søker = lagSøker(),
     status: Dialogstatus = Dialogstatus.ForespørselSendt,
     melding: Dialogmelding.FraNav = lagFraNavMelding(),
     fagområde: Fagområde = Fagområde.EnkeltståendeBehandlingsdager,
@@ -14,11 +15,16 @@ fun lagDialog(
     Dialog.fraLagring(
         conversationRef = ConversationRef(UUID.randomUUID()),
         identitetsnummer = identitetsnummer,
-        søkernavn = søkernavn,
+        søker = søker,
         meldinger = listOf(melding),
         status = status,
         fagområde = fagområde,
     )
+
+fun lagSøker(
+    navn: Navn = lagNavn(),
+    fødselsdato: LocalDate = LocalDate.of(1990, 1, 1),
+): Søker = Søker(navn = navn, fødselsdato = fødselsdato)
 
 fun lagFraNavMelding(
     ident: NavIdent = lagNavIdent(),

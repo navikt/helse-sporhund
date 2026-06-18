@@ -28,7 +28,7 @@ enum class Fagområde {
 class Dialog private constructor(
     val conversationRef: ConversationRef,
     val identitetsnummer: Identitetsnummer,
-    val søkernavn: Navn,
+    val søker: Søker,
     status: Dialogstatus,
     val fagområde: Fagområde,
     meldinger: List<Dialogmelding<*>>,
@@ -135,14 +135,14 @@ class Dialog private constructor(
     companion object {
         fun ny(
             identitetsnummer: Identitetsnummer,
-            søkernavn: Navn,
+            søker: Søker,
             melding: Dialogmelding.FraNav,
             fagområde: Fagområde,
         ): Dialog =
             Dialog(
                 conversationRef = ConversationRef(UUID.randomUUID()),
                 identitetsnummer = identitetsnummer,
-                søkernavn = søkernavn,
+                søker = søker,
                 meldinger = emptyList(),
                 status = Dialogstatus.ForespørselSendt,
                 fagområde = fagområde,
@@ -151,11 +151,11 @@ class Dialog private constructor(
         fun fraLagring(
             conversationRef: ConversationRef,
             identitetsnummer: Identitetsnummer,
-            søkernavn: Navn,
+            søker: Søker,
             meldinger: List<Dialogmelding<*>>,
             status: Dialogstatus,
             fagområde: Fagområde,
-        ): Dialog = Dialog(conversationRef, identitetsnummer, søkernavn, status, fagområde, meldinger)
+        ): Dialog = Dialog(conversationRef, identitetsnummer, søker, status, fagområde, meldinger)
     }
 }
 

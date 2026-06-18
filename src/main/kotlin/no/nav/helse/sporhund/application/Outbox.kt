@@ -42,7 +42,7 @@ sealed interface OutboxMelding {
             avsender = avsender,
             mottaker = melding.behandler,
             gjelder = dialog.identitetsnummer,
-            søkernavn = dialog.søkernavn,
+            søker = dialog.søker,
             tidspunkt = melding.tidspunkt,
             fagområde = dialog.fagområde,
         )
@@ -72,7 +72,7 @@ data class OpprettUtgåendeJournalpost(
     val avsender: Saksbehandler,
     val mottaker: Behandler,
     val gjelder: Identitetsnummer,
-    val søkernavn: Navn,
+    val søker: Søker,
     val tidspunkt: Instant,
     val fagområde: Fagområde,
 ) : OutboxMelding

@@ -12,6 +12,7 @@ import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.OutboxMeldingId
 import no.nav.helse.sporhund.domain.*
 import java.time.Instant
+import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -41,9 +42,10 @@ class PgOutbox(
                         avsenderNavn = melding.avsender.navn,
                         mottaker = BehandlerDto.fra(melding.mottaker),
                         gjelder = melding.gjelder.value,
-                        søkerFornavn = melding.søkernavn.fornavn,
-                        søkerMellomnavn = melding.søkernavn.mellomnavn,
-                        søkerEtternavn = melding.søkernavn.etternavn,
+                        søkerFornavn = melding.søker.navn.fornavn,
+                        søkerMellomnavn = melding.søker.navn.mellomnavn,
+                        søkerEtternavn = melding.søker.navn.etternavn,
+                        søkerFødselsdato = melding.søker.fødselsdato,
                         tidspunkt = melding.tidspunkt,
                         fagområde =
                             when (melding.fagområde) {
@@ -104,11 +106,15 @@ class PgOutbox(
                             ),
                         mottaker = dto.mottaker.tilDomene(),
                         gjelder = Identitetsnummer.fraString(dto.gjelder),
-                        søkernavn =
-                            Navn(
-                                fornavn = dto.søkerFornavn,
-                                mellomnavn = dto.søkerMellomnavn,
-                                etternavn = dto.søkerEtternavn,
+                        søker =
+                            Søker(
+                                navn =
+                                    Navn(
+                                        fornavn = dto.søkerFornavn,
+                                        mellomnavn = dto.søkerMellomnavn,
+                                        etternavn = dto.søkerEtternavn,
+                                    ),
+                                fødselsdato = dto.søkerFødselsdato,
                             ),
                         tidspunkt = dto.tidspunkt,
                         fagområde =
@@ -170,6 +176,7 @@ class PgOutbox(
         val søkerFornavn: String,
         val søkerMellomnavn: String?,
         val søkerEtternavn: String,
+        val søkerFødselsdato: LocalDate,
         val tidspunkt: Instant,
         val fagområde: String,
     ) : OutboxMeldingDto
