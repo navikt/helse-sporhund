@@ -40,13 +40,14 @@ class KafkaProducerJobb(
                             val event = it.nyDialogmeldingFraNavEvent
                             val partitionKey = event.conversationRef.value.toString()
                             val kafkaDto = event.toKafkaDto()
-                            producer.send(
-                                ProducerRecord(
-                                    dialogmeldingFraNayTopic,
-                                    partitionKey,
-                                    objectMapper.writeValueAsString(kafkaDto),
-                                ),
-                            )
+                            producer
+                                .send(
+                                    ProducerRecord(
+                                        dialogmeldingFraNayTopic,
+                                        partitionKey,
+                                        objectMapper.writeValueAsString(kafkaDto),
+                                    ),
+                                ).get()
                             outbox.meldingSendt(it.id)
                         }
                     }
