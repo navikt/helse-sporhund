@@ -18,16 +18,16 @@ fun KafkaConsumerJobb.håndterSvarFraBehandler(
 ) {
     val kafkamelding = objectMapper.readValue<DialogmeldingFraBehandlerKafkaDto>(record.value())
     if (!kafkamelding.erRelevant()) {
-        loggDebug("Meldingen er ikke relevant. Ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding))
+        loggDebug("Meldingen er ikke relevant. Ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding.medMaskertForesporselSvar()))
         return
     }
 
     if (kafkamelding.conversationRef != null) {
-        loggInfo("conversationRef er uuid, forsøker å knytte meldingen til dialog", "melding" to objectMapper.writeValueAsString(kafkamelding))
+        loggInfo("conversationRef er uuid, forsøker å knytte meldingen til dialog", "melding" to objectMapper.writeValueAsString(kafkamelding.medMaskertForesporselSvar()))
         val svarFraBehandler = kafkamelding.svarFraBehandlerMedConversationRef()
         svarFraBehandler.håndterSvarMedConversationRef(transactionProvider)
     } else {
-        loggDebug("conversationRef er null, ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding))
+        loggDebug("conversationRef er null, ignorerer meldingen.", "melding" to objectMapper.writeValueAsString(kafkamelding.medMaskertForesporselSvar()))
     }
 }
 

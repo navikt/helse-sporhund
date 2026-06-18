@@ -8,3 +8,16 @@ fun String.erUuid(): Boolean =
     }.isSuccess
 
 fun DialogmeldingFraBehandlerKafkaDto.erRelevant(): Boolean = (this.conversationRef == null || this.conversationRef.erUuid()) && this.dialogmelding.foresporselFraSaksbehandlerForesporselSvar != null
+
+fun DialogmeldingFraBehandlerKafkaDto.medMaskertForesporselSvar(): DialogmeldingFraBehandlerKafkaDto =
+    copy(
+        dialogmelding =
+            dialogmelding.copy(
+                foresporselFraSaksbehandlerForesporselSvar =
+                    dialogmelding.foresporselFraSaksbehandlerForesporselSvar?.copy(
+                        tekstNotatInnhold = "***",
+                        dokIdNotat = dialogmelding.foresporselFraSaksbehandlerForesporselSvar.dokIdNotat?.let { "***" },
+                        datoNotat = null,
+                    ),
+            ),
+    )
