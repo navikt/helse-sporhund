@@ -16,8 +16,6 @@ fun DialogmeldingFraBehandlerKafkaDto.medMaskertForesporselSvar(): Dialogmelding
                 foresporselFraSaksbehandlerForesporselSvar =
                     dialogmelding.foresporselFraSaksbehandlerForesporselSvar?.copy(
                         tekstNotatInnhold = "***",
-                        dokIdNotat = dialogmelding.foresporselFraSaksbehandlerForesporselSvar.dokIdNotat?.let { "***" },
-                        datoNotat = null,
                     ),
             ),
     )
