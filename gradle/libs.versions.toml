@@ -46,7 +46,7 @@ postgresJdbcDriver = "org.postgresql:postgresql:42.7.11"
 kotliquery = "com.github.seratch:kotliquery:1.9.1"
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
-hikari = "com.zaxxer:HikariCP:7.0.2"
+hikari = "com.zaxxer:HikariCP:7.1.0"
 cloud-sql-postgres-socket-factory = { module = "com.google.cloud.sql:postgres-socket-factory", version.ref = "cloudSqlSocketFactory" }
 
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
