@@ -5,19 +5,12 @@ import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggDebug
 import no.nav.helse.sporhund.application.logg.loggInfo
-import no.nav.helse.sporhund.domain.Behandler
-import no.nav.helse.sporhund.domain.ConversationRef
+import no.nav.helse.sporhund.domain.*
 import no.nav.helse.sporhund.domain.Dialogmelding
-import no.nav.helse.sporhund.domain.DialogmeldingId
-import no.nav.helse.sporhund.domain.HprNummer
-import no.nav.helse.sporhund.domain.Identitetsnummer
-import no.nav.helse.sporhund.domain.Kontor
-import no.nav.helse.sporhund.domain.Navn
-import no.nav.helse.sporhund.domain.Organisasjonsnummer
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.time.ZoneId
-import java.util.UUID
+import java.util.*
 
 fun KafkaConsumerJobb.håndterSvarFraBehandler(
     transactionProvider: TransactionProvider,
@@ -53,16 +46,11 @@ fun KafkaConsumerJobb.håndterStatusOppdatering(
 ) {
     val kafkamelding = objectMapper.readValue<DialogmeldingStatusKafkaDto>(record.value())
     if (kafkamelding.status != "OK" && kafkamelding.status != "AVVIST") {
-        loggDebug("Ignorerer statusmelding med status=${kafkamelding.status}")
         return
     }
     val meldingId = UUID.fromString(kafkamelding.bestillingUuid)
     transactionProvider.transaction {
-        val dialog = dialogRepository.finnDialogVedMeldingId(meldingId)
-        if (dialog == null) {
-            loggDebug("Fant ingen dialog for bestillingUuid=${kafkamelding.bestillingUuid}, ignorerer statusmelding")
-            return@transaction
-        }
+        val dialog = dialogRepository.finnDialogVedMeldingId(meldingId) ?: return@transaction
         dialog.mottaKvittering(
             meldingId = DialogmeldingId(meldingId),
             avvist = kafkamelding.status == "AVVIST",
@@ -72,6 +60,7 @@ fun KafkaConsumerJobb.håndterStatusOppdatering(
             "Mottok kvittering for melding",
             "bestillingUuid" to kafkamelding.bestillingUuid,
             "status" to kafkamelding.status,
+            "tekst" to kafkamelding.tekst,
         )
     }
 }
