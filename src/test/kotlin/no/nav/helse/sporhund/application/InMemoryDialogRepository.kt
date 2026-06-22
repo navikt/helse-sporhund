@@ -1,9 +1,7 @@
 package no.nav.helse.sporhund.application
 
-import no.nav.helse.sporhund.domain.ConversationRef
-import no.nav.helse.sporhund.domain.Dialog
-import no.nav.helse.sporhund.domain.Dialogstatus
-import no.nav.helse.sporhund.domain.Identitetsnummer
+import no.nav.helse.sporhund.domain.*
+import java.util.*
 
 class InMemoryDialogRepository : DialogRepository {
     private val dialoger = mutableMapOf<ConversationRef, Dialog>()
@@ -16,5 +14,17 @@ class InMemoryDialogRepository : DialogRepository {
 
     override fun finnDialoger(identitetsnummer: Identitetsnummer): List<Dialog> = dialoger.values.filter { it.identitetsnummer == identitetsnummer }
 
-    override fun finnIkkeLukkedeDialoger(): List<Dialog> = dialoger.values.filter { it.status != Dialogstatus.DialogLukket }
+    override fun finnÅpneDialoger(): List<Dialog> = dialoger.values.filter { it.status != Dialogstatus.DialogLukket }
+
+    override fun finnDialogVedMeldingId(meldingId: UUID): Dialog? =
+        dialoger.values.firstOrNull { dialog ->
+            dialog.meldinger.any { melding ->
+                melding.id == DialogmeldingId(meldingId) &&
+                    when (melding) {
+                        is Dialogmelding.FraNav -> !melding.kvitteringMottatt
+                        is Dialogmelding.FraSystem -> !melding.kvitteringMottatt
+                        else -> false
+                    }
+            }
+        }
 }

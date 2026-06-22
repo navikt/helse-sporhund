@@ -16,6 +16,7 @@ enum class Dialogstatus {
     SvarMottatt,
     PurringSendt,
     DialogLukket,
+    Avvist,
 }
 
 enum class Fagområde {
@@ -86,6 +87,23 @@ class Dialog private constructor(
             }
     }
 
+    fun mottaKvittering(
+        meldingId: DialogmeldingId<UUID>,
+        avvist: Boolean,
+    ) {
+        val melding =
+            _meldinger.firstOrNull { it.id == meldingId }
+                ?: return
+        when (melding) {
+            is Dialogmelding.FraNav -> melding.kvitteringMottatt = true
+            is Dialogmelding.FraSystem -> melding.kvitteringMottatt = true
+            else -> return
+        }
+        if (avvist && (status == Dialogstatus.ForespørselSendt || status == Dialogstatus.PurringSendt)) {
+            status = Dialogstatus.Avvist
+        }
+    }
+
     fun frist(): Instant = førsteMeldingFraNav().tidspunkt + Duration.ofDays(21)
 
     fun antallVedleggTotalt() = meldinger.filterIsInstance<Dialogmelding.FraBehandler>().sumOf { it.antallVedlegg }
@@ -110,6 +128,7 @@ class Dialog private constructor(
                     ),
                 )
             }
+
             is Dialogmelding.FraSystem -> {
                 status = Dialogstatus.PurringSendt
                 events.add(
@@ -177,6 +196,7 @@ sealed interface Dialogmelding<ID_TYPE> {
         override val behandler: Behandler,
         val saksbehandler: NavIdent,
         val behandlerRef: BehandlerRef,
+        var kvitteringMottatt: Boolean = false,
     ) : Dialogmelding<UUID> {
         companion object {
             fun ny(
@@ -192,6 +212,7 @@ sealed interface Dialogmelding<ID_TYPE> {
                     saksbehandler = saksbehandler,
                     behandler = behandler,
                     behandlerRef = behandlerRef,
+                    kvitteringMottatt = false,
                 )
 
             fun fraLagring(
@@ -201,6 +222,7 @@ sealed interface Dialogmelding<ID_TYPE> {
                 saksbehandler: NavIdent,
                 behandler: Behandler,
                 behandlerRef: BehandlerRef,
+                kvitteringMottatt: Boolean = false,
             ) = FraNav(
                 id = id,
                 tidspunkt = tidspunkt,
@@ -208,6 +230,7 @@ sealed interface Dialogmelding<ID_TYPE> {
                 saksbehandler = saksbehandler,
                 behandler = behandler,
                 behandlerRef = behandlerRef,
+                kvitteringMottatt = kvitteringMottatt,
             )
         }
     }
@@ -257,6 +280,7 @@ sealed interface Dialogmelding<ID_TYPE> {
         override val melding: String,
         override val behandler: Behandler,
         val behandlerRef: BehandlerRef,
+        var kvitteringMottatt: Boolean = false,
     ) : Dialogmelding<UUID> {
         companion object {
             fun ny(
@@ -270,6 +294,7 @@ sealed interface Dialogmelding<ID_TYPE> {
                     melding = melding,
                     behandler = behandler,
                     behandlerRef = behandlerRef,
+                    kvitteringMottatt = false,
                 )
 
             fun fraLagring(
@@ -278,12 +303,14 @@ sealed interface Dialogmelding<ID_TYPE> {
                 melding: String,
                 behandler: Behandler,
                 behandlerRef: BehandlerRef,
+                kvitteringMottatt: Boolean = false,
             ) = FraSystem(
                 id = id,
                 tidspunkt = tidspunkt,
                 melding = melding,
                 behandler = behandler,
                 behandlerRef = behandlerRef,
+                kvitteringMottatt = kvitteringMottatt,
             )
         }
     }

@@ -6,10 +6,13 @@ import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.naisful.naisApp
 import com.github.navikt.tbd_libs.populasjonstilgang.client.TilgangsmaskinenClient
 import io.github.smiley4.ktoropenapi.OpenApi
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import io.ktor.server.routing.*
+import io.ktor.server.application.ApplicationStarted
+import io.ktor.server.application.ApplicationStopping
+import io.ktor.server.application.install
+import io.ktor.server.auth.authentication
+import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.routing.Routing
+import io.ktor.server.routing.routing
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -49,6 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
 
 const val DIALOGMELDING_FRA_NAY_TOPIC = "teamsykefravr.isdialogmelding-behandler-dialogmelding-bestilling"
+const val DIALOGMELDING_STATUS_TOPIC = "teamsykefravr.behandler-dialogmelding-status"
 const val DIALOGMELDING_FRA_BEHANDLER_TOPIC = "teamsykefravr.dialogmelding"
 
 fun main() {
@@ -59,6 +63,7 @@ fun main() {
             readTopics =
                 ReadTopics(
                     dialogmeldingFraBehandlerTopic = DIALOGMELDING_FRA_BEHANDLER_TOPIC,
+                    dialogmeldingStatusTopic = DIALOGMELDING_STATUS_TOPIC,
                 ),
             writeTopic = DIALOGMELDING_FRA_NAY_TOPIC,
         )

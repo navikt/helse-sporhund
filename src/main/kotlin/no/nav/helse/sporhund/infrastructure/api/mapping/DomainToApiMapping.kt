@@ -79,6 +79,7 @@ private fun Dialogstatus.tilApiDialogmeldingStatus(): ApiDialogmeldingStatus =
         Dialogstatus.PurringSendt -> ApiDialogmeldingStatus.PURRING_SENDT
         Dialogstatus.SvarMottatt -> ApiDialogmeldingStatus.MOTTATT
         Dialogstatus.DialogLukket -> ApiDialogmeldingStatus.FERDIGSTILT
+        Dialogstatus.Avvist -> ApiDialogmeldingStatus.AVVIST
     }
 
 private fun Dialog.tilApiFagomrade(): ApiFagomrade =

@@ -29,7 +29,7 @@ fun Route.getDialogmeldingOppgaverRoute(
         krevTilgangOgRolle(påkrevdTilgang = Tilgang.Les, påkrevdRolle = Brukerrolle.Dialogmelding) {
             val dialoger =
                 transactionProvider.transaction {
-                    dialogRepository.finnIkkeLukkedeDialoger()
+                    dialogRepository.finnÅpneDialoger()
                 }
             call.respond(
                 dialoger.map { dialog ->

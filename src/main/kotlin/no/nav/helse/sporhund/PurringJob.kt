@@ -32,7 +32,7 @@ internal fun sendPurringerForUtlopteFrister(transactionProvider: TransactionProv
     transactionProvider.transaction {
         val now = Instant.now()
         dialogRepository
-            .finnIkkeLukkedeDialoger()
+            .finnÅpneDialoger()
             .filter { dialog ->
                 dialog.status == Dialogstatus.ForespørselSendt &&
                     !dialog.harFåttSvar() &&

@@ -119,6 +119,7 @@ enum class ApiDialogmeldingStatus {
     PURRING_SENDT,
     MOTTATT,
     FERDIGSTILT,
+    AVVIST,
 }
 
 data class ApiDialogmeldingOppgave(

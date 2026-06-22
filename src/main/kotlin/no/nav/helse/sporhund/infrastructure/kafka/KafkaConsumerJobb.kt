@@ -32,9 +32,11 @@ class KafkaConsumerJobb(
             try {
                 consumer.poll(readyToConsume::get) { records ->
                     records.forEach { record ->
-                        // lytt på melding fra behandler og knytt til dialog
                         runCatching {
+                            // lytt på melding fra behandler og knytt til dialog
                             if (record.topic() == topics.dialogmeldingFraBehandlerTopic) this.håndterSvarFraBehandler(transactionProvider, record)
+                            // lytt på og oppdater status
+                            if (record.topic() == topics.dialogmeldingStatusTopic) this.håndterStatusOppdatering(transactionProvider, record)
                         }.onFailure {
                             val maskedRecordValue = record.value()?.maskertForesporselSvar()
                             loggError("Kafka consumer-jobb: feil ved lesing av melding, committer ikke offsets", it, "recordKey" to record.key(), "recordValue" to maskedRecordValue)

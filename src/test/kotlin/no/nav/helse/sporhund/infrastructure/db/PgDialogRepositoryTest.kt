@@ -7,6 +7,7 @@ import no.nav.helse.sporhund.domain.testhelpers.lagBehandler
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagFraBehandlerMelding
 import no.nav.helse.sporhund.domain.testhelpers.lagFraNavMelding
+import no.nav.helse.sporhund.domain.testhelpers.lagFraSystemMelding
 import no.nav.helse.sporhund.infrastructure.db.testhelpers.DbTest
 import java.util.*
 import kotlin.test.*
@@ -102,20 +103,20 @@ class PgDialogRepositoryTest : DbTest() {
         }
 
     @Test
-    fun `finnIkkeLukkedeDialoger returnerer tom liste når det ikke finnes noen dialoger`() =
+    fun `finnÅpneDialoger returnerer tom liste når det ikke finnes noen dialoger`() =
         test {
             // given
             val repository = dialogRepository
 
             // when
-            val funnet = repository.finnIkkeLukkedeDialoger()
+            val funnet = repository.finnÅpneDialoger()
 
             // then
             assertTrue(funnet.isEmpty())
         }
 
     @Test
-    fun `finnIkkeLukkedeDialoger returnerer dialog som ikke er lukket`() =
+    fun `finnÅpneDialoger returnerer dialog som ikke er lukket`() =
         test {
             // given
             val repository = dialogRepository
@@ -123,7 +124,7 @@ class PgDialogRepositoryTest : DbTest() {
             repository.lagre(dialog)
 
             // when
-            val funnet = repository.finnIkkeLukkedeDialoger()
+            val funnet = repository.finnÅpneDialoger()
 
             // then
             assertEquals(1, funnet.size)
@@ -131,7 +132,7 @@ class PgDialogRepositoryTest : DbTest() {
         }
 
     @Test
-    fun `finnIkkeLukkedeDialoger returnerer ikke dialog med status DialogLukket`() =
+    fun `finnÅpneDialoger returnerer ikke dialog med status DialogLukket`() =
         test {
             // given
             val repository = dialogRepository
@@ -139,14 +140,14 @@ class PgDialogRepositoryTest : DbTest() {
             repository.lagre(lukketDialog)
 
             // when
-            val funnet = repository.finnIkkeLukkedeDialoger()
+            val funnet = repository.finnÅpneDialoger()
 
             // then
             assertTrue(funnet.isEmpty())
         }
 
     @Test
-    fun `finnIkkeLukkedeDialoger returnerer kun ikke-lukkede dialoger`() =
+    fun `finnÅpneDialoger returnerer kun ikke-lukkede dialoger`() =
         test {
             // given
             val repository = dialogRepository
@@ -156,7 +157,7 @@ class PgDialogRepositoryTest : DbTest() {
             repository.lagre(lukketDialog)
 
             // when
-            val funnet = repository.finnIkkeLukkedeDialoger()
+            val funnet = repository.finnÅpneDialoger()
 
             // then
             assertEquals(1, funnet.size)
@@ -164,7 +165,7 @@ class PgDialogRepositoryTest : DbTest() {
         }
 
     @Test
-    fun `finnIkkeLukkedeDialoger returnerer alle statuser unntatt DialogLukket`() =
+    fun `finnÅpneDialoger returnerer alle statuser unntatt DialogLukket`() =
         test {
             // given
             val repository = dialogRepository
@@ -180,7 +181,7 @@ class PgDialogRepositoryTest : DbTest() {
                 }
 
             // when
-            val funnet = repository.finnIkkeLukkedeDialoger()
+            val funnet = repository.finnÅpneDialoger()
 
             // then
             assertEquals(statuser.size, funnet.size)
@@ -188,5 +189,87 @@ class PgDialogRepositoryTest : DbTest() {
             dialoger.forEach { dialog ->
                 assertTrue(dialog.conversationRef in funnedeRefs)
             }
+        }
+
+    @Test
+    fun `finnDialogVedMeldingId finner dialog med FraNav-melding som ikke er kvittert`() =
+        test {
+            // given
+            val fraNavMelding = lagFraNavMelding()
+            val dialog = lagDialog(melding = fraNavMelding)
+            dialogRepository.lagre(dialog)
+
+            // when
+            val funnet = dialogRepository.finnDialogVedMeldingId(fraNavMelding.id.value)
+
+            // then
+            assertNotNull(funnet)
+            assertEquals(dialog.conversationRef, funnet.conversationRef)
+        }
+
+    @Test
+    fun `finnDialogVedMeldingId finner dialog med FraSystem-melding som ikke er kvittert`() =
+        test {
+            // given
+            val fraSystemMelding = lagFraSystemMelding()
+            val dialog = lagDialog()
+            dialog.nyMelding(fraSystemMelding)
+            dialogRepository.lagre(dialog)
+
+            // when
+            val funnet = dialogRepository.finnDialogVedMeldingId(fraSystemMelding.id.value)
+
+            // then
+            assertNotNull(funnet)
+            assertEquals(dialog.conversationRef, funnet.conversationRef)
+        }
+
+    @Test
+    fun `finnDialogVedMeldingId returnerer null når melding allerede er kvittert`() =
+        test {
+            // given
+            val fraNavMelding = lagFraNavMelding()
+            val dialog = lagDialog(melding = fraNavMelding)
+            dialog.mottaKvittering(fraNavMelding.id, avvist = false)
+            dialogRepository.lagre(dialog)
+
+            // when
+            val funnet = dialogRepository.finnDialogVedMeldingId(fraNavMelding.id.value)
+
+            // then
+            assertNull(funnet)
+        }
+
+    @Test
+    fun `finnDialogVedMeldingId returnerer null når meldingId ikke finnes`() =
+        test {
+            // given
+            dialogRepository.lagre(lagDialog())
+
+            // when
+            val funnet = dialogRepository.finnDialogVedMeldingId(UUID.randomUUID())
+
+            // then
+            assertNull(funnet)
+        }
+
+    @Test
+    fun `finnDialogVedMeldingId returnerer ikke dialog der en annen melding i samme dialog er kvittert`() =
+        test {
+            // given - dialog with two FraNav messages, first is kvittert, second is not
+            val kvittertMelding = lagFraNavMelding()
+            val ukvittertMelding = lagFraNavMelding()
+            val dialog = lagDialog(melding = kvittertMelding)
+            dialog.nyMelding(ukvittertMelding)
+            dialog.mottaKvittering(kvittertMelding.id, avvist = false)
+            dialogRepository.lagre(dialog)
+
+            // when
+            val søkPåKvittert = dialogRepository.finnDialogVedMeldingId(kvittertMelding.id.value)
+            val søkPåUkvittert = dialogRepository.finnDialogVedMeldingId(ukvittertMelding.id.value)
+
+            // then
+            assertNull(søkPåKvittert)
+            assertNotNull(søkPåUkvittert)
         }
 }

@@ -83,6 +83,7 @@ fun main() {
     val topics =
         ReadTopics(
             dialogmeldingFraBehandlerTopic = DIALOGMELDING_FRA_BEHANDLER_TOPIC,
+            dialogmeldingStatusTopic = DIALOGMELDING_STATUS_TOPIC,
         )
 
     app(

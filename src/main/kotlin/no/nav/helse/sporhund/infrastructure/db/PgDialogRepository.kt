@@ -8,7 +8,7 @@ import no.nav.helse.sporhund.application.DialogRepository
 import no.nav.helse.sporhund.domain.*
 import java.time.Instant
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 class PgDialogRepository(
     private val session: Session,
@@ -47,12 +47,28 @@ class PgDialogRepository(
             objectMapper.readValue<DialogDto>(it.string("json")).tilDomene()
         }
 
-    override fun finnIkkeLukkedeDialoger(): List<Dialog> =
+    override fun finnÅpneDialoger(): List<Dialog> =
         asSQL(
             """
             SELECT json FROM dialog WHERE json -> 'status' != '"DialogLukket"'
             """.trimIndent(),
         ).list(session) {
+            objectMapper.readValue<DialogDto>(it.string("json")).tilDomene()
+        }
+
+    override fun finnDialogVedMeldingId(meldingId: UUID): Dialog? =
+        asSQL(
+            """
+            SELECT json FROM dialog
+            WHERE EXISTS (
+                SELECT 1
+                FROM jsonb_array_elements(json -> 'meldinger') AS melding
+                WHERE melding ->> 'id' = :melding_id
+                AND (melding -> 'kvitteringMottatt') IS DISTINCT FROM 'true'::jsonb
+            )
+            """,
+            "melding_id" to meldingId.toString(),
+        ).single(session) {
             objectMapper.readValue<DialogDto>(it.string("json")).tilDomene()
         }
 
@@ -127,6 +143,7 @@ class PgDialogRepository(
         SvarMottatt,
         PurringSendt,
         DialogLukket,
+        Avvist,
         ;
 
         fun tilDomene(): Dialogstatus =
@@ -135,6 +152,7 @@ class PgDialogRepository(
                 SvarMottatt -> Dialogstatus.SvarMottatt
                 PurringSendt -> Dialogstatus.PurringSendt
                 DialogLukket -> Dialogstatus.DialogLukket
+                Avvist -> Dialogstatus.Avvist
             }
 
         companion object {
@@ -144,6 +162,7 @@ class PgDialogRepository(
                     Dialogstatus.SvarMottatt -> SvarMottatt
                     Dialogstatus.PurringSendt -> PurringSendt
                     Dialogstatus.DialogLukket -> DialogLukket
+                    Dialogstatus.Avvist -> Avvist
                 }
         }
     }
@@ -190,6 +209,7 @@ class PgDialogRepository(
             val saksbehandler: String,
             val behandlerRef: String,
             val behandler: BehandlerDto,
+            val kvitteringMottatt: Boolean = false,
         ) : DialogmeldingDto {
             override fun tilDomene(): Dialogmelding.FraNav =
                 Dialogmelding.FraNav.fraLagring(
@@ -199,6 +219,7 @@ class PgDialogRepository(
                     saksbehandler = NavIdent(saksbehandler),
                     behandler = behandler.tilDomene(),
                     behandlerRef = BehandlerRef(behandlerRef),
+                    kvitteringMottatt = kvitteringMottatt,
                 )
         }
 
@@ -225,6 +246,7 @@ class PgDialogRepository(
             val melding: String,
             val behandlerRef: String,
             val behandler: BehandlerDto,
+            val kvitteringMottatt: Boolean = false,
         ) : DialogmeldingDto {
             override fun tilDomene(): Dialogmelding.FraSystem =
                 Dialogmelding.FraSystem.fraLagring(
@@ -233,6 +255,7 @@ class PgDialogRepository(
                     melding = melding,
                     behandler = behandler.tilDomene(),
                     behandlerRef = BehandlerRef(behandlerRef),
+                    kvitteringMottatt = kvitteringMottatt,
                 )
         }
 
@@ -247,6 +270,7 @@ class PgDialogRepository(
                             saksbehandler = dialogmelding.saksbehandler.value,
                             behandlerRef = dialogmelding.behandlerRef.value,
                             behandler = BehandlerDto.fraBehandler(dialogmelding.behandler),
+                            kvitteringMottatt = dialogmelding.kvitteringMottatt,
                         )
                     }
 
@@ -267,6 +291,7 @@ class PgDialogRepository(
                             melding = dialogmelding.melding,
                             behandlerRef = dialogmelding.behandlerRef.value,
                             behandler = BehandlerDto.fraBehandler(dialogmelding.behandler),
+                            kvitteringMottatt = dialogmelding.kvitteringMottatt,
                         )
                     }
                 }

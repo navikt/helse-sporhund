@@ -10,6 +10,7 @@ data class KafkaConfig(
 
 class ReadTopics(
     val dialogmeldingFraBehandlerTopic: String,
+    val dialogmeldingStatusTopic: String,
 ) {
-    val alleTopics = listOf(dialogmeldingFraBehandlerTopic)
+    val alleTopics = listOf(dialogmeldingFraBehandlerTopic, dialogmeldingStatusTopic)
 }
