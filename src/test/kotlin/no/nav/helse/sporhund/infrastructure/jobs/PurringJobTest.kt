@@ -138,6 +138,18 @@ class PurringJobTest {
     }
 
     @Test
+    fun `sender ikke purring når meldingen blitt avvist`() {
+        val dialog =
+            lagDialog(
+                status = Dialogstatus.Avvist,
+                melding = lagFraNavMelding(opprettet = Instant.now().minusSeconds(22 * 24 * 3600)),
+            )
+        transactionProvider.dialogRepository.lagre(dialog)
+        sendPurringerForUtlopteFrister(transactionProvider)
+        assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
+    }
+
+    @Test
     fun `sender ikke purring når behandler har svart og nav har sendt ny melding etterpå`() {
         val dialog =
             lagDialog(
