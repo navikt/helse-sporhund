@@ -2,7 +2,7 @@
 tbd-libs = "20260701.2248"
 smiley4KtorOpenapiTools = "5.7.0"
 smiley4SchemaKenerator = "2.7.2"
-ktor = "3.5.0"
+ktor = "3.5.1"
 testcontainers = "2.0.5"
 flyway = "12.9.0"
 jackson = "2.22.0"
