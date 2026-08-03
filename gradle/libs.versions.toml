@@ -9,7 +9,7 @@ jackson = "2.22.1"
 logback = "1.6.0"
 logstash = "9.0"
 auth0 = "4.6.0"
-cloudSqlSocketFactory = "1.28.6"
+cloudSqlSocketFactory = "1.29.0"
 
 [libraries]
 tbd-naisful-app = { module = "com.github.navikt.tbd-libs:naisful-app", version.ref = "tbd-libs" }
