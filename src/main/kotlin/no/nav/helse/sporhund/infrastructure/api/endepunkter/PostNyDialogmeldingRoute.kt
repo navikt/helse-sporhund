@@ -100,5 +100,6 @@ private fun ApiNyDialogmelding.tilDialog(
                 ApiFagomrade.TILBAKEDATERING -> Fagområde.Tilbakedatering
                 ApiFagomrade.YRKESSKADE -> Fagområde.Yrkesskade
                 ApiFagomrade.BESTRIDELSE -> Fagområde.Bestridelse
+                ApiFagomrade.UNNTAK_FRA_ARBEIDSGIVERANSVAR -> Fagområde.UnntakFraArbeidsgiveransvar
             },
     )

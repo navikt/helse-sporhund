@@ -53,6 +53,7 @@ class PgOutbox(
                                 Fagområde.Tilbakedatering -> "Tilbakedatering"
                                 Fagområde.Yrkesskade -> "Yrkesskade"
                                 Fagområde.Bestridelse -> "Bestridelse"
+                                Fagområde.UnntakFraArbeidsgiveransvar -> "Unntak fra arbeidsgiveransvar"
                             },
                     )
                 is KnyttInnkommendeJournalpost ->
@@ -123,6 +124,7 @@ class PgOutbox(
                                 "Tilbakedatering" -> Fagområde.Tilbakedatering
                                 "Yrkesskade" -> Fagområde.Yrkesskade
                                 "Bestridelse" -> Fagområde.Bestridelse
+                                "UnntakFraArbeidsgiveransvar" -> Fagområde.UnntakFraArbeidsgiveransvar
                                 else -> error("Ukjent fagområde: ${dto.fagområde}")
                             },
                     )

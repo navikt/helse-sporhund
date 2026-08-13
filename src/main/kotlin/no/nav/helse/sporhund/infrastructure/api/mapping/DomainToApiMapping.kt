@@ -88,6 +88,7 @@ private fun Dialog.tilApiFagomrade(): ApiFagomrade =
         Fagområde.Tilbakedatering -> ApiFagomrade.TILBAKEDATERING
         Fagområde.Yrkesskade -> ApiFagomrade.YRKESSKADE
         Fagområde.Bestridelse -> ApiFagomrade.BESTRIDELSE
+        Fagområde.UnntakFraArbeidsgiveransvar -> ApiFagomrade.UNNTAK_FRA_ARBEIDSGIVERANSVAR
     }
 
 private fun Behandler.tilApiBehandler(

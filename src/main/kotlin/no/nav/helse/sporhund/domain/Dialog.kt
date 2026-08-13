@@ -24,6 +24,7 @@ enum class Fagområde {
     Tilbakedatering,
     Yrkesskade,
     Bestridelse,
+    UnntakFraArbeidsgiveransvar,
 }
 
 class Dialog private constructor(
