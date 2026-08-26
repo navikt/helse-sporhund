@@ -226,20 +226,21 @@ private data class AvsenderMottaker(
 
 private data class JournalpostPayload(
     val tittel: String,
-    val journalpostType: String = "UTGAAENDE",
+    val journalpostType: String = "UTGAAENDE", // brukes for dokumentasjon som NAV har produsert og sendt ut til en ekstern part. Dette kan for eksempel være informasjons- eller vedtaksbrev til privatpersoner eller organisasjoner.
     val avsenderMottaker: AvsenderMottaker,
-    val tema: String = "SYK",
-    val behandlingstema: String = "ab0061",
-    val journalfoerendeEnhet: String = "9999",
+    val tema: String = "SYK", // Temaet som forsendelsen tilhører, for eksempel 'DAG' (Dagpenger). Tema er påkrevd dersom Sak oppgis.
+    val behandlingstema: String = "ab0061", // Behandlingstema for forsendelsen, for eksempel ab0001 (Ordinære dagpenger). Lovlige verdier finnes i i Felles Kodeverksløsning, men valideres ikke.
+    val journalfoerendeEnhet: String = "9999", // NAV-enheten som har journalført forsendelsen. Dersom forsoekFerdigstill=true skal enhet alltid settes. Dersom det ikke er noen Nav-enhet involvert (f.eks. ved automatisk brevutsending), skal enhet være '9999'.
     val bruker: Bruker,
     val sak: Sak,
     val dokumenter: List<Dokument>,
+    val overstyrInnsynsregler: String = "VISES_MASKINELT_GODKJENT", // brukes når en maskinell prosess har besluttet at journalposten og underliggende dokumenter kan vises til bruker på nav.no.
     val eksternReferanseId: String,
 ) {
     data class Sak(
-        val sakstype: String = "FAGSAK",
+        val sakstype: String = "FAGSAK", // vil si at dokumentene tilhører en sak i et fagsystem. Dersom FAGSAK velges, må fagsakid og fagsaksystem oppgis.
         val fagsakId: String,
-        val fagsaksystem: String = "SPEIL",
+        val fagsaksystem: String = "SPEIL", // Fagsystemet som saken behandles i
     )
 
     data class Dokument(
