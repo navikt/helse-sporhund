@@ -9,7 +9,6 @@ import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilBruk
 import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.sporhund.domain.NavIdent
 import no.nav.helse.sporhund.domain.Saksbehandler
-import no.nav.helse.sporhund.domain.SaksbehandlerOid
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.*
@@ -31,6 +30,10 @@ fun JWTAuthenticationProvider.Config.configureJwtAuthentication(
 
     validate { credentials ->
         try {
+            credentials.payload
+                .getClaim("oid")
+                .asString()
+                .let(UUID::fromString)
             val saksbehandler = credentials.tilSaksbehandler()
             val accessToken =
                 accessToken()
@@ -63,7 +66,6 @@ private fun JWTCredential.groupsAsUuids(): List<UUID> =
 private fun JWTCredential.tilSaksbehandler(): Saksbehandler =
     with(payload) {
         Saksbehandler(
-            id = getClaim("oid").asString().let(UUID::fromString).let(::SaksbehandlerOid),
             navn = getClaim("name").asString(),
             epost = getClaim("preferred_username").asString(),
             ident = getClaim("NAVident").asString().let(::NavIdent),

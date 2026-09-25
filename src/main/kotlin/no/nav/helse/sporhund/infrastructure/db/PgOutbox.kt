@@ -100,7 +100,6 @@ class PgOutbox(
                         tekst = dto.tekst,
                         avsender =
                             Saksbehandler(
-                                id = SaksbehandlerOid(UUID.fromString("00000000-0000-0000-0000-000000000000")),
                                 navn = dto.avsenderNavn,
                                 epost = "",
                                 ident = NavIdent(dto.avsenderIdent),

@@ -20,7 +20,6 @@ import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilBruk
 import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.sporhund.domain.NavIdent
 import no.nav.helse.sporhund.domain.Saksbehandler
-import no.nav.helse.sporhund.domain.SaksbehandlerOid
 import no.nav.helse.sporhund.infrastructure.api.appRoutes
 import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
 import no.nav.helse.sporhund.infrastructure.api.auth.configureJwtAuthentication
@@ -84,7 +83,6 @@ fun ApplicationTestBuilder.jsonClient(): HttpClient =
 
 fun lagTestSaksbehandler() =
     Saksbehandler(
-        id = SaksbehandlerOid(UUID.randomUUID()),
         navn = "Test Saksbehandler",
         epost = "test.saksbehandler@nav.no",
         ident = NavIdent("T123456"),
@@ -93,20 +91,22 @@ fun lagTestSaksbehandler() =
 fun MockOAuth2Server.utstedToken(
     saksbehandler: Saksbehandler,
     groups: List<UUID> = emptyList(),
-): String =
-    issueToken(
+): String {
+    val oid = UUID.nameUUIDFromBytes(saksbehandler.navn.encodeToByteArray())
+    return issueToken(
         issuerId = TEST_ISSUER_ID,
         audience = TEST_CLIENT_ID,
-        subject = saksbehandler.id.value.toString(),
+        subject = oid.toString(),
         claims =
             mapOf(
                 "NAVident" to saksbehandler.ident.value,
                 "preferred_username" to saksbehandler.epost,
-                "oid" to saksbehandler.id.value.toString(),
+                "oid" to oid.toString(),
                 "name" to saksbehandler.navn,
                 "groups" to groups.map { it.toString() },
             ),
     ).serialize()
+}
 
 fun MockOAuth2Server.utstedTokenMedLesTilgang(
     saksbehandler: Saksbehandler,

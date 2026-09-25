@@ -21,6 +21,7 @@ import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.TestcontainersKafk
 import no.nav.helse.sporhund.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.sporhund.tilgangskontroll.tilgangsgrupperTilTilganger
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import java.util.UUID
 
 fun main() {
     val clientId = "en-client-id"
@@ -38,21 +39,23 @@ fun main() {
     val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()
     val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
 
-    fun localToken(): String =
-        mockOAuth2Server
+    fun localToken(): String {
+        val oid = UUID.nameUUIDFromBytes(saksbehandler.navn.encodeToByteArray())
+        return mockOAuth2Server
             .issueToken(
                 issuerId = issuerId,
                 audience = clientId,
-                subject = saksbehandler.id.value.toString(),
+                subject = oid.toString(),
                 claims =
                     mapOf(
                         "NAVident" to saksbehandler.ident.value,
                         "preferred_username" to saksbehandler.epost,
-                        "oid" to saksbehandler.id.value.toString(),
+                        "oid" to oid.toString(),
                         "name" to saksbehandler.navn,
                         "groups" to tilgangsgrupperTilTilganger.skrivetilgang.map { it.toString() },
                     ),
             ).serialize()
+    }
 
     val azureAdConfig =
         AzureAdConfig(
