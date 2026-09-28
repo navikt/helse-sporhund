@@ -40,6 +40,7 @@ class DokarkivClient(
                 Fagområde.Yrkesskade -> "yrkesskade"
                 Fagområde.Bestridelse -> "bestridelse"
                 Fagområde.UnntakFraArbeidsgiveransvar -> "unntak fra arbeidsgiveransvar"
+                Fagområde.Klage -> "klage"
             }
         val journalpostPayload =
             JournalpostPayload(
@@ -291,6 +292,7 @@ private fun OpprettUtgåendeJournalpost.tilPdfInput() =
                 Fagområde.Yrkesskade -> "Yrkesskade"
                 Fagområde.Bestridelse -> "Bestridelse"
                 Fagområde.UnntakFraArbeidsgiveransvar -> "Unntak fra arbeidsgiveransvar"
+                Fagområde.Klage -> "Klage"
             },
         melding = tekst,
     )

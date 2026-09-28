@@ -173,6 +173,7 @@ class PgDialogRepository(
         Yrkesskade,
         Bestridelse,
         UnntakFraArbeidsgiveransvar,
+        Klage,
         ;
 
         fun tilDomene(): Fagområde =
@@ -182,6 +183,7 @@ class PgDialogRepository(
                 Yrkesskade -> Fagområde.Yrkesskade
                 Bestridelse -> Fagområde.Bestridelse
                 UnntakFraArbeidsgiveransvar -> Fagområde.UnntakFraArbeidsgiveransvar
+                Klage -> Fagområde.Klage
             }
 
         companion object {
@@ -192,6 +194,7 @@ class PgDialogRepository(
                     Fagområde.Yrkesskade -> Yrkesskade
                     Fagområde.Bestridelse -> Bestridelse
                     Fagområde.UnntakFraArbeidsgiveransvar -> UnntakFraArbeidsgiveransvar
+                    Fagområde.Klage -> Klage
                 }
         }
     }

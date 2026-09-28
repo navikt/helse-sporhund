@@ -54,6 +54,7 @@ class PgOutbox(
                                 Fagområde.Yrkesskade -> "Yrkesskade"
                                 Fagområde.Bestridelse -> "Bestridelse"
                                 Fagområde.UnntakFraArbeidsgiveransvar -> "UnntakFraArbeidsgiveransvar"
+                                Fagområde.Klage -> "Klage"
                             },
                     )
                 is KnyttInnkommendeJournalpost ->
@@ -124,6 +125,7 @@ class PgOutbox(
                                 "Yrkesskade" -> Fagområde.Yrkesskade
                                 "Bestridelse" -> Fagområde.Bestridelse
                                 "UnntakFraArbeidsgiveransvar" -> Fagområde.UnntakFraArbeidsgiveransvar
+                                "Klage" -> Fagområde.Klage
                                 else -> error("Ukjent fagområde: ${dto.fagområde}")
                             },
                     )

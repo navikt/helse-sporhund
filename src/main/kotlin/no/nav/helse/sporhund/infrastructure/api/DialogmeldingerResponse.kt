@@ -140,6 +140,7 @@ enum class ApiFagomrade {
     YRKESSKADE,
     BESTRIDELSE,
     UNNTAK_FRA_ARBEIDSGIVERANSVAR,
+    KLAGE,
 }
 
 data class ApiNyDialogmelding(
