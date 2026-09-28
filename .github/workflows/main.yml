@@ -48,13 +48,13 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/dev.yml
           IMAGE: ${{ needs.build.outputs.image }}
           VARS: .nais/entra-id-vars.yml
-      - uses: nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/purring-job-dev.yml, .nais/dev-db-policy.yml
@@ -69,13 +69,13 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/prod.yml
           IMAGE: ${{ needs.build.outputs.image }}
           VARS: .nais/entra-id-vars.yml
-      - uses: nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/purring-job-prod.yml,.nais/prod-db-policy.yml
