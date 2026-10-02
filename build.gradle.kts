@@ -1,17 +1,15 @@
-plugins {
-    kotlin("jvm") version "2.4.20"
-    id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
-}
-
 group = "no.nav.helse"
 
-repositories {
-    mavenCentral()
-    maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
+plugins {
+    alias(libs.plugins.sykepenger.deployable)
+}
+
+sykepengerDeployable {
+    mainClass = "no.nav.helse.sporhund.AppKt"
+    imageName = "helse-sporhund"
 }
 
 dependencies {
-    implementation(platform(libs.ktor.bom))
     implementation(libs.tbd.naisful.app)
     implementation(libs.tbd.kafka)
     implementation(libs.tbd.personpseudoid)
@@ -39,7 +37,6 @@ dependencies {
     implementation(libs.ktor.client.jackson)
     implementation(libs.ktor.client.content.negotiation)
 
-    testImplementation(kotlin("test"))
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.ktor.server.content.negotiation)
     testImplementation(libs.ktor.client.content.negotiation)
@@ -50,45 +47,12 @@ dependencies {
     testImplementation(libs.mockOauth2Server)
 }
 
-kotlin {
-    jvmToolchain(21)
-}
-
 tasks {
-    test {
-        useJUnitPlatform()
-    }
-    build {
-        val erCiBygg = providers.environmentVariable("GITHUB_ACTIONS").orNull == "true"
-        if (!erCiBygg) {
-            dependsOn("addKtlintFormatGitPreCommitHook")
-        }
-    }
-
     register<JavaExec>("runLocal") {
         group = "application"
         description = "Runs LocalApp locally"
         classpath = sourceSets["test"].runtimeClasspath
         mainClass.set("no.nav.helse.sporhund.LocalAppKt")
         environment("NAIS_CLUSTER_NAME", "local")
-    }
-
-    jar {
-        archiveBaseName.set("app")
-
-        manifest {
-            attributes["Main-Class"] = "no.nav.helse.sporhund.AppKt"
-            attributes["Class-Path"] =
-                configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                    it.name
-                }
-        }
-
-        doLast {
-            configurations.runtimeClasspath.get().forEach {
-                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
-                if (!file.exists()) it.copyTo(file)
-            }
-        }
     }
 }

@@ -4,13 +4,8 @@ metadata:
   name: sporhund-purring-db-policy
   namespace: tbd
 spec:
-  egress:
-    - to:
-        - ipBlock:
-            cidr: 34.88.143.189/32
   podSelector:
     matchLabels:
       dbPolicyUser: purring
   policyTypes:
     - Egress
-

@@ -1,0 +1,66 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: sporhund
+  namespace: tbd
+  labels:
+    team: tbd
+spec:
+  port: 8080
+  strategy:
+    type: Recreate
+  startup:
+    path: isready
+    initialDelay: 20
+    periodSeconds: 5
+    failureThreshold: 9
+  liveness:
+    path: isalive
+  readiness:
+    path: isready
+  preStopHook:
+    http:
+      path: /stop
+  resources:
+    limits:
+      memory: 640Mi
+    requests:
+      cpu: 20m
+      memory: 512Mi
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
+  prometheus:
+    enabled: true
+    path: /metrics
+  azure:
+    application:
+      enabled: true
+      claims:
+        extra:
+          - "NAVident"
+  accessPolicy:
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
+        - application: padm2
+          namespace: teamsykefravr
+        - application: sprinter
+  valkey:
+    - instance: personpseudoid
+      access: readwrite
+  env:
+    - name: TILGANGSMASKINEN_BASE_URL
+      value: http://populasjonstilgangskontroll.tilgangsmaskin
+    - name: PADM2_BASE_URL
+      value: http://padm2.teamsykefravr
+    - name: SPRINTER_BASE_URL
+      value: http://sprinter

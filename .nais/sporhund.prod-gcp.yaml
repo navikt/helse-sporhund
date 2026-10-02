@@ -1,0 +1,63 @@
+spec:
+  replicas:
+    min: 2
+    max: 2
+  kafka:
+    pool: nav-prod
+  azure:
+    application:
+      claims:
+        groups:
+          - id: 611669fa-de5c-4dc2-a0e8-6041a019992a # 0000-AZ-speil-brukere
+          - id: c5f26254-c6fa-4942-b81b-5cdff847d3df # 0000-CA-Speil_Lesetilgang
+          - id: a857cdaf-9a02-4f3d-8e37-ecc81a0160d0 # 4448-CA-speil-dialogmelding_til_behandler
+          - id: c0227409-2085-4eb2-b487-c4ba270986a3 # nais-team-tbd
+          - id: f787f900-6697-440d-a086-d5bb56e26a9c # tbd
+          - id: 54273224-e40a-4e3d-b3cb-2219603058f9 # speil-riksrevisjonen-lesetilgang
+  accessPolicy:
+    inbound:
+      rules:
+        - application: speil
+          cluster: prod-gcp
+    outbound:
+      external:
+        - host: dokarkiv.prod-fss-pub.nais.io
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_18
+        diskAutoresize: true
+        tier: db-custom-1-3840
+        flags:
+          - name: "cloudsql.enable_pgaudit"
+            value: "on"
+          - name: "pgaudit.log"
+            value: "write,ddl,role"
+          - name: "pgaudit.log_parameter"
+            value: "on"
+          - name: "pgaudit.log_relation"
+            value: "on"
+        databases:
+          - name: sporhund
+            envVarPrefix: DATABASE
+            users:
+              - name: purring
+  env:
+    - name: KAFKA_CONSUMER_GROUP_ID
+      value: tbd-sporhund-v2
+    - name: TILGANGSMASKINEN_SCOPE
+      value: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
+    - name: PADM2_SCOPE
+      value: api://prod-gcp.teamsykefravr.padm2/.default
+    - name: DOKARKIV_BASE_URL
+      value: https://dokarkiv.prod-fss-pub.nais.io
+    - name: DOKARKIV_SCOPE
+      value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
+    # 0000-AZ-speil-brukere
+    - name: TILGANG_SKRIV
+      value: 611669fa-de5c-4dc2-a0e8-6041a019992a
+    # 0000-CA-Speil_Lesetilgang, tbd, speil-riksrevisjonen-lesetilgang
+    - name: TILGANG_LES
+      value: c5f26254-c6fa-4942-b81b-5cdff847d3df,f787f900-6697-440d-a086-d5bb56e26a9c,54273224-e40a-4e3d-b3cb-2219603058f9
+    # 4448-CA-speil-dialogmelding_til_behandler, nais-team-tbd
+    - name: ROLLE_DIALOGMELDING
+      value: a857cdaf-9a02-4f3d-8e37-ecc81a0160d0,c0227409-2085-4eb2-b487-c4ba270986a3

@@ -7,13 +7,12 @@ metadata:
     team: tbd
     dbPolicyUser: purring
 spec:
-  image: {{image}}
   schedule: "0 0 * * *"
   timeZone: "Europe/Oslo"
   command:
     - /usr/bin/java
     - -cp
-    - /app/*
+    - /app/resources:/app/classes:/app/libs/*
     - no.nav.helse.sporhund.PurringJobKt
   resources:
     limits:
@@ -33,13 +32,6 @@ spec:
           namespace: nais-system
   envFrom:
     - secret: google-sql-sporhund-sporhund-purring-494b7001
-  gcp:
-    permissions:
-      - resource:
-          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
-          kind: Project
-          name: tbd-prod-eacd
-        role: roles/cloudsql.client
   env:
     - name: DATABASE_REGION
       value: "europe-north1"

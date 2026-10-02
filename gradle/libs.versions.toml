@@ -10,6 +10,7 @@ logback = "1.6.3"
 logstash = "9.0"
 auth0 = "4.6.0"
 cloudSqlSocketFactory = "1.30.0"
+sykepengerGradlePlugins = "20261001.1830"
 
 [libraries]
 tbd-naisful-app = { module = "com.github.navikt.tbd-libs:naisful-app", version.ref = "tbd-libs" }
@@ -29,7 +30,6 @@ smiley4-schema-kenerator-reflection = { module = "io.github.smiley4:schema-kener
 smiley4-schema-kenerator-serialization = { module = "io.github.smiley4:schema-kenerator-serialization", version.ref = "smiley4SchemaKenerator" }
 smiley4-schema-kenerator-swagger = { module = "io.github.smiley4:schema-kenerator-swagger", version.ref = "smiley4SchemaKenerator" }
 
-ktor-bom = { module = "io.ktor:ktor-bom", version.ref = "ktor" }
 ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
 ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
@@ -70,3 +70,6 @@ smiley4-ktor-openapi-tools = [
     "smiley4-schema-kenerator-serialization",
     "smiley4-schema-kenerator-swagger"
 ]
+
+[plugins]
+sykepenger-deployable = { id = "no.nav.sykepenger.deployable", version.ref = "sykepengerGradlePlugins" }

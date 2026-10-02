@@ -1,0 +1,53 @@
+spec:
+  replicas:
+    min: 1
+    max: 1
+  kafka:
+    pool: nav-dev
+  azure:
+    application:
+      tenant: trygdeetaten.no
+      claims:
+        groups:
+          - id: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
+          - id: 216b7219-3906-43c5-8e22-03fb74133b42 # 0000-CA-Speil_Lesetilgang
+  accessPolicy:
+    inbound:
+      rules:
+        - application: speil
+          cluster: dev-gcp
+    outbound:
+      external:
+        - host: dokarkiv.dev-fss-pub.nais.io
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_18
+        diskAutoresize: true
+        tier: db-f1-micro
+        flags:
+          - name: cloudsql.enable_pgaudit
+            value: "true"
+          - name: pgaudit.log
+            value: 'write'
+        databases:
+          - name: sporhund
+            envVarPrefix: DATABASE
+            users:
+              - name: purring
+  env:
+    - name: KAFKA_CONSUMER_GROUP_ID
+      value: tbd-sporhund-v1
+    - name: TILGANGSMASKINEN_SCOPE
+      value: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
+    - name: PADM2_SCOPE
+      value: api://dev-gcp.teamsykefravr.padm2/.default
+    - name: DOKARKIV_BASE_URL
+      value: https://dokarkiv.dev-fss-pub.nais.io
+    - name: DOKARKIV_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default
+    - name: TILGANG_SKRIV
+      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
+    - name: TILGANG_LES
+      value: 216b7219-3906-43c5-8e22-03fb74133b42 # 0000-CA-Speil_Lesetilgang
+    - name: ROLLE_DIALOGMELDING
+      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
