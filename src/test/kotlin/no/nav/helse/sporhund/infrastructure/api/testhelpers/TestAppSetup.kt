@@ -1,13 +1,10 @@
 package no.nav.helse.sporhund.infrastructure.api.testhelpers
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.github.smiley4.ktoropenapi.OpenApi
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.jackson.*
+import io.ktor.serialization.jackson3.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -25,6 +22,7 @@ import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
 import no.nav.helse.sporhund.infrastructure.api.auth.configureJwtAuthentication
 import no.nav.helse.sporhund.infrastructure.api.configureOpenApiPlugin
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import tools.jackson.databind.DeserializationFeature
 import java.util.*
 
 const val TEST_CLIENT_ID = "test-client-id"
@@ -50,9 +48,7 @@ fun ApplicationTestBuilder.setupTestApp(
         install(OpenApi) { configureOpenApiPlugin() }
         install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) {
             jackson {
-                registerModule(JavaTimeModule())
-                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             }
         }
         authentication {
@@ -74,9 +70,7 @@ fun ApplicationTestBuilder.jsonClient(): HttpClient =
     createClient {
         install(ContentNegotiation) {
             jackson {
-                registerModule(JavaTimeModule())
-                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             }
         }
     }

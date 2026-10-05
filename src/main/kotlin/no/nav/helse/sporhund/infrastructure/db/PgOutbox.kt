@@ -2,7 +2,6 @@ package no.nav.helse.sporhund.infrastructure.db
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.sporhund.application.KnyttInnkommendeJournalpost
 import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
@@ -11,6 +10,7 @@ import no.nav.helse.sporhund.application.Outbox
 import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.OutboxMeldingId
 import no.nav.helse.sporhund.domain.*
+import tools.jackson.module.kotlin.readValue
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*

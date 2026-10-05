@@ -13,4 +13,9 @@ class InMemoryPopulasjonstilgangskontrollProvider : PopulasjonstilgangskontrollP
         accessToken: String,
         fødselsnummer: String,
     ): TilgangskontrollResultat = TilgangskontrollResultat.Ok
+
+    override fun kontrollerKjerneTilgangForAnsatt(
+        ansattId: String,
+        fødselsnummer: String,
+    ): TilgangskontrollResultat = TilgangskontrollResultat.Ok
 }

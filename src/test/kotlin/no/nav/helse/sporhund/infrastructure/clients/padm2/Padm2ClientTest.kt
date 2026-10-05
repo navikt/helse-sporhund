@@ -1,6 +1,5 @@
 package no.nav.helse.sporhund.infrastructure.clients.padm2
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -9,6 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.Base64
 import java.util.UUID
 import kotlin.test.Test

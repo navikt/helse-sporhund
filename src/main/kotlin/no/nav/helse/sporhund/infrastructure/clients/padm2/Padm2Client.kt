@@ -1,8 +1,5 @@
 package no.nav.helse.sporhund.infrastructure.clients.padm2
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -12,6 +9,9 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.sporhund.application.VedleggProvider
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.util.Base64
 import java.util.UUID
 

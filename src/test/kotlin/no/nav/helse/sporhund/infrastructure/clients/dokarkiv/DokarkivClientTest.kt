@@ -10,7 +10,7 @@ import io.ktor.client.request.HttpRequestData
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.jackson
 import no.nav.helse.sporhund.application.KnyttInnkommendeJournalpost
 import no.nav.helse.sporhund.application.MeldingTilBehandlerPdfInput
 import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost

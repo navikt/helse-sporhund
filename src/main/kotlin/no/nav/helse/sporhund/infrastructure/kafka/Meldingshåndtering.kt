@@ -1,6 +1,5 @@
 package no.nav.helse.sporhund.infrastructure.kafka
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggDebug
@@ -9,6 +8,7 @@ import no.nav.helse.sporhund.domain.*
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import tools.jackson.module.kotlin.readValue
 import java.time.ZoneId
 import java.util.*
 
