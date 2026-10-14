@@ -141,6 +141,7 @@ enum class ApiFagomrade {
     BESTRIDELSE,
     UNNTAK_FRA_ARBEIDSGIVERANSVAR,
     KLAGE,
+    REISETILSKUDD,
 }
 
 data class ApiNyDialogmelding(

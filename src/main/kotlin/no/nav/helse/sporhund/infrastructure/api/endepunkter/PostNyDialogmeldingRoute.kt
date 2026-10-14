@@ -102,5 +102,6 @@ private fun ApiNyDialogmelding.tilDialog(
                 ApiFagomrade.BESTRIDELSE -> Fagområde.Bestridelse
                 ApiFagomrade.UNNTAK_FRA_ARBEIDSGIVERANSVAR -> Fagområde.UnntakFraArbeidsgiveransvar
                 ApiFagomrade.KLAGE -> Fagområde.Klage
+                ApiFagomrade.REISETILSKUDD -> Fagområde.Reisetilskudd
             },
     )

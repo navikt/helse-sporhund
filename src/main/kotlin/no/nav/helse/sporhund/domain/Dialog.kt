@@ -26,6 +26,7 @@ enum class Fagområde {
     Bestridelse,
     UnntakFraArbeidsgiveransvar,
     Klage,
+    Reisetilskudd,
 }
 
 class Dialog private constructor(
