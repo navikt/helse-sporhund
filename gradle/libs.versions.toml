@@ -1,14 +1,14 @@
 [versions]
-tbd-libs = "20260701.2248"
+tbd-libs = "20261002.1227"
 smiley4KtorOpenapiTools = "5.7.0"
 smiley4SchemaKenerator = "2.7.2"
-ktor = "3.5.2"
+ktor = "3.6.0"
 testcontainers = "2.0.5"
-flyway = "12.11.0"
-jackson = "2.22.2"
-logback = "1.6.3"
+flyway = "13.8.0"
+jackson = "2.22.3"
+logback = "1.6.4"
 logstash = "9.0"
-auth0 = "4.6.0"
+auth0 = "4.6.1"
 cloudSqlSocketFactory = "1.30.0"
 sykepengerGradlePlugins = "20261001.1830"
 
@@ -57,7 +57,7 @@ jackson-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr
 jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 
 auth0-jwt = { module = "com.auth0:java-jwt", version.ref = "auth0" }
-mockOauth2Server = "no.nav.security:mock-oauth2-server:3.0.3"
+mockOauth2Server = "no.nav.security:mock-oauth2-server:6.0.3"
 
 [bundles]
 db = ["flyway-core", "flyway-postgres", "hikari", "kotliquery", "postgresJdbcDriver"]
