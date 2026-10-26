@@ -2,10 +2,10 @@ package no.nav.helse.sporhund.infrastructure.db
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.sporhund.application.DialogRepository
 import no.nav.helse.sporhund.domain.*
+import tools.jackson.module.kotlin.readValue
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID

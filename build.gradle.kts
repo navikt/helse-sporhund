@@ -34,13 +34,12 @@ dependencies {
     implementation(libs.tbd.access.token.api)
 
     implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.jackson)
     implementation(libs.ktor.client.content.negotiation)
 
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.ktor.server.content.negotiation)
     testImplementation(libs.ktor.client.content.negotiation)
-    testImplementation(libs.ktor.serialization.jackson)
+    testImplementation(libs.ktor.serialization.jackson3)
     testImplementation(libs.ktor.client.mock)
     testImplementation(libs.testcontainers.kafka)
     testImplementation(libs.testcontainers.postgres)

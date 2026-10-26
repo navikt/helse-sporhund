@@ -81,7 +81,7 @@ class SprinterClientTest {
 
         val fra = objectMapper.readTree(capturedBodies.single())["fra"]
         assertNotNull(fra["NAVIdent"], "Mangler felt: fra.NAVIdent — ble det kanskje lowercaset til 'navident'?")
-        assertEquals("Z123456", fra["NAVIdent"].asText())
+        assertEquals("Z123456", fra["NAVIdent"].asString())
     }
 
     @Test
@@ -91,7 +91,7 @@ class SprinterClientTest {
 
         val gjelder = objectMapper.readTree(capturedBodies.single())["gjelder"]
         assertNotNull(gjelder["fødselsnummer"], "Mangler felt: gjelder.fødselsnummer")
-        assertEquals("01010112345", gjelder["fødselsnummer"].asText())
+        assertEquals("01010112345", gjelder["fødselsnummer"].asString())
     }
 
     @Test
@@ -101,7 +101,7 @@ class SprinterClientTest {
 
         val node = objectMapper.readTree(capturedBodies.single())
         assertNotNull(node["fagområde"], "Mangler felt: fagområde")
-        assertEquals("Bestridelse", node["fagområde"].asText())
+        assertEquals("Bestridelse", node["fagområde"].asString())
     }
 
     @Test
@@ -109,7 +109,7 @@ class SprinterClientTest {
         val (engine, capturedBodies) = lagClientOgEngine()
         lagSprinterClient(engine).genererPdf(input)
 
-        val tidspunkt = objectMapper.readTree(capturedBodies.single())["tidspunkt"].asText()
+        val tidspunkt = objectMapper.readTree(capturedBodies.single())["tidspunkt"].asString()
         assertEquals("2024-06-01T12:00:00", tidspunkt)
     }
 
