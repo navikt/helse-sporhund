@@ -1,6 +1,5 @@
 package no.nav.helse.sporhund.infrastructure.clients.dokarkiv
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import com.github.navikt.tbd_libs.retry.retry
 import io.ktor.client.*
@@ -21,6 +20,7 @@ import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
+import tools.jackson.module.kotlin.readValue
 import java.time.ZoneId
 import javax.net.ssl.SSLHandshakeException
 import kotlin.io.encoding.Base64
