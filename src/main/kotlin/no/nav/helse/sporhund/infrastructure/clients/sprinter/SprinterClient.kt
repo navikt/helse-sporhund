@@ -34,7 +34,7 @@ class SprinterClient(
         conversationRef: String,
     ): ByteArray {
         val body = objectMapper.writeValueAsString(input)
-        loggInfo("Genererer PDF for conversationRef=$conversationRef", "body" to body)
+        loggInfo("Genererer PDF for conversationRef=$conversationRef")
         return retry {
             httpClient
                 .preparePost(url) {
