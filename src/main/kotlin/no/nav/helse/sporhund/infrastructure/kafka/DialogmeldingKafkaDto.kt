@@ -37,7 +37,7 @@ data class DialogmeldingFraBehandlerKafkaDto(
     val dialogmelding: Dialogmelding,
     val antallVedlegg: Int,
     val journalpostId: String,
-    val fellesformatXML: String,
+    val fellesformatXML: String?,
 )
 
 data class Dialogmelding(

@@ -23,7 +23,7 @@ fun lagDialogmeldingFraBehandlerKafkaDto(
     dialogmelding: Dialogmelding = lagDialogmelding(),
     antallVedlegg: Int = 0,
     journalpostId: String = UUID.randomUUID().toString(),
-    fellesformatXML: String = "<fellesformat/>",
+    fellesformatXML: String? = "<fellesformat/>",
 ): DialogmeldingFraBehandlerKafkaDto =
     DialogmeldingFraBehandlerKafkaDto(
         msgId = msgId,
