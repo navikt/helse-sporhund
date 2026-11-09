@@ -3,13 +3,11 @@ package no.nav.helse.sporhund.infrastructure.api.endepunkter
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.server.testing.*
 import no.nav.helse.sporhund.domain.Dialogstatus
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogmeldingOppgave
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogmeldingStatus
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
-import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedTokenMedLesTilgang
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -17,18 +15,10 @@ import kotlin.test.assertTrue
 class GetDialogmeldingOppgaverTest : EndepunktTest() {
     @Test
     fun `returnerer 200 med tom liste når det ikke finnes noen åpne dialoger`() =
-        testApplication {
-            setupDefaultTestApp()
-
+        testApp {
             val client = jsonClient()
-            val token =
-                mockOAuth2Server.utstedTokenMedLesTilgang(
-                    saksbehandler,
-                    tilgangsgrupperTilTilganger,
-                    tilgangsgrupperTilBrukerroller,
-                )
 
-            val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }
+            val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(lesetoken()) }
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertTrue(response.body<List<ApiDialogmeldingOppgave>>().isEmpty())
@@ -36,21 +26,13 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
 
     @Test
     fun `returnerer åpen dialog som oppgave`() =
-        testApplication {
+        testApp {
             val dialog = lagDialog()
-            transactionProvider.dialogRepository.lagre(dialog)
-
-            setupDefaultTestApp()
+            lagreDialog(dialog)
 
             val client = jsonClient()
-            val token =
-                mockOAuth2Server.utstedTokenMedLesTilgang(
-                    saksbehandler,
-                    tilgangsgrupperTilTilganger,
-                    tilgangsgrupperTilBrukerroller,
-                )
 
-            val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }
+            val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(lesetoken()) }
 
             assertEquals(HttpStatusCode.OK, response.status)
             val oppgaver = response.body<List<ApiDialogmeldingOppgave>>()
@@ -60,21 +42,13 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
 
     @Test
     fun `inkluderer ikke lukket dialog`() =
-        testApplication {
+        testApp {
             val lukketDialog = lagDialog(status = Dialogstatus.DialogLukket)
-            transactionProvider.dialogRepository.lagre(lukketDialog)
-
-            setupDefaultTestApp()
+            lagreDialog(lukketDialog)
 
             val client = jsonClient()
-            val token =
-                mockOAuth2Server.utstedTokenMedLesTilgang(
-                    saksbehandler,
-                    tilgangsgrupperTilTilganger,
-                    tilgangsgrupperTilBrukerroller,
-                )
 
-            val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }
+            val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(lesetoken()) }
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertTrue(response.body<List<ApiDialogmeldingOppgave>>().isEmpty())
@@ -82,23 +56,15 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
 
     @Test
     fun `returnerer kun ikke-lukkede dialoger blant flere`() =
-        testApplication {
+        testApp {
             val åpenDialog = lagDialog()
             val lukketDialog = lagDialog(status = Dialogstatus.DialogLukket)
-            transactionProvider.dialogRepository.lagre(åpenDialog)
-            transactionProvider.dialogRepository.lagre(lukketDialog)
-
-            setupDefaultTestApp()
+            lagreDialog(åpenDialog)
+            lagreDialog(lukketDialog)
 
             val client = jsonClient()
-            val token =
-                mockOAuth2Server.utstedTokenMedLesTilgang(
-                    saksbehandler,
-                    tilgangsgrupperTilTilganger,
-                    tilgangsgrupperTilBrukerroller,
-                )
 
-            val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }
+            val response = client.get("/api/dialogmelding-oppgaver") { bearerAuth(lesetoken()) }
 
             assertEquals(HttpStatusCode.OK, response.status)
             val oppgaver = response.body<List<ApiDialogmeldingOppgave>>()
@@ -108,81 +74,49 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
 
     @Test
     fun `status ForespørselSendt mappes til SENDT`() =
-        testApplication {
-            transactionProvider.dialogRepository.lagre(lagDialog())
-
-            setupDefaultTestApp()
+        testApp {
+            lagreDialog()
 
             val client = jsonClient()
-            val token =
-                mockOAuth2Server.utstedTokenMedLesTilgang(
-                    saksbehandler,
-                    tilgangsgrupperTilTilganger,
-                    tilgangsgrupperTilBrukerroller,
-                )
             val oppgaver =
-                client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
+                client.get("/api/dialogmelding-oppgaver") { bearerAuth(lesetoken()) }.body<List<ApiDialogmeldingOppgave>>()
 
             assertEquals(ApiDialogmeldingStatus.SENDT, oppgaver.first().status)
         }
 
     @Test
     fun `status PurringSendt mappes til PURRING_SENDT`() =
-        testApplication {
-            transactionProvider.dialogRepository.lagre(lagDialog(status = Dialogstatus.PurringSendt))
-
-            setupDefaultTestApp()
+        testApp {
+            lagreDialog(lagDialog(status = Dialogstatus.PurringSendt))
 
             val client = jsonClient()
-            val token =
-                mockOAuth2Server.utstedTokenMedLesTilgang(
-                    saksbehandler,
-                    tilgangsgrupperTilTilganger,
-                    tilgangsgrupperTilBrukerroller,
-                )
             val oppgaver =
-                client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
+                client.get("/api/dialogmelding-oppgaver") { bearerAuth(lesetoken()) }.body<List<ApiDialogmeldingOppgave>>()
 
             assertEquals(ApiDialogmeldingStatus.PURRING_SENDT, oppgaver.first().status)
         }
 
     @Test
     fun `status SvarMottatt mappes til MOTTATT`() =
-        testApplication {
-            transactionProvider.dialogRepository.lagre(lagDialog(status = Dialogstatus.SvarMottatt))
-
-            setupDefaultTestApp()
+        testApp {
+            lagreDialog(lagDialog(status = Dialogstatus.SvarMottatt))
 
             val client = jsonClient()
-            val token =
-                mockOAuth2Server.utstedTokenMedLesTilgang(
-                    saksbehandler,
-                    tilgangsgrupperTilTilganger,
-                    tilgangsgrupperTilBrukerroller,
-                )
             val oppgaver =
-                client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
+                client.get("/api/dialogmelding-oppgaver") { bearerAuth(lesetoken()) }.body<List<ApiDialogmeldingOppgave>>()
 
             assertEquals(ApiDialogmeldingStatus.MOTTATT, oppgaver.first().status)
         }
 
     @Test
     fun `oppgave inneholder conversationRef og fristTidspunkt er etter sisteAktivitetTidspunkt`() =
-        testApplication {
+        testApp {
             val dialog = lagDialog()
-            transactionProvider.dialogRepository.lagre(dialog)
-
-            setupDefaultTestApp()
+            lagreDialog(dialog)
 
             val client = jsonClient()
-            val token =
-                mockOAuth2Server.utstedTokenMedLesTilgang(
-                    saksbehandler,
-                    tilgangsgrupperTilTilganger,
-                    tilgangsgrupperTilBrukerroller,
-                )
             val oppgaver =
-                client.get("/api/dialogmelding-oppgaver") { bearerAuth(token) }.body<List<ApiDialogmeldingOppgave>>()
+                client.get("/api/dialogmelding-oppgaver") { bearerAuth(lesetoken()) }.body<List<ApiDialogmeldingOppgave>>()
 
             val oppgave = oppgaver.first()
             assertEquals(dialog.conversationRef.value, oppgave.conversationRef)
@@ -191,9 +125,7 @@ class GetDialogmeldingOppgaverTest : EndepunktTest() {
 
     @Test
     fun `returnerer 401 uten token`() =
-        testApplication {
-            setupDefaultTestApp()
-
+        testApp {
             val response = client.get("/api/dialogmelding-oppgaver")
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)

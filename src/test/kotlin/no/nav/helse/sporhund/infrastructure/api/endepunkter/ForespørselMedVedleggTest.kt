@@ -8,11 +8,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
-import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
 import no.nav.helse.sporhund.infrastructure.api.ApiSvarPaDialog
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
-import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedTokenMedSkrivTilgang
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import kotlin.io.encoding.Base64
 import kotlin.test.Test
@@ -51,14 +49,12 @@ class ForespørselMedVedleggTest : EndepunktTest() {
     @Test
     fun `svar i en dialog som finnes sendes på Kafka og journalføres med samme PDF`() =
         testApp {
-            val identitetsnummer = lagIdentitetsnummer()
-            val pseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer)
-            val dialog = lagDialog(identitetsnummer = identitetsnummer)
-            transactionProvider.dialogRepository.lagre(dialog)
+            val dialog = lagDialog()
+            val pseudoId = lagreDialog(dialog)
 
             val response =
                 jsonClient().post("/api/personer/${pseudoId.value}/dialogmeldinger/${dialog.conversationRef.value}") {
-                    bearerAuth(token())
+                    bearerAuth(skrivetoken())
                     contentType(ContentType.Application.Json)
                     setBody(ApiSvarPaDialog(melding = "Dette er et svar"))
                 }
@@ -74,11 +70,4 @@ class ForespørselMedVedleggTest : EndepunktTest() {
             assertContentEquals(pdf, vedlegg)
             assertContentEquals(vedlegg, sendtJournalpost().fysiskDokument())
         }
-
-    private fun token() =
-        mockOAuth2Server.utstedTokenMedSkrivTilgang(
-            saksbehandler,
-            tilgangsgrupperTilTilganger,
-            tilgangsgrupperTilBrukerroller,
-        )
 }

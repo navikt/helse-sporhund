@@ -17,7 +17,9 @@ import io.ktor.server.testing.*
 import no.nav.helse.sporhund.application.*
 import no.nav.helse.sporhund.application.kommando.DialogmeldingKommandoHåndterer
 import no.nav.helse.sporhund.application.kommando.KommandoJobb
+import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Saksbehandler
+import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.ApiBehandler
 import no.nav.helse.sporhund.infrastructure.api.ApiBehandlerKategori
@@ -30,6 +32,7 @@ import no.nav.helse.sporhund.infrastructure.api.ApiSoker
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.lagTestSaksbehandler
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.setupTestApp
+import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedTokenMedLesTilgang
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedTokenMedSkrivTilgang
 import no.nav.helse.sporhund.infrastructure.clients.dokarkiv.DokarkivClient
 import no.nav.helse.sporhund.infrastructure.clients.dokarkiv.DokarkivConfig
@@ -105,8 +108,17 @@ abstract class EndepunktTest {
             populasjonstilgangskontrollProvider,
             tilgangsgrupperTilTilganger,
             tilgangsgrupperTilBrukerroller,
-            vedleggProvider,
+            { msgId -> vedleggProvider.hentVedlegg(msgId) },
         )
+    }
+
+    protected fun lesetoken(): String = mockOAuth2Server.utstedTokenMedLesTilgang(saksbehandler, tilgangsgrupperTilTilganger, tilgangsgrupperTilBrukerroller)
+
+    protected fun skrivetoken(): String = mockOAuth2Server.utstedTokenMedSkrivTilgang(saksbehandler, tilgangsgrupperTilTilganger, tilgangsgrupperTilBrukerroller)
+
+    protected fun lagreDialog(dialog: Dialog = lagDialog()): PersonPseudoId {
+        transactionProvider.dialogRepository.lagre(dialog)
+        return personPseudoIdProvider.nyPersonPseudoId(dialog.identitetsnummer)
     }
 
     protected fun kjørKommandoerTilKøenErTom() {
@@ -136,13 +148,7 @@ abstract class EndepunktTest {
         pseudoId: PersonPseudoId = personPseudoIdProvider.nyPersonPseudoId(lagIdentitetsnummer()),
     ): HttpResponse =
         jsonClient().post("/api/personer/${pseudoId.value}/dialogmelding") {
-            bearerAuth(
-                mockOAuth2Server.utstedTokenMedSkrivTilgang(
-                    saksbehandler,
-                    tilgangsgrupperTilTilganger,
-                    tilgangsgrupperTilBrukerroller,
-                ),
-            )
+            bearerAuth(skrivetoken())
             contentType(ContentType.Application.Json)
             setBody(
                 ApiNyDialogmelding(
