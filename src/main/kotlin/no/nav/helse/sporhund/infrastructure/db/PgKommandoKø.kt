@@ -7,11 +7,13 @@ import no.nav.helse.sporhund.application.kommando.JournalførDialogmelding
 import no.nav.helse.sporhund.application.kommando.Kommando
 import no.nav.helse.sporhund.application.kommando.KommandoId
 import no.nav.helse.sporhund.application.kommando.KommandoKø
+import no.nav.helse.sporhund.application.kommando.KøetKommando
 import no.nav.helse.sporhund.application.kommando.LagDialogmeldingPdf
 import no.nav.helse.sporhund.application.kommando.SendDialogmeldingPåKafka
 import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.DialogmeldingId
 import tools.jackson.module.kotlin.readValue
+import java.time.Instant
 import java.util.UUID
 
 class PgKommandoKø(
@@ -20,24 +22,38 @@ class PgKommandoKø(
     override fun leggTil(kommando: Kommando) {
         asSQL(
             """
-            INSERT INTO kommando(id, kommando)
-            VALUES (:id, :kommando::jsonb)
+            INSERT INTO kommando(id, kommando, type, conversation_ref)
+            VALUES (:id, :kommando::jsonb, :type, :conversationRef)
             """.trimIndent(),
             "id" to kommando.id.value,
             "kommando" to objectMapper.writeValueAsString(kommando.tilDto()),
+            "type" to kommando.typenavn(),
+            "conversationRef" to kommando.conversationRef.value,
         ).update(session)
     }
 
-    override fun nesteKommando(): Kommando? =
+    // Eldre rader som er låst av andre transaksjoner, er fortsatt synlige i NOT EXISTS og blokkerer derfor.
+    override fun nesteKommando(nå: Instant): KøetKommando? =
         asSQL(
             """
-            SELECT kommando FROM kommando
-            ORDER BY opprettet
+            SELECT kommando, antall_forsøk FROM kommando k
+            WHERE (neste_forsøk IS NULL OR neste_forsøk <= :naa)
+            AND NOT EXISTS (
+                SELECT 1 FROM kommando eldre
+                WHERE eldre.type = k.type
+                  AND eldre.conversation_ref = k.conversation_ref
+                  AND eldre.sekvens < k.sekvens
+            )
+            ORDER BY sekvens
             LIMIT 1
             FOR UPDATE SKIP LOCKED
             """.trimIndent(),
+            "naa" to nå,
         ).single(session) { row ->
-            objectMapper.readValue<KommandoDto>(row.string("kommando")).tilDomene()
+            KøetKommando(
+                kommando = objectMapper.readValue<KommandoDto>(row.string("kommando")).tilDomene(),
+                antallForsøk = row.int("antall_forsøk"),
+            )
         }
 
     override fun utført(id: KommandoId) {
@@ -46,6 +62,32 @@ class PgKommandoKø(
             "id" to id.value,
         ).update(session)
     }
+
+    override fun feilet(
+        id: KommandoId,
+        antallForsøk: Int,
+        feilklasse: String,
+        nesteForsøk: Instant,
+    ) {
+        asSQL(
+            """
+            UPDATE kommando
+            SET antall_forsøk = :antallForsok, siste_feil = :feilklasse, neste_forsøk = :nesteForsok
+            WHERE id = :id
+            """.trimIndent(),
+            "id" to id.value,
+            "antallForsok" to antallForsøk,
+            "feilklasse" to feilklasse,
+            "nesteForsok" to nesteForsøk,
+        ).update(session)
+    }
+
+    private fun Kommando.typenavn(): String =
+        when (this) {
+            is LagDialogmeldingPdf -> "LagDialogmeldingPdf"
+            is SendDialogmeldingPåKafka -> "SendDialogmeldingPåKafka"
+            is JournalførDialogmelding -> "JournalførDialogmelding"
+        }
 
     private fun Kommando.tilDto(): KommandoDto =
         when (this) {

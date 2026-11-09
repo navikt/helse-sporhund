@@ -3,17 +3,28 @@ package no.nav.helse.sporhund.application
 import no.nav.helse.sporhund.application.kommando.Kommando
 import no.nav.helse.sporhund.application.kommando.KommandoId
 import no.nav.helse.sporhund.application.kommando.KommandoKø
+import no.nav.helse.sporhund.application.kommando.KøetKommando
+import java.time.Instant
 
 class InMemoryKommandoKø : KommandoKø {
-    private val kommandoer = mutableListOf<Kommando>()
+    private val kommandoer = mutableListOf<KøetKommando>()
 
     override fun leggTil(kommando: Kommando) {
-        kommandoer.add(kommando)
+        kommandoer.add(KøetKommando(kommando, antallForsøk = 0))
     }
 
-    override fun nesteKommando(): Kommando? = kommandoer.firstOrNull()
+    override fun nesteKommando(nå: Instant): KøetKommando? = kommandoer.firstOrNull()
 
     override fun utført(id: KommandoId) {
-        kommandoer.removeIf { it.id == id }
+        kommandoer.removeIf { it.kommando.id == id }
+    }
+
+    override fun feilet(
+        id: KommandoId,
+        antallForsøk: Int,
+        feilklasse: String,
+        nesteForsøk: Instant,
+    ) {
+        kommandoer.replaceAll { if (it.kommando.id == id) it.copy(antallForsøk = antallForsøk) else it }
     }
 }
