@@ -1,5 +1,7 @@
 package no.nav.helse.sporhund.infrastructure.db
 
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.sporhund.application.kommando.JournalførDialogmelding
 import no.nav.helse.sporhund.application.kommando.Kommando
 import no.nav.helse.sporhund.application.kommando.KommandoId
@@ -17,6 +19,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -114,6 +117,25 @@ class PgKommandoKøTest {
         val hentet = transactionProvider.transaction { kommandoKø.nesteKommando(nesteForsøk) }
         assertEquals(KøetKommando(lagPdf, antallForsøk = 1), hentet)
     }
+
+    @Test
+    fun `en utført kommando blir liggende som utført, hentes ikke igjen og blokkerer ikke nyere i samme dialog`() {
+        val nyereISammeDialog = LagDialogmeldingPdf.ny(dialog.nyesteMeldingFraNav(), dialog, lagSaksbehandler())
+        transactionProvider.transaction {
+            kommandoKø.leggTil(lagPdf)
+            kommandoKø.leggTil(nyereISammeDialog)
+        }
+
+        transactionProvider.transaction { kommandoKø.utført(lagPdf.id) }
+
+        assertNotNull(utførtTidspunkt(lagPdf.id), "Utført kommando skal ligge igjen med tidspunkt for når den ble utført")
+        assertEquals(nyereISammeDialog.id, transactionProvider.transaction { kommandoKø.nesteKommando(nå)?.kommando?.id })
+    }
+
+    private fun utførtTidspunkt(id: KommandoId): Instant? =
+        sessionOf(TestDb.dataSource).use { session ->
+            session.single(queryOf("SELECT utført_tidspunkt FROM kommando WHERE id = ?", id.value)) { it.instantOrNull("utført_tidspunkt") }
+        }
 
     @Test
     fun `en kommando som er låst av en annen transaksjon hoppes over`() {

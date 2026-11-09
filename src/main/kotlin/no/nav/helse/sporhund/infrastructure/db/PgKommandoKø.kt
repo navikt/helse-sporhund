@@ -37,10 +37,12 @@ class PgKommandoKø(
         asSQL(
             """
             SELECT kommando, antall_forsøk FROM kommando k
-            WHERE (neste_forsøk IS NULL OR neste_forsøk <= :naa)
+            WHERE utført_tidspunkt IS NULL
+            AND (neste_forsøk IS NULL OR neste_forsøk <= :naa)
             AND NOT EXISTS (
                 SELECT 1 FROM kommando eldre
-                WHERE eldre.type = k.type
+                WHERE eldre.utført_tidspunkt IS NULL
+                  AND eldre.type = k.type
                   AND eldre.conversation_ref = k.conversation_ref
                   AND eldre.sekvens < k.sekvens
             )
@@ -58,7 +60,7 @@ class PgKommandoKø(
 
     override fun utført(id: KommandoId) {
         asSQL(
-            """DELETE FROM kommando WHERE id = :id""",
+            """UPDATE kommando SET utført_tidspunkt = now() WHERE id = :id""",
             "id" to id.value,
         ).update(session)
     }
