@@ -16,6 +16,7 @@ import io.ktor.server.routing.routing
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -233,10 +234,11 @@ fun app(
                         loggError("Feil i coroutine, terminerer appen", throwable)
                         it.engine.stop()
                     }
-                journalførerJob = launch(exceptionHandler) { journalførerJobb.start() }
-                consumerJob = launch(exceptionHandler) { kafkaConsumerJobb.start() }
-                producerJob = launch(exceptionHandler) { kafkaProducerJobb.start() }
-                kommandoJob = launch(exceptionHandler) { kommandoJobb.start(running) }
+                // Jobbene blokkerer tråden sin så lenge appen kjører, så de må ikke ta tråder fra Dispatchers.Default
+                journalførerJob = launch(Dispatchers.IO + exceptionHandler) { journalførerJobb.start() }
+                consumerJob = launch(Dispatchers.IO + exceptionHandler) { kafkaConsumerJobb.start() }
+                producerJob = launch(Dispatchers.IO + exceptionHandler) { kafkaProducerJobb.start() }
+                kommandoJob = launch(Dispatchers.IO + exceptionHandler) { kommandoJobb.start(running) }
             }
             this.monitor.subscribe(ApplicationStopping) {
                 running.set(false)
