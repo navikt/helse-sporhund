@@ -32,7 +32,6 @@ import no.nav.helse.sporhund.infrastructure.api.configureOpenApiPlugin
 import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.AccessTokenProviderConfig
 import no.nav.helse.sporhund.infrastructure.clients.dokarkiv.DokarkivClient
 import no.nav.helse.sporhund.infrastructure.clients.dokarkiv.DokarkivConfig
-import no.nav.helse.sporhund.infrastructure.clients.dokarkiv.JournalførerJobb
 import no.nav.helse.sporhund.infrastructure.clients.padm2.Padm2Client
 import no.nav.helse.sporhund.infrastructure.clients.padm2.Padm2Config
 import no.nav.helse.sporhund.infrastructure.clients.personpseudoid.PersonPseudoIdConfig
@@ -183,8 +182,6 @@ fun app(
 
     val dokarkivClient = DokarkivClient(dokarkivConfig, accessTokenProvider)
 
-    val journalførerJobb = JournalførerJobb(running, transactionProvider, dokarkivClient)
-
     val kommandoJobb =
         KommandoJobb(
             transactionProvider = transactionProvider,
@@ -205,7 +202,6 @@ fun app(
         )
 
     var consumerJob: Job? = null
-    var journalførerJob: Job? = null
     var kommandoJob: Job? = null
     naisApp(
         meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
@@ -225,7 +221,6 @@ fun app(
                         it.engine.stop()
                     }
                 // Jobbene blokkerer tråden sin så lenge appen kjører, så de må ikke ta tråder fra Dispatchers.Default
-                journalførerJob = launch(Dispatchers.IO + exceptionHandler) { journalførerJobb.start() }
                 consumerJob = launch(Dispatchers.IO + exceptionHandler) { kafkaConsumerJobb.start() }
                 kommandoJob = launch(Dispatchers.IO + exceptionHandler) { kommandoJobb.start(running) }
             }
@@ -233,7 +228,6 @@ fun app(
                 running.set(false)
                 runBlocking {
                     consumerJob?.join()
-                    journalførerJob?.join()
                     kommandoJob?.join()
                 }
             }
