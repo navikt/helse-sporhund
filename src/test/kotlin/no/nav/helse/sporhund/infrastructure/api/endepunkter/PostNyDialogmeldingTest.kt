@@ -3,15 +3,8 @@ package no.nav.helse.sporhund.infrastructure.api.endepunkter
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
-import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
-import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.*
-import no.nav.helse.sporhund.infrastructure.api.testhelpers.jsonClient
-import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedTokenMedSkrivTilgang
-import java.time.LocalDate
-import java.util.*
-import kotlin.random.Random.Default.nextInt
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -20,57 +13,11 @@ class PostNyDialogmeldingTest : EndepunktTest() {
     @Test
     fun `returnerer 201 med ny dialog`() =
         testApp {
-            val identitetsnummer = lagIdentitetsnummer()
-            val pseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer)
-
-            val client = jsonClient()
-            val token =
-                mockOAuth2Server.utstedTokenMedSkrivTilgang(
-                    saksbehandler,
-                    tilgangsgrupperTilTilganger,
-                    tilgangsgrupperTilBrukerroller,
-                )
-
-            val nyDialogmelding =
-                ApiNyDialogmelding(
-                    soker =
-                        ApiSoker(
-                            navn = ApiNavn(fornavn = "Slapp", mellomnavn = null, etternavn = "Appelsin"),
-                            fodselsdato = LocalDate.of(1990, 6, 15),
-                        ),
-                    behandler =
-                        ApiBehandler(
-                            id = "behandler-123",
-                            navn = ApiNavn(fornavn = "Ola", mellomnavn = null, etternavn = "Lege"),
-                            type = ApiBehandlerType.FASTLEGE,
-                            kategori = ApiBehandlerKategori.LEGE,
-                            legekontor =
-                                ApiLegekontor(
-                                    kontor = "Legesenteret",
-                                    orgnummer = "912345678",
-                                    adresse = "Storgata 1",
-                                    postnummer = "0181",
-                                    poststed = "Oslo",
-                                ),
-                            telefonnummer = "22334455",
-                            hprNummer = nextInt(1_000_000, 999_999_999),
-                        ),
-                    fagomrade = ApiFagomrade.TILBAKEDATERING,
-                    melding = "Jeg trenger informasjon om pasienten",
-                )
-
-            val response =
-                client.post("/api/personer/${pseudoId.value}/dialogmelding") {
-                    bearerAuth(token)
-                    contentType(ContentType.Application.Json)
-                    setBody(nyDialogmelding)
-                }
+            val response = postNyForespørsel(melding = "Jeg trenger informasjon om pasienten")
 
             assertEquals(HttpStatusCode.Created, response.status)
             val opprettet = response.body<ApiDialogDetails>()
             assertNotNull(opprettet.conversationRef)
-            assertOutboxContains<NyDialogmeldingFraNav>()
-            assertOutboxContains<OpprettUtgåendeJournalpost>()
         }
 
     @Test
@@ -83,6 +30,6 @@ class PostNyDialogmeldingTest : EndepunktTest() {
                 }
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
-            assertEmptyOutbox()
+            assertIngentingSendt()
         }
 }

@@ -4,8 +4,6 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
-import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagIdentitetsnummer
 import no.nav.helse.sporhund.infrastructure.api.ApiDialogDetails
@@ -49,8 +47,6 @@ class PostSvarPåDialogTest : EndepunktTest() {
             val oppdatert = response.body<ApiDialogDetails>()
             assertEquals(dialog.conversationRef.value, oppdatert.conversationRef)
             assertEquals(2, oppdatert.dialogmeldinger.size)
-            assertOutboxContains<NyDialogmeldingFraNav>()
-            assertOutboxContains<OpprettUtgåendeJournalpost>()
         }
 
     @Test
@@ -76,7 +72,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
                 }
 
             assertEquals(HttpStatusCode.NotFound, response.status)
-            assertEmptyOutbox()
+            assertIngentingSendt()
         }
 
     @Test
@@ -105,7 +101,7 @@ class PostSvarPåDialogTest : EndepunktTest() {
                 }
 
             assertEquals(HttpStatusCode.NotFound, response.status)
-            assertEmptyOutbox()
+            assertIngentingSendt()
         }
 
     @Test
@@ -122,6 +118,6 @@ class PostSvarPåDialogTest : EndepunktTest() {
                 }
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
-            assertEmptyOutbox()
+            assertIngentingSendt()
         }
 }

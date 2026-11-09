@@ -6,9 +6,9 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.application.kommando.LagDialogmeldingPdf
 import no.nav.helse.sporhund.domain.BehandlerRef
 import no.nav.helse.sporhund.domain.Dialog
 import no.nav.helse.sporhund.domain.Dialogmelding
@@ -56,12 +56,7 @@ fun Route.postNyDialogmeldingRoute(
                     transactionProvider.transaction {
                         val dialog = apiDialogmelding.tilDialog(identitetsnummer, saksbehandler)
                         dialogRepository.lagre(dialog)
-                        val events = dialog.events()
-                        val melding = dialog.nyesteMeldingFraNav()
-                        events.forEach {
-                            outbox.nyMelding(OutboxMelding.nyDialogmeldingFraNav(it))
-                        }
-                        outbox.nyMelding(OutboxMelding.opprettUtgåendeJournalpost(melding, dialog, saksbehandler))
+                        kommandoKø.leggTil(LagDialogmeldingPdf.ny(dialog.nyesteMeldingFraNav(), dialog, saksbehandler))
                         return@transaction dialog
                     }
 

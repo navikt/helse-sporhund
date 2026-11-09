@@ -15,13 +15,14 @@ import no.nav.helse.sporhund.application.KnyttInnkommendeJournalpost
 import no.nav.helse.sporhund.application.MeldingTilBehandlerPdfInput
 import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
 import no.nav.helse.sporhund.application.PdfProvider
+import no.nav.helse.sporhund.application.UtgåendeDialogmeldingJournalfører
+import no.nav.helse.sporhund.application.UtgåendeDialogmeldingJournalpost
 import no.nav.helse.sporhund.application.logg.loggError
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import tools.jackson.module.kotlin.readValue
-import java.time.ZoneId
 import javax.net.ssl.SSLHandshakeException
 import kotlin.io.encoding.Base64
 
@@ -30,11 +31,40 @@ class DokarkivClient(
     private val pdfProvider: PdfProvider,
     private val accessTokenProvider: AccessTokenProvider,
     private val httpClient: HttpClient = HttpClient(CIO),
-) {
+) : UtgåendeDialogmeldingJournalfører {
     fun journalførUtgåendeDialogmelding(melding: OpprettUtgåendeJournalpost) {
-        val pdf = pdfProvider.genererPdf(melding.tilPdfInput())
+        val pdf =
+            pdfProvider.genererPdf(
+                MeldingTilBehandlerPdfInput.fra(
+                    conversationRef = melding.conversationRef,
+                    tekst = melding.tekst,
+                    avsenderIdent = melding.avsender.ident,
+                    avsenderNavn = melding.avsender.navn,
+                    mottaker = melding.mottaker,
+                    gjelder = melding.gjelder,
+                    søker = melding.søker,
+                    tidspunkt = melding.tidspunkt,
+                    fagområde = melding.fagområde,
+                ),
+            )
+        journalfør(
+            UtgåendeDialogmeldingJournalpost(
+                conversationRef = melding.conversationRef,
+                meldingId = melding.meldingId,
+                mottaker = melding.mottaker,
+                gjelder = melding.gjelder,
+                fagområde = melding.fagområde,
+            ),
+            pdf,
+        )
+    }
+
+    override fun journalfør(
+        journalpost: UtgåendeDialogmeldingJournalpost,
+        pdf: ByteArray,
+    ) {
         val fagområde =
-            when (melding.fagområde) {
+            when (journalpost.fagområde) {
                 Fagområde.EnkeltståendeBehandlingsdager -> "enkeltstående behandlingsdager"
                 Fagområde.Tilbakedatering -> "tilbakedatering"
                 Fagområde.Yrkesskade -> "yrkesskade"
@@ -48,18 +78,18 @@ class DokarkivClient(
                 tittel = "Dialogmelding - $fagområde",
                 bruker =
                     Bruker(
-                        id = melding.gjelder.value,
+                        id = journalpost.gjelder.value,
                     ),
                 avsenderMottaker =
                     AvsenderMottaker(
-                        melding.mottaker.navn.fulltNavn(),
+                        journalpost.mottaker.navn.fulltNavn(),
                         id =
-                            melding.mottaker.hprNummer.value
+                            journalpost.mottaker.hprNummer.value
                                 .toString(),
                     ),
                 sak =
                     JournalpostPayload.Sak(
-                        fagsakId = melding.conversationRef.value.toString(),
+                        fagsakId = journalpost.conversationRef.value.toString(),
                     ),
                 dokumenter =
                     listOf(
@@ -73,7 +103,7 @@ class DokarkivClient(
                                 ),
                         ),
                     ),
-                eksternReferanseId = melding.meldingId.value.toString(),
+                eksternReferanseId = journalpost.meldingId.value.toString(),
             )
         runBlocking {
             httpClient
@@ -256,45 +286,3 @@ private data class JournalpostPayload(
         )
     }
 }
-
-private fun OpprettUtgåendeJournalpost.tilPdfInput() =
-    MeldingTilBehandlerPdfInput(
-        conversationRef = conversationRef.value.toString(),
-        fra =
-            MeldingTilBehandlerPdfInput.Fra(
-                NAVIdent = avsender.ident.value,
-                navn = avsender.navn,
-            ),
-        til =
-            MeldingTilBehandlerPdfInput.Til(
-                navn = mottaker.navn.let { "${it.fornavn}${it.mellomnavn?.let { m -> " $m" } ?: ""} ${it.etternavn}" },
-                kontor =
-                    MeldingTilBehandlerPdfInput.Til.Kontor(
-                        navn = mottaker.kontor.navn ?: "",
-                        organisasjonsnummer = mottaker.kontor.organisasjonsnummer?.value ?: "",
-                        adresse =
-                            MeldingTilBehandlerPdfInput.Til.Kontor.Adresse(
-                                gate = mottaker.kontor.adresse?.veiadresse ?: "",
-                                postnummer = mottaker.kontor.adresse?.postnummer ?: "",
-                                poststed = mottaker.kontor.adresse?.poststed ?: "",
-                            ),
-                    ),
-            ),
-        tidspunkt = tidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
-        gjelder =
-            MeldingTilBehandlerPdfInput.Gjelder(
-                fødselsnummer = gjelder.value,
-                navn = søker.navn.let { "${it.fornavn}${it.mellomnavn?.let { m -> " $m" } ?: ""} ${it.etternavn}" },
-            ),
-        fagområde =
-            when (fagområde) {
-                Fagområde.EnkeltståendeBehandlingsdager -> "Enkeltstående behandlingsdager"
-                Fagområde.Tilbakedatering -> "Tilbakedatering"
-                Fagområde.Yrkesskade -> "Yrkesskade"
-                Fagområde.Bestridelse -> "Bestridelse"
-                Fagområde.UnntakFraArbeidsgiveransvar -> "Unntak fra arbeidsgiveransvar"
-                Fagområde.Klage -> "Klage"
-                Fagområde.Reisetilskudd -> "Reisetilskudd"
-            },
-        melding = tekst,
-    )

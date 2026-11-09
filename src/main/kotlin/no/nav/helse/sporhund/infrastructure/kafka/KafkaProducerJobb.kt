@@ -39,7 +39,7 @@ class KafkaProducerJobb(
                         meldinger.forEach {
                             val event = it.nyDialogmeldingFraNavEvent
                             val partitionKey = event.conversationRef.value.toString()
-                            val kafkaDto = event.toKafkaDto()
+                            val kafkaDto = event.toKafkaDto(vedlegg = null)
                             loggInfo("Sender dialogmelding på kafka", "dialogmeldingUuid" to event.meldingId.value, "conversationRef" to event.conversationRef.value, "identitetsnummer" to event.identitetsnummer.value)
                             producer
                                 .send(
@@ -65,7 +65,7 @@ class KafkaProducerJobb(
     }
 }
 
-private fun NyDialogmeldingFraNavEvent.toKafkaDto(): DialogmeldingTilBehandlerKafkaDto =
+internal fun NyDialogmeldingFraNavEvent.toKafkaDto(vedlegg: ByteArray?): DialogmeldingTilBehandlerKafkaDto =
     DialogmeldingTilBehandlerKafkaDto(
         behandlerRef = behandlerRef.value,
         personIdent = identitetsnummer.value,
@@ -76,6 +76,6 @@ private fun NyDialogmeldingFraNavEvent.toKafkaDto(): DialogmeldingTilBehandlerKa
         dialogmeldingKodeverk = "FORESPORSEL",
         dialogmeldingKode = if (erPurring) 2 else 1,
         dialogmeldingTekst = tekst,
-        dialogmeldingVedlegg = null,
+        dialogmeldingVedlegg = vedlegg,
         kilde = "sykepenger",
     )

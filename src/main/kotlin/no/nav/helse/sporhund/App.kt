@@ -19,6 +19,8 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.sporhund.application.kommando.DialogmeldingKommandoHåndterer
+import no.nav.helse.sporhund.application.kommando.KommandoJobb
 import no.nav.helse.sporhund.application.logg.loggError
 import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilTilganger
@@ -43,6 +45,7 @@ import no.nav.helse.sporhund.infrastructure.db.PgTransactionProvider
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaConfig
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaConsumerJobb
+import no.nav.helse.sporhund.infrastructure.kafka.KafkaDialogmeldingSender
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaProducerJobb
 import no.nav.helse.sporhund.infrastructure.kafka.ReadTopics
 import org.slf4j.LoggerFactory
@@ -188,6 +191,17 @@ fun app(
 
     val journalførerJobb = JournalførerJobb(running, transactionProvider, dokarkivClient)
 
+    val kommandoJobb =
+        KommandoJobb(
+            transactionProvider = transactionProvider,
+            håndterer =
+                DialogmeldingKommandoHåndterer(
+                    pdfProvider = pdfProvider,
+                    sender = KafkaDialogmeldingSender(kafkaConfig.writeTopic, factory.createProducer()),
+                    journalfører = dokarkivClient,
+                ),
+        )
+
     val tilgangsmaskinenClient =
         TilgangsmaskinenClient(
             scope = populasjonstilgangskontrollConfig.scope,
@@ -198,6 +212,7 @@ fun app(
     var producerJob: Job? = null
     var consumerJob: Job? = null
     var journalførerJob: Job? = null
+    var kommandoJob: Job? = null
     naisApp(
         meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         objectMapper = objectMapper,
@@ -218,6 +233,7 @@ fun app(
                 journalførerJob = launch(exceptionHandler) { journalførerJobb.start() }
                 consumerJob = launch(exceptionHandler) { kafkaConsumerJobb.start() }
                 producerJob = launch(exceptionHandler) { kafkaProducerJobb.start() }
+                kommandoJob = launch(exceptionHandler) { kommandoJobb.start(running) }
             }
             this.monitor.subscribe(ApplicationStopping) {
                 running.set(false)
@@ -225,6 +241,7 @@ fun app(
                     consumerJob?.join()
                     producerJob?.join()
                     journalførerJob?.join()
+                    kommandoJob?.join()
                 }
             }
 

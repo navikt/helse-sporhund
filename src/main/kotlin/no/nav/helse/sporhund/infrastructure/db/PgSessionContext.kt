@@ -9,4 +9,6 @@ class PgSessionContext(
 ) : SessionContext {
     override val outbox: Outbox = PgOutbox(session)
     override val dialogRepository = PgDialogRepository(session)
+    override val kommandoKø = PgKommandoKø(session)
+    override val dialogmeldingPdfRepository = PgDialogmeldingPdfRepository(session)
 }

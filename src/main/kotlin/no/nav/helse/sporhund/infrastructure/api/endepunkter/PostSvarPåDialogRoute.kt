@@ -6,9 +6,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.PersonPseudoIdProvider
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.application.kommando.LagDialogmeldingPdf
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.sporhund.domain.tilgangskontroll.Tilgang
@@ -63,12 +63,7 @@ fun Route.postSvarPåDialogRoute(
                             ),
                         )
                         dialogRepository.lagre(dialog)
-                        val events = dialog.events()
-                        val melding = dialog.nyesteMeldingFraNav()
-                        events.forEach {
-                            outbox.nyMelding(OutboxMelding.nyDialogmeldingFraNav(it))
-                        }
-                        outbox.nyMelding(OutboxMelding.opprettUtgåendeJournalpost(melding, dialog, saksbehandler))
+                        kommandoKø.leggTil(LagDialogmeldingPdf.ny(dialog.nyesteMeldingFraNav(), dialog, saksbehandler))
                         dialog
                     }
                 if (oppdatertDialog != null) {
