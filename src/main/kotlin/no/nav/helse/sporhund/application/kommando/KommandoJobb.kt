@@ -6,10 +6,12 @@ import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggError
 import no.nav.helse.sporhund.application.logg.loggInfo
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 class KommandoJobb(
     private val transactionProvider: TransactionProvider,
+    private val ventetid: Duration = 5.seconds,
     private val håndterer: KommandoHåndterer,
 ) {
     /**
@@ -34,7 +36,7 @@ class KommandoJobb(
                     runCatching { utførNeste() }
                         .onFailure { loggError("Kommandojobb: Klarte ikke utføre kommando, prøver igjen i neste runde", it) }
                         .getOrDefault(false)
-                if (!fantKommando) delay(5.seconds)
+                if (!fantKommando) delay(ventetid)
             }
         }
         loggInfo("Stopper kommandojobb")

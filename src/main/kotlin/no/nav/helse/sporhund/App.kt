@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 const val DIALOGMELDING_FRA_NAY_TOPIC = "teamsykefravr.isdialogmelding-behandler-dialogmelding-bestilling"
@@ -152,6 +153,7 @@ fun app(
     sprinterConfig: SprinterConfig,
     dokarkivConfig: DokarkivConfig,
     port: Int = 8080,
+    kommandoJobbVentetid: Duration = 5.seconds,
     additionalRoutes: Routing.() -> Unit = { },
 ) {
     val factory = ConsumerProducerFactory(kafkaConfig.aivenConfig)
@@ -194,6 +196,7 @@ fun app(
     val kommandoJobb =
         KommandoJobb(
             transactionProvider = transactionProvider,
+            ventetid = kommandoJobbVentetid,
             håndterer =
                 DialogmeldingKommandoHåndterer(
                     pdfProvider = pdfProvider,

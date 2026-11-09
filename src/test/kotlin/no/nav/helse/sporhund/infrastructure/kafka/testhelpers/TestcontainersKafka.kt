@@ -64,5 +64,8 @@ class TestcontainersKafka(
         error("Consumer group '$consumerGroupId' fikk ikke tildelt partisjoner innen timeout")
     }
 
-    fun stop() = kafka.stop()
+    fun stop() {
+        adminClient.close()
+        kafka.stop()
+    }
 }

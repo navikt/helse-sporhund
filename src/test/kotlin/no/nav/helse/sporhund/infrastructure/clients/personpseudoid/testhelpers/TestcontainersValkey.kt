@@ -25,4 +25,6 @@ class TestcontainersValkey(
             valkeyPassord = "password",
             valkeyConnectionString = "valkey://${valkey.host}:${valkey.getMappedPort(6379)}",
         )
+
+    fun stop() = valkey.stop()
 }
