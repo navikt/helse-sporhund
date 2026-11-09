@@ -11,11 +11,11 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.sporhund.application.KnyttInnkommendeJournalpost
-import no.nav.helse.sporhund.application.UtgåendeDialogmeldingJournalfører
+import no.nav.helse.sporhund.application.JournalføringProvider
 import no.nav.helse.sporhund.application.UtgåendeDialogmeldingJournalpost
 import no.nav.helse.sporhund.application.logg.loggError
 import no.nav.helse.sporhund.application.logg.loggInfo
+import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
@@ -27,8 +27,8 @@ class DokarkivClient(
     private val dokarkivConfig: DokarkivConfig,
     private val accessTokenProvider: AccessTokenProvider,
     private val httpClient: HttpClient = HttpClient(CIO),
-) : UtgåendeDialogmeldingJournalfører {
-    override fun journalfør(
+) : JournalføringProvider {
+    override fun journalførUtgående(
         journalpost: UtgåendeDialogmeldingJournalpost,
         pdf: ByteArray,
     ) {
@@ -87,9 +87,13 @@ class DokarkivClient(
         }
     }
 
-    fun feilregistrerOgKnyttJournalpost(melding: KnyttInnkommendeJournalpost) {
-        feilregistrer(melding.journalpostId)
-        knyttTilAnnenSak(melding.journalpostId, melding.conversationRef.value.toString(), melding.identitetsnummer)
+    override fun feilregistrerOgKnyttInnkommende(
+        journalpostId: String,
+        conversationRef: ConversationRef,
+        gjelder: Identitetsnummer,
+    ) {
+        feilregistrer(journalpostId)
+        knyttTilAnnenSak(journalpostId, conversationRef.value.toString(), gjelder)
     }
 
     private fun feilregistrer(journalpostId: String) {

@@ -26,6 +26,7 @@ class DialogmeldingE2ETest {
             }
             så {
                 saksbehandlerSerSvaret("Her er notatet")
+                svaretErKnyttetTilSaken()
             }
         }
 

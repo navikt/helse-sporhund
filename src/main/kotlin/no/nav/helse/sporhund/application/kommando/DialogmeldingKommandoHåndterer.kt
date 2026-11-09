@@ -1,11 +1,11 @@
 package no.nav.helse.sporhund.application.kommando
 
 import no.nav.helse.sporhund.application.DialogmeldingTilBehandlerSender
+import no.nav.helse.sporhund.application.JournalføringProvider
 import no.nav.helse.sporhund.application.MeldingTilBehandlerPdfInput
 import no.nav.helse.sporhund.application.PdfProvider
 import no.nav.helse.sporhund.application.PurringTilBehandlerPdfInput
 import no.nav.helse.sporhund.application.SessionContext
-import no.nav.helse.sporhund.application.UtgåendeDialogmeldingJournalfører
 import no.nav.helse.sporhund.application.UtgåendeDialogmeldingJournalpost
 import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.Dialog
@@ -17,7 +17,7 @@ import java.util.UUID
 class DialogmeldingKommandoHåndterer(
     private val pdfProvider: PdfProvider,
     private val sender: DialogmeldingTilBehandlerSender,
-    private val journalfører: UtgåendeDialogmeldingJournalfører,
+    private val journalføringProvider: JournalføringProvider,
 ) : KommandoHåndterer {
     override fun håndter(
         kommando: Kommando,
@@ -27,6 +27,7 @@ class DialogmeldingKommandoHåndterer(
             is LagDialogmeldingPdf -> lagPdf(kommando, session)
             is SendDialogmeldingPåKafka -> sendPåKafka(kommando, session)
             is JournalførDialogmelding -> journalfør(kommando, session)
+            is KnyttJournalpostTilDialog -> knytt(kommando, session)
         }
 
     private fun lagPdf(
@@ -94,7 +95,7 @@ class DialogmeldingKommandoHåndterer(
         session: SessionContext,
     ): List<Kommando> {
         val (dialog, melding) = session.finnDialogOgMelding(kommando.conversationRef, kommando.meldingId)
-        journalfører.journalfør(
+        journalføringProvider.journalførUtgående(
             UtgåendeDialogmeldingJournalpost(
                 conversationRef = dialog.conversationRef,
                 meldingId = melding.id,
@@ -105,6 +106,15 @@ class DialogmeldingKommandoHåndterer(
             ),
             session.finnPdf(melding.id),
         )
+        return emptyList()
+    }
+
+    private fun knytt(
+        kommando: KnyttJournalpostTilDialog,
+        session: SessionContext,
+    ): List<Kommando> {
+        val dialog = session.dialogRepository.finnDialog(kommando.conversationRef) ?: error("Fant ikke dialog for kommando")
+        journalføringProvider.feilregistrerOgKnyttInnkommende(kommando.journalpostId, dialog.conversationRef, dialog.identitetsnummer)
         return emptyList()
     }
 

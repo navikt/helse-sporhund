@@ -193,7 +193,7 @@ fun app(
                 DialogmeldingKommandoHåndterer(
                     pdfProvider = pdfProvider,
                     sender = KafkaDialogmeldingSender(kafkaConfig.writeTopic, factory.createProducer()),
-                    journalfører = dokarkivClient,
+                    journalføringProvider = dokarkivClient,
                 ),
         )
 

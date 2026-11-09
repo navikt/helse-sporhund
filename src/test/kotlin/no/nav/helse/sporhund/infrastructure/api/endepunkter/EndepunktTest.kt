@@ -85,7 +85,7 @@ abstract class EndepunktTest {
                 DialogmeldingKommandoHåndterer(
                     pdfProvider = pdfProvider,
                     sender = KafkaDialogmeldingSender("topic", producer),
-                    journalfører =
+                    journalføringProvider =
                         DokarkivClient(
                             DokarkivConfig(baseUrl = "http://dokarkiv", scope = "scope"),
                             object : AccessTokenProvider {

@@ -120,5 +120,8 @@ class Så internal constructor(
 
     suspend fun saksbehandlerSerSvaret(tekst: String) = forløp.ventPåSvarHosSaksbehandler(tekst)
 
+    /** Journalposten til det siste svaret fra behandler er feilregistrert og knyttet til saken for dialogen, på samme person. */
+    suspend fun svaretErKnyttetTilSaken() = forløp.ventPåKnytningAvSvar()
+
     suspend fun dialogenErFerdigstilt() = assertEquals(ApiDialogmeldingStatus.FERDIGSTILT, forløp.dialogstatus(), "Dialogen skal være ferdigstilt")
 }

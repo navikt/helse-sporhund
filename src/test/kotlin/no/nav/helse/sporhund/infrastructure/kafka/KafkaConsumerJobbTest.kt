@@ -3,6 +3,7 @@ package no.nav.helse.sporhund.infrastructure.kafka
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import kotlinx.coroutines.*
 import no.nav.helse.sporhund.application.InMemoryTransactionProvider
+import no.nav.helse.sporhund.application.kommando.KnyttJournalpostTilDialog
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.domain.Dialogstatus
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
@@ -60,11 +61,14 @@ class KafkaConsumerJobbTest {
         )
 
         // when
+        val journalpostId = "JP-svar"
         lesTilEndenAvTopicetOgStoppConsumer {
             producer.send(
                 ProducerRecord(
                     dialogmeldingFraBehandlerTopic,
-                    objectMapper.writeValueAsString(lagDialogmeldingFraBehandlerKafkaDto(conversationRef = dialog.conversationRef.value.toString())),
+                    objectMapper.writeValueAsString(
+                        lagDialogmeldingFraBehandlerKafkaDto(conversationRef = dialog.conversationRef.value.toString(), journalpostId = journalpostId),
+                    ),
                 ),
             )
         }
@@ -77,6 +81,14 @@ class KafkaConsumerJobbTest {
         val funnet = transactionProvider.dialogRepository.finnDialog(dialog.conversationRef)
         assertNotNull(funnet)
         assertEquals(2, funnet.meldinger.size)
+
+        val knytning =
+            transactionProvider.kommandoKø
+                .kommandoer()
+                .filterIsInstance<KnyttJournalpostTilDialog>()
+                .single()
+        assertEquals(journalpostId, knytning.journalpostId)
+        assertEquals(dialog.conversationRef, knytning.conversationRef)
     }
 
     @Test

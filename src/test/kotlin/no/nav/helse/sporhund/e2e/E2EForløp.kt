@@ -67,6 +67,7 @@ internal class E2EForløp(
         get() = checkNotNull(gjeldendeConversationRef) { "Dialogen finnes ikke ennå. Saksbehandler må sende en forespørsel først" }
 
     private val meldingerFraSaksbehandler = mutableListOf<String>()
+    private val journalposterFraBehandler = mutableListOf<String>()
 
     private val dialogsti get() = "${miljø.baseUrl}/api/personer/${personPseudoId.value}/dialogmeldinger/$conversationRef"
 
@@ -102,6 +103,7 @@ internal class E2EForløp(
                 personIdentPasient = identitetsnummer.value,
                 legehpr = behandlerHprNummer.toString(),
                 dialogmelding = lagDialogmelding(tekstNotatInnhold = tekst),
+                journalpostId = UUID.randomUUID().toString().also { journalposterFraBehandler += it },
                 // Uten vedlegg, så appen ikke trenger padm2
                 antallVedlegg = 0,
             )
@@ -197,6 +199,22 @@ internal class E2EForløp(
                 .singleOrNull()
         }
 
+    suspend fun ventPåKnytningAvSvar() {
+        val journalpostId = journalposterFraBehandler.lastOrNull() ?: fail("Behandler har ikke svart ennå")
+        val knytning =
+            ventPåVerdi("at journalpost $journalpostId blir knyttet til saken") {
+                miljø.dokarkiv
+                    .knyttedeJournalposter()
+                    .filter { it.journalpostId == journalpostId }
+                    .also { assertTrue(it.size <= 1, "Journalposten er knyttet ${it.size} ganger") }
+                    .singleOrNull()
+            }
+        assertTrue(journalpostId in miljø.dokarkiv.feilregistrerteJournalposter(), "Journalposten til svaret skal være feilregistrert")
+        val forespørsel = objectMapper.readValue<KnyttTilAnnenSakForespørsel>(knytning.body)
+        assertEquals(conversationRef.toString(), forespørsel.fagsakId)
+        assertEquals(identitetsnummer.value, forespørsel.bruker["id"])
+    }
+
     suspend fun ventPåSvarHosSaksbehandler(tekst: String) {
         ventPå("at saksbehandler ser svaret «$tekst» fra behandler") {
             val dialog = hentDialog()
@@ -256,6 +274,11 @@ internal class E2EForløp(
             fagomrade = ApiFagomrade.TILBAKEDATERING,
             melding = melding,
         )
+
+    private data class KnyttTilAnnenSakForespørsel(
+        val fagsakId: String,
+        val bruker: Map<String, Any?>,
+    )
 
     private data class JournalpostForespørsel(
         val tittel: String,

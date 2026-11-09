@@ -1,7 +1,7 @@
 package no.nav.helse.sporhund.infrastructure.kafka
 
-import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.application.kommando.KnyttJournalpostTilDialog
 import no.nav.helse.sporhund.application.logg.loggDebug
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.domain.*
@@ -81,7 +81,7 @@ private fun SvarFraBehandler.MedConversationRef.håndterSvarMedConversationRef(
         if (dialog.meldingFinnes(fraBehandler.id)) return@transaction loggInfo("Melding med id=$meldingId finnes allerede i dialogen, forsøker ikke å legge den til på nytt")
         dialog.nyMelding(fraBehandler)
         dialogRepository.lagre(dialog)
-        outbox.nyMelding(OutboxMelding.knyttInnkommendeJournalpost(journalpostId, dialog))
+        kommandoKø.leggTil(KnyttJournalpostTilDialog.ny(journalpostId, dialog))
         loggInfo("Knytter meldingen til dialog")
     }
 }

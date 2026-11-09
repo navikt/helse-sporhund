@@ -11,8 +11,6 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson3.jackson
-import no.nav.helse.sporhund.application.KnyttInnkommendeJournalpost
-import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.UtgåendeDialogmeldingJournalpost
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,7 +33,7 @@ class DokarkivClientTest {
         }
 
     @Test
-    fun `journalfør sender POST til riktig URL`() {
+    fun `journalførUtgående sender POST til riktig URL`() {
         val engine =
             lagMockEngine {
                 respond(
@@ -54,7 +52,7 @@ class DokarkivClientTest {
                     headersOf(),
                 )
             }
-        lagDokarkivClient(engine).journalfør(lagUtgåendeJournalpost(), ByteArray(16))
+        lagDokarkivClient(engine).journalførUtgående(lagUtgåendeJournalpost(), ByteArray(16))
 
         assertEquals(1, engine.requestHistory.size)
         assertEquals(HttpMethod.Post, engine.requestHistory[0].method)
@@ -62,25 +60,25 @@ class DokarkivClientTest {
     }
 
     @Test
-    fun `journalfør ignorerer 409 Conflict`() {
+    fun `journalførUtgående ignorerer 409 Conflict`() {
         val engine = lagMockEngine { respond("", HttpStatusCode.Conflict, headersOf()) }
         assertDoesNotThrow {
-            lagDokarkivClient(engine).journalfør(lagUtgåendeJournalpost(), ByteArray(16))
+            lagDokarkivClient(engine).journalførUtgående(lagUtgåendeJournalpost(), ByteArray(16))
         }
     }
 
     @Test
-    fun `journalfør kaster exception ved feil fra dokarkiv`() {
+    fun `journalførUtgående kaster exception ved feil fra dokarkiv`() {
         val engine = lagMockEngine { respond("feil", HttpStatusCode.InternalServerError, headersOf()) }
         assertThrows<Exception> {
-            lagDokarkivClient(engine).journalfør(lagUtgåendeJournalpost(), ByteArray(16))
+            lagDokarkivClient(engine).journalførUtgående(lagUtgåendeJournalpost(), ByteArray(16))
         }
     }
 
     @Test
-    fun `feilregistrerOgKnyttJournalpost sender PATCH, så PUT`() {
+    fun `feilregistrerOgKnyttInnkommende sender PATCH, så PUT`() {
         val engine = lagMockEngine { respond("""{ "nyJournalpostId": 12344512 }""", HttpStatusCode.OK, headersOf()) }
-        lagDokarkivClient(engine).feilregistrerOgKnyttJournalpost(lagKnyttInnkommendeJournalpost("JP-123"))
+        lagDokarkivClient(engine).feilregistrerOgKnyttInnkommende("JP-123")
 
         assertEquals(2, engine.requestHistory.size)
         assertEquals(HttpMethod.Patch, engine.requestHistory[0].method)
@@ -96,10 +94,10 @@ class DokarkivClientTest {
     }
 
     @Test
-    fun `feilregistrerOgKnyttJournalpost kaller ikke knyttTilAnnenSak dersom feilregistrer feiler`() {
+    fun `feilregistrerOgKnyttInnkommende kaller ikke knyttTilAnnenSak dersom feilregistrer feiler`() {
         val engine = lagMockEngine { respond("feil", HttpStatusCode.InternalServerError, headersOf()) }
         assertThrows<Exception> {
-            lagDokarkivClient(engine).feilregistrerOgKnyttJournalpost(lagKnyttInnkommendeJournalpost())
+            lagDokarkivClient(engine).feilregistrerOgKnyttInnkommende("JP-456")
         }
 
         assertEquals(4, engine.requestHistory.size)
@@ -130,5 +128,8 @@ class DokarkivClientTest {
         )
     }
 
-    private fun lagKnyttInnkommendeJournalpost(journalpostId: String = "JP-456"): KnyttInnkommendeJournalpost = OutboxMelding.knyttInnkommendeJournalpost(journalpostId, lagDialog())
+    private fun DokarkivClient.feilregistrerOgKnyttInnkommende(journalpostId: String) {
+        val dialog = lagDialog()
+        feilregistrerOgKnyttInnkommende(journalpostId, dialog.conversationRef, dialog.identitetsnummer)
+    }
 }

@@ -63,3 +63,21 @@ data class JournalførDialogmelding(
     override val conversationRef: ConversationRef,
     val meldingId: DialogmeldingId<UUID>,
 ) : Kommando
+
+/** Journalposten til en innkommende dialogmelding feilregistreres og knyttes til saken for dialogen. */
+data class KnyttJournalpostTilDialog(
+    override val id: KommandoId,
+    override val conversationRef: ConversationRef,
+    val journalpostId: String,
+) : Kommando {
+    companion object {
+        fun ny(
+            journalpostId: String,
+            dialog: Dialog,
+        ) = KnyttJournalpostTilDialog(
+            id = KommandoId(UUID.randomUUID()),
+            conversationRef = dialog.conversationRef,
+            journalpostId = journalpostId,
+        )
+    }
+}

@@ -3,6 +3,7 @@ package no.nav.helse.sporhund.infrastructure.db
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.sporhund.application.kommando.JournalførDialogmelding
+import no.nav.helse.sporhund.application.kommando.KnyttJournalpostTilDialog
 import no.nav.helse.sporhund.application.kommando.Kommando
 import no.nav.helse.sporhund.application.kommando.KommandoId
 import no.nav.helse.sporhund.application.kommando.KommandoJobb
@@ -72,6 +73,17 @@ class PgKommandoKøTest {
         assertEquals(1, nesteSteg.filterIsInstance<SendDialogmeldingPåKafka>().count { it.meldingId == lagPdf.meldingId })
         assertEquals(1, nesteSteg.filterIsInstance<JournalførDialogmelding>().count { it.meldingId == lagPdf.meldingId })
         assertTrue(nesteSteg.all { it.conversationRef == dialog.conversationRef })
+    }
+
+    @Test
+    fun `knytting av innkommende journalpost lagres og hentes uendret`() {
+        val knytning = KnyttJournalpostTilDialog.ny("JP-123", dialog)
+        transactionProvider.transaction { kommandoKø.leggTil(knytning) }
+        val mottatt = mutableListOf<Kommando>()
+
+        KommandoJobb(transactionProvider, nå = { nå }) { kommando, _ -> emptyList<Kommando>().also { mottatt.add(kommando) } }.utførNeste()
+
+        assertEquals(listOf<Kommando>(knytning), mottatt)
     }
 
     @Test

@@ -7,10 +7,17 @@ import no.nav.helse.sporhund.domain.Fagområde
 import no.nav.helse.sporhund.domain.Identitetsnummer
 import java.util.UUID
 
-fun interface UtgåendeDialogmeldingJournalfører {
-    fun journalfør(
+interface JournalføringProvider {
+    fun journalførUtgående(
         journalpost: UtgåendeDialogmeldingJournalpost,
         pdf: ByteArray,
+    )
+
+    /** Feilregistrerer journalposten til en innkommende dialogmelding og knytter den til saken for dialogen. */
+    fun feilregistrerOgKnyttInnkommende(
+        journalpostId: String,
+        conversationRef: ConversationRef,
+        gjelder: Identitetsnummer,
     )
 }
 

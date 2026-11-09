@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import kotliquery.Session
 import no.nav.helse.sporhund.application.kommando.JournalførDialogmelding
+import no.nav.helse.sporhund.application.kommando.KnyttJournalpostTilDialog
 import no.nav.helse.sporhund.application.kommando.Kommando
 import no.nav.helse.sporhund.application.kommando.KommandoId
 import no.nav.helse.sporhund.application.kommando.KommandoKø
@@ -89,6 +90,7 @@ class PgKommandoKø(
             is LagDialogmeldingPdf -> "LagDialogmeldingPdf"
             is SendDialogmeldingPåKafka -> "SendDialogmeldingPåKafka"
             is JournalførDialogmelding -> "JournalførDialogmelding"
+            is KnyttJournalpostTilDialog -> "KnyttJournalpostTilDialog"
         }
 
     private fun Kommando.tilDto(): KommandoDto =
@@ -104,6 +106,8 @@ class PgKommandoKø(
                 SendDialogmeldingPåKafkaDto(id = id.value, conversationRef = conversationRef.value, meldingId = meldingId.value)
             is JournalførDialogmelding ->
                 JournalførDialogmeldingDto(id = id.value, conversationRef = conversationRef.value, meldingId = meldingId.value)
+            is KnyttJournalpostTilDialog ->
+                KnyttJournalpostTilDialogDto(id = id.value, conversationRef = conversationRef.value, journalpostId = journalpostId)
         }
 
     private fun KommandoDto.tilDomene(): Kommando =
@@ -119,6 +123,8 @@ class PgKommandoKø(
                 SendDialogmeldingPåKafka(KommandoId(id), ConversationRef(conversationRef), DialogmeldingId(meldingId))
             is JournalførDialogmeldingDto ->
                 JournalførDialogmelding(KommandoId(id), ConversationRef(conversationRef), DialogmeldingId(meldingId))
+            is KnyttJournalpostTilDialogDto ->
+                KnyttJournalpostTilDialog(KommandoId(id), ConversationRef(conversationRef), journalpostId)
         }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
@@ -126,6 +132,7 @@ class PgKommandoKø(
         JsonSubTypes.Type(value = LagDialogmeldingPdfDto::class, name = "LagDialogmeldingPdf"),
         JsonSubTypes.Type(value = SendDialogmeldingPåKafkaDto::class, name = "SendDialogmeldingPåKafka"),
         JsonSubTypes.Type(value = JournalførDialogmeldingDto::class, name = "JournalførDialogmelding"),
+        JsonSubTypes.Type(value = KnyttJournalpostTilDialogDto::class, name = "KnyttJournalpostTilDialog"),
     )
     private sealed interface KommandoDto
 
@@ -146,5 +153,11 @@ class PgKommandoKø(
         val id: UUID,
         val conversationRef: UUID,
         val meldingId: UUID,
+    ) : KommandoDto
+
+    private data class KnyttJournalpostTilDialogDto(
+        val id: UUID,
+        val conversationRef: UUID,
+        val journalpostId: String,
     ) : KommandoDto
 }

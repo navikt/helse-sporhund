@@ -31,7 +31,7 @@ class JournalførerJobb(
                         }
                         loggDebug("Journalfører-jobb: Fant ${innkommendeJournalposter.size} innkommende journalposter som skal journalføres")
                         innkommendeJournalposter.forEach { melding ->
-                            dokarkivClient.feilregistrerOgKnyttJournalpost(melding)
+                            dokarkivClient.feilregistrerOgKnyttInnkommende(melding.journalpostId, melding.conversationRef, melding.identitetsnummer)
                             outbox.meldingSendt(melding.id)
                         }
                         loggDebug("Journalfører-jobb: Journalført ${innkommendeJournalposter.size} innkommende journalposter")
