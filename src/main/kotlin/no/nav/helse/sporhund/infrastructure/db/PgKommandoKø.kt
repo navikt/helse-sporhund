@@ -131,7 +131,7 @@ class PgKommandoKø(
         val id: UUID,
         val conversationRef: UUID,
         val meldingId: UUID,
-        val avsenderNavn: String,
+        val avsenderNavn: String?,
     ) : KommandoDto
 
     private data class SendDialogmeldingPåKafkaDto(

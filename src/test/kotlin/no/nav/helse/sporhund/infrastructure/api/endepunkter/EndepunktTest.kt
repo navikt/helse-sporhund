@@ -66,6 +66,8 @@ abstract class EndepunktTest {
     protected val pdfProvider =
         object : PdfProvider {
             override fun genererPdf(meldingTilBehandlerPdfInput: MeldingTilBehandlerPdfInput) = pdf.also { pdfInput.add(meldingTilBehandlerPdfInput) }
+
+            override fun genererPurringPdf(purringTilBehandlerPdfInput: PurringTilBehandlerPdfInput) = pdf
         }
     protected val producer = MockProducer(true, null, StringSerializer(), StringSerializer())
     protected val dokarkiv =

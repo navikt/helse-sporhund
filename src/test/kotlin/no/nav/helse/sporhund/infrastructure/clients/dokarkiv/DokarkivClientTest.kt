@@ -16,6 +16,7 @@ import no.nav.helse.sporhund.application.MeldingTilBehandlerPdfInput
 import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
 import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.PdfProvider
+import no.nav.helse.sporhund.application.PurringTilBehandlerPdfInput
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
 import no.nav.helse.sporhund.domain.testhelpers.lagFraNavMelding
 import no.nav.helse.sporhund.domain.testhelpers.lagSaksbehandler
@@ -31,6 +32,8 @@ class DokarkivClientTest {
     private val pdfProvider =
         object : PdfProvider {
             override fun genererPdf(meldingTilBehandlerPdfInput: MeldingTilBehandlerPdfInput) = ByteArray(16)
+
+            override fun genererPurringPdf(purringTilBehandlerPdfInput: PurringTilBehandlerPdfInput) = ByteArray(16)
         }
     private val accessTokenProvider =
         object : AccessTokenProvider {

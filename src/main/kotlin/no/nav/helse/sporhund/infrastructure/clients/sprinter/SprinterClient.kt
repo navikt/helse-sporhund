@@ -12,6 +12,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.application.MeldingTilBehandlerPdfInput
 import no.nav.helse.sporhund.application.PdfProvider
+import no.nav.helse.sporhund.application.PurringTilBehandlerPdfInput
 import no.nav.helse.sporhund.application.logg.loggInfo
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 
@@ -25,6 +26,15 @@ class SprinterClient(
                 url = "${sprinterConfig.baseUrl}/api/v1/genpdf/sporhund/melding_til_behandler",
                 input = meldingTilBehandlerPdfInput,
                 conversationRef = meldingTilBehandlerPdfInput.conversationRef,
+            )
+        }
+
+    override fun genererPurringPdf(purringTilBehandlerPdfInput: PurringTilBehandlerPdfInput): ByteArray =
+        runBlocking {
+            produserPdfBytes(
+                url = "${sprinterConfig.baseUrl}/api/v1/genpdf/sporhund/purring_til_behandler",
+                input = purringTilBehandlerPdfInput,
+                conversationRef = purringTilBehandlerPdfInput.conversationRef,
             )
         }
 

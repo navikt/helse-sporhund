@@ -29,17 +29,21 @@ import no.nav.helse.sporhund.infrastructure.api.ApiSoker
 import no.nav.helse.sporhund.infrastructure.api.ApiSvarPaDialog
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.lagTestSaksbehandler
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.utstedTokenMedSkrivTilgang
+import no.nav.helse.sporhund.infrastructure.clients.sprinter.testhelpers.MockSprinterServer
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.lagDialogmelding
 import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.lagDialogmeldingFraBehandlerKafkaDto
 import org.apache.kafka.clients.producer.ProducerRecord
 import tools.jackson.module.kotlin.readValue
+import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 import java.util.Base64
 import java.util.UUID
 import kotlin.random.Random
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -125,7 +129,7 @@ internal class E2EForløp(
         medVedlegg: Boolean,
     ) {
         val melding = meldingTilBehandler(tekst)
-        val alleMeldinger = miljø.meldingerTilBehandler(conversationRef.toString())
+        val alleMeldinger = miljø.meldingerTilBehandler(conversationRef.toString()).filter { it.dialogmeldingKode == FORESPØRSEL }
         assertEquals(meldingerFraSaksbehandler, alleMeldinger.map { it.dialogmeldingTekst }, "Behandler skal ha fått nøyaktig én melding per melding fra saksbehandler")
         assertEquals(conversationRef.toString(), melding.dialogmeldingRefConversation)
         assertEquals(identitetsnummer.value, melding.personIdent)
@@ -140,25 +144,58 @@ internal class E2EForløp(
     suspend fun ventPåJournalføring() {
         val tekst = meldingerFraSaksbehandler.lastOrNull() ?: fail("Saksbehandler har ikke sendt noen melding ennå")
         val melding = meldingTilBehandler(tekst)
-        val journalpost =
-            ventPåVerdi("at dialogmeldingen ${melding.dialogmeldingUuid} blir journalført") {
-                miljø.dokarkiv
-                    .opprettedeJournalposter()
-                    .map { objectMapper.readValue<JournalpostForespørsel>(it) }
-                    .filter { it.eksternReferanseId == melding.dialogmeldingUuid }
-                    .also { assertTrue(it.size <= 1, "Dialogmeldingen er journalført ${it.size} ganger") }
-                    .singleOrNull()
-            }
-        val dokument =
-            Base64.getDecoder().decode(
-                journalpost.dokumenter
-                    .single()
-                    .dokumentvarianter
-                    .single()
-                    .fysiskDokument,
-            )
-        assertContentEquals(melding.dialogmeldingVedlegg, dokument, "Det journalførte dokumentet skal være det samme som vedlegget til behandler")
+        val journalpost = journalpostFor(melding.dialogmeldingUuid)
+        assertContentEquals(melding.dialogmeldingVedlegg, journalpost.pdf(), "Det journalførte dokumentet skal være det samme som vedlegget til behandler")
     }
+
+    /** Kjører purringsjobben på et tidspunkt der fristen for svar på forespørselen er ute. */
+    fun fristenGårUt() = miljø.kjørPurringsjobben(Instant.now().plus(Duration.ofDays(22)))
+
+    /** Venter på at behandler har mottatt nøyaktig én purring, med PDF fra purring-malen i Sprinter. */
+    suspend fun sjekkPurringTilBehandler() {
+        val purring = purringTilBehandler()
+        assertEquals(identitetsnummer.value, purring.personIdent)
+        assertContentEquals(PDF_FRA_PURRINGSMALEN, purring.dialogmeldingVedlegg, "Vedlegget skal være PDF-en fra purring-malen")
+        val pdfInput =
+            miljø.sprinter
+                .forespørslerTil(MockSprinterServer.PURRING_TIL_BEHANDLER)
+                .map { objectMapper.readTree(it) }
+                .single { it["conversationRef"].asString() == conversationRef.toString() }
+        assertFalse(pdfInput.has("fra"), "Purring-malen skal ikke få «fra»")
+        assertTrue(pdfInput["melding"].asString().contains("Vi kan ikke se å ha mottatt svar på vår forespørsel"), "PDF-en skal ha purringsteksten")
+    }
+
+    /** Venter på at purringen er journalført på samme sak, bruker og behandler som forespørselen, med samme PDF som vedlegget. */
+    suspend fun ventPåJournalføringAvPurring() {
+        val purring = purringTilBehandler()
+        val forespørsel = journalpostFor(meldingTilBehandler(meldingerFraSaksbehandler.first()).dialogmeldingUuid)
+        val journalpost = journalpostFor(purring.dialogmeldingUuid)
+        assertEquals("Purring - tilbakedatering", journalpost.tittel)
+        assertEquals("Purring - tilbakedatering", journalpost.dokumenter.single().tittel)
+        assertEquals(conversationRef.toString(), journalpost.sak.fagsakId)
+        assertEquals(forespørsel.bruker, journalpost.bruker)
+        assertEquals(forespørsel.avsenderMottaker, journalpost.avsenderMottaker)
+        assertContentEquals(purring.dialogmeldingVedlegg, journalpost.pdf(), "Det journalførte dokumentet skal være det samme som vedlegget til behandler")
+    }
+
+    private suspend fun purringTilBehandler() =
+        ventPåVerdi("at behandler mottar purringen") {
+            miljø
+                .meldingerTilBehandler(conversationRef.toString())
+                .filter { it.dialogmeldingKode == PURRING }
+                .also { assertTrue(it.size <= 1, "Behandler har fått ${it.size} purringer") }
+                .singleOrNull()
+        }
+
+    private suspend fun journalpostFor(dialogmeldingUuid: String) =
+        ventPåVerdi("at dialogmeldingen $dialogmeldingUuid blir journalført") {
+            miljø.dokarkiv
+                .opprettedeJournalposter()
+                .map { objectMapper.readValue<JournalpostForespørsel>(it) }
+                .filter { it.eksternReferanseId == dialogmeldingUuid }
+                .also { assertTrue(it.size <= 1, "Dialogmeldingen er journalført ${it.size} ganger") }
+                .singleOrNull()
+        }
 
     suspend fun ventPåSvarHosSaksbehandler(tekst: String) {
         ventPå("at saksbehandler ser svaret «$tekst» fra behandler") {
@@ -221,10 +258,28 @@ internal class E2EForløp(
         )
 
     private data class JournalpostForespørsel(
+        val tittel: String,
         val eksternReferanseId: String,
+        val sak: Sak,
+        val bruker: Map<String, Any?>,
+        val avsenderMottaker: Map<String, Any?>,
         val dokumenter: List<Dokument>,
     ) {
+        fun pdf(): ByteArray =
+            Base64.getDecoder().decode(
+                dokumenter
+                    .single()
+                    .dokumentvarianter
+                    .single()
+                    .fysiskDokument,
+            )
+
+        data class Sak(
+            val fagsakId: String,
+        )
+
         data class Dokument(
+            val tittel: String,
             val dokumentvarianter: List<Dokumentvariant>,
         )
 
@@ -234,7 +289,9 @@ internal class E2EForløp(
     }
 
     private companion object {
-        // Det MockSprinterServer svarer med
-        val PDF_FRA_SPRINTER = "%PDF-1.4 mock".toByteArray()
+        const val FORESPØRSEL = 1
+        const val PURRING = 2
+        val PDF_FRA_SPRINTER = MockSprinterServer.PDF_PER_MAL.getValue(MockSprinterServer.MELDING_TIL_BEHANDLER)
+        val PDF_FRA_PURRINGSMALEN = MockSprinterServer.PDF_PER_MAL.getValue(MockSprinterServer.PURRING_TIL_BEHANDLER)
     }
 }

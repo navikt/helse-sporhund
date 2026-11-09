@@ -13,6 +13,8 @@ import java.time.ZoneId
 
 interface PdfProvider {
     fun genererPdf(meldingTilBehandlerPdfInput: MeldingTilBehandlerPdfInput): ByteArray
+
+    fun genererPurringPdf(purringTilBehandlerPdfInput: PurringTilBehandlerPdfInput): ByteArray
 }
 
 data class MeldingTilBehandlerPdfInput(
@@ -33,6 +35,24 @@ data class MeldingTilBehandlerPdfInput(
         val navn: String,
         val kontor: Kontor,
     ) {
+        companion object {
+            fun lag(mottaker: Behandler) =
+                Til(
+                    navn = mottaker.navn.fulltNavn(),
+                    kontor =
+                        Kontor(
+                            navn = mottaker.kontor.navn ?: "",
+                            organisasjonsnummer = mottaker.kontor.organisasjonsnummer?.value ?: "",
+                            adresse =
+                                Kontor.Adresse(
+                                    gate = mottaker.kontor.adresse?.veiadresse ?: "",
+                                    postnummer = mottaker.kontor.adresse?.postnummer ?: "",
+                                    poststed = mottaker.kontor.adresse?.poststed ?: "",
+                                ),
+                        ),
+                )
+        }
+
         data class Kontor(
             val navn: String,
             val organisasjonsnummer: String,
@@ -69,38 +89,53 @@ data class MeldingTilBehandlerPdfInput(
                     NAVIdent = avsenderIdent.value,
                     navn = avsenderNavn,
                 ),
-            til =
-                Til(
-                    navn = mottaker.navn.fulltNavn(),
-                    kontor =
-                        Til.Kontor(
-                            navn = mottaker.kontor.navn ?: "",
-                            organisasjonsnummer = mottaker.kontor.organisasjonsnummer?.value ?: "",
-                            adresse =
-                                Til.Kontor.Adresse(
-                                    gate = mottaker.kontor.adresse?.veiadresse ?: "",
-                                    postnummer = mottaker.kontor.adresse?.postnummer ?: "",
-                                    poststed = mottaker.kontor.adresse?.poststed ?: "",
-                                ),
-                        ),
-                ),
-            tidspunkt = tidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
-            gjelder =
-                Gjelder(
-                    fødselsnummer = gjelder.value,
-                    navn = søker.navn.fulltNavn(),
-                ),
-            fagområde =
-                when (fagområde) {
-                    Fagområde.EnkeltståendeBehandlingsdager -> "Enkeltstående behandlingsdager"
-                    Fagområde.Tilbakedatering -> "Tilbakedatering"
-                    Fagområde.Yrkesskade -> "Yrkesskade"
-                    Fagområde.Bestridelse -> "Bestridelse"
-                    Fagområde.UnntakFraArbeidsgiveransvar -> "Unntak fra arbeidsgiveransvar"
-                    Fagområde.Klage -> "Klage"
-                    Fagområde.Reisetilskudd -> "Reisetilskudd"
-                },
+            til = Til.lag(mottaker),
+            tidspunkt = tidspunkt.tilNorskTid(),
+            gjelder = Gjelder(fødselsnummer = gjelder.value, navn = søker.navn.fulltNavn()),
+            fagområde = fagområde.tekst(),
             melding = tekst,
         )
     }
 }
+
+/** Samme innhold som [MeldingTilBehandlerPdfInput], men uten avsender: purringen sendes av systemet. */
+data class PurringTilBehandlerPdfInput(
+    val conversationRef: String,
+    val til: MeldingTilBehandlerPdfInput.Til,
+    val tidspunkt: LocalDateTime,
+    val gjelder: MeldingTilBehandlerPdfInput.Gjelder,
+    val fagområde: String,
+    val melding: String,
+) {
+    companion object {
+        fun fra(
+            conversationRef: ConversationRef,
+            tekst: String,
+            mottaker: Behandler,
+            gjelder: Identitetsnummer,
+            søker: Søker,
+            tidspunkt: Instant,
+            fagområde: Fagområde,
+        ) = PurringTilBehandlerPdfInput(
+            conversationRef = conversationRef.value.toString(),
+            til = MeldingTilBehandlerPdfInput.Til.lag(mottaker),
+            tidspunkt = tidspunkt.tilNorskTid(),
+            gjelder = MeldingTilBehandlerPdfInput.Gjelder(fødselsnummer = gjelder.value, navn = søker.navn.fulltNavn()),
+            fagområde = fagområde.tekst(),
+            melding = tekst,
+        )
+    }
+}
+
+private fun Instant.tilNorskTid(): LocalDateTime = atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime()
+
+private fun Fagområde.tekst(): String =
+    when (this) {
+        Fagområde.EnkeltståendeBehandlingsdager -> "Enkeltstående behandlingsdager"
+        Fagområde.Tilbakedatering -> "Tilbakedatering"
+        Fagområde.Yrkesskade -> "Yrkesskade"
+        Fagområde.Bestridelse -> "Bestridelse"
+        Fagområde.UnntakFraArbeidsgiveransvar -> "Unntak fra arbeidsgiveransvar"
+        Fagområde.Klage -> "Klage"
+        Fagområde.Reisetilskudd -> "Reisetilskudd"
+    }

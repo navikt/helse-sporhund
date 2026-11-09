@@ -73,9 +73,10 @@ class DokarkivClient(
                 Fagområde.Klage -> "klage"
                 Fagområde.Reisetilskudd -> "reisetilskudd"
             }
+        val tittel = if (journalpost.erPurring) "Purring - $fagområde" else "Dialogmelding - $fagområde"
         val journalpostPayload =
             JournalpostPayload(
-                tittel = "Dialogmelding - $fagområde",
+                tittel = tittel,
                 bruker =
                     Bruker(
                         id = journalpost.gjelder.value,
@@ -94,7 +95,7 @@ class DokarkivClient(
                 dokumenter =
                     listOf(
                         JournalpostPayload.Dokument(
-                            "Dialogmelding - $fagområde",
+                            tittel,
                             dokumentvarianter =
                                 listOf(
                                     JournalpostPayload.Dokument.DokumentVariant(

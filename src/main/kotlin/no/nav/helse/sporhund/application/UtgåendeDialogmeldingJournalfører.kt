@@ -20,4 +20,5 @@ data class UtgåendeDialogmeldingJournalpost(
     val mottaker: Behandler,
     val gjelder: Identitetsnummer,
     val fagområde: Fagområde,
+    val erPurring: Boolean = false,
 )

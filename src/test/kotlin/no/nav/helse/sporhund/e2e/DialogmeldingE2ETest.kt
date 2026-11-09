@@ -59,4 +59,19 @@ class DialogmeldingE2ETest {
                 dialogenErFerdigstilt()
             }
         }
+
+    @Test
+    fun `purring sendes til behandler med PDF og journalføres når fristen for svar er ute`() =
+        e2e {
+            gitt {
+                saksbehandlerHarSendtForespørsel("Kan du sende journalnotat?")
+            }
+            når {
+                fristenForSvarGårUt()
+            }
+            så {
+                behandlerHarMottattPurring()
+                purringenErJournalført()
+            }
+        }
 }

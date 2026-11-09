@@ -3,6 +3,7 @@ package no.nav.helse.sporhund.application.kommando
 import no.nav.helse.sporhund.application.DialogmeldingTilBehandlerSender
 import no.nav.helse.sporhund.application.MeldingTilBehandlerPdfInput
 import no.nav.helse.sporhund.application.PdfProvider
+import no.nav.helse.sporhund.application.PurringTilBehandlerPdfInput
 import no.nav.helse.sporhund.application.SessionContext
 import no.nav.helse.sporhund.application.UtgåendeDialogmeldingJournalfører
 import no.nav.helse.sporhund.application.UtgåendeDialogmeldingJournalpost
@@ -34,19 +35,34 @@ class DialogmeldingKommandoHåndterer(
     ): List<Kommando> {
         val (dialog, melding) = session.finnDialogOgMelding(kommando.conversationRef, kommando.meldingId)
         val pdf =
-            pdfProvider.genererPdf(
-                MeldingTilBehandlerPdfInput.fra(
-                    conversationRef = dialog.conversationRef,
-                    tekst = melding.melding,
-                    avsenderIdent = melding.saksbehandler,
-                    avsenderNavn = kommando.avsenderNavn,
-                    mottaker = melding.behandler,
-                    gjelder = dialog.identitetsnummer,
-                    søker = dialog.søker,
-                    tidspunkt = melding.tidspunkt,
-                    fagområde = dialog.fagområde,
-                ),
-            )
+            when (melding) {
+                is Dialogmelding.FraNav ->
+                    pdfProvider.genererPdf(
+                        MeldingTilBehandlerPdfInput.fra(
+                            conversationRef = dialog.conversationRef,
+                            tekst = melding.melding,
+                            avsenderIdent = melding.saksbehandler,
+                            avsenderNavn = checkNotNull(kommando.avsenderNavn) { "Mangler navn på avsender av dialogmelding fra Nav" },
+                            mottaker = melding.behandler,
+                            gjelder = dialog.identitetsnummer,
+                            søker = dialog.søker,
+                            tidspunkt = melding.tidspunkt,
+                            fagområde = dialog.fagområde,
+                        ),
+                    )
+                is Dialogmelding.FraSystem ->
+                    pdfProvider.genererPurringPdf(
+                        PurringTilBehandlerPdfInput.fra(
+                            conversationRef = dialog.conversationRef,
+                            tekst = melding.melding,
+                            mottaker = melding.behandler,
+                            gjelder = dialog.identitetsnummer,
+                            søker = dialog.søker,
+                            tidspunkt = melding.tidspunkt,
+                            fagområde = dialog.fagområde,
+                        ),
+                    )
+            }
         session.dialogmeldingPdfRepository.lagre(melding.id, pdf)
         return listOf(
             SendDialogmeldingPåKafka(KommandoId(UUID.randomUUID()), dialog.conversationRef, melding.id),
@@ -66,6 +82,7 @@ class DialogmeldingKommandoHåndterer(
                 identitetsnummer = dialog.identitetsnummer,
                 meldingId = melding.id,
                 tekst = melding.melding,
+                erPurring = melding.erPurring,
             ),
             session.finnPdf(melding.id),
         )
@@ -84,6 +101,7 @@ class DialogmeldingKommandoHåndterer(
                 mottaker = melding.behandler,
                 gjelder = dialog.identitetsnummer,
                 fagområde = dialog.fagområde,
+                erPurring = melding.erPurring,
             ),
             session.finnPdf(melding.id),
         )
@@ -93,11 +111,11 @@ class DialogmeldingKommandoHåndterer(
     private fun SessionContext.finnDialogOgMelding(
         conversationRef: ConversationRef,
         meldingId: DialogmeldingId<UUID>,
-    ): Pair<Dialog, Dialogmelding.FraNav> {
+    ): Pair<Dialog, Dialogmelding.Utgående> {
         val dialog = dialogRepository.finnDialog(conversationRef) ?: error("Fant ikke dialog for kommando")
         val melding =
-            dialog.meldinger.filterIsInstance<Dialogmelding.FraNav>().singleOrNull { it.id == meldingId }
-                ?: error("Fant ikke dialogmelding ${meldingId.value} fra Nav i dialogen")
+            dialog.meldinger.filterIsInstance<Dialogmelding.Utgående>().singleOrNull { it.id == meldingId }
+                ?: error("Fant ikke utgående dialogmelding ${meldingId.value} i dialogen")
         return dialog to melding
     }
 

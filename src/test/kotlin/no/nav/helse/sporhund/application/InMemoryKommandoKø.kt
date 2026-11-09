@@ -9,6 +9,8 @@ import java.time.Instant
 class InMemoryKommandoKø : KommandoKø {
     private val kommandoer = mutableListOf<KøetKommando>()
 
+    fun kommandoer(): List<Kommando> = kommandoer.map { it.kommando }
+
     override fun leggTil(kommando: Kommando) {
         kommandoer.add(KøetKommando(kommando, antallForsøk = 0))
     }

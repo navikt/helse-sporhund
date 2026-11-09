@@ -20,12 +20,13 @@ sealed interface Kommando {
 /**
  * Meldingen og dialogen endres ikke etter at de er lagret, så PDF-en lages fra dem.
  * Navnet på avsenderen lagres ikke i dialogen og må derfor følge med kommandoen.
+ * En purring har ingen avsender, så da er [avsenderNavn] null.
  */
 data class LagDialogmeldingPdf(
     override val id: KommandoId,
     override val conversationRef: ConversationRef,
     val meldingId: DialogmeldingId<UUID>,
-    val avsenderNavn: String,
+    val avsenderNavn: String?,
 ) : Kommando {
     companion object {
         fun ny(
@@ -37,6 +38,16 @@ data class LagDialogmeldingPdf(
             conversationRef = dialog.conversationRef,
             meldingId = melding.id,
             avsenderNavn = avsender.navn,
+        )
+
+        fun nyPurring(
+            purring: Dialogmelding.FraSystem,
+            dialog: Dialog,
+        ) = LagDialogmeldingPdf(
+            id = KommandoId(UUID.randomUUID()),
+            conversationRef = dialog.conversationRef,
+            meldingId = purring.id,
+            avsenderNavn = null,
         )
     }
 }

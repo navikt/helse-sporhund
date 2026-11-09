@@ -1,7 +1,7 @@
 package no.nav.helse.sporhund
 
-import no.nav.helse.sporhund.application.OutboxMelding
 import no.nav.helse.sporhund.application.TransactionProvider
+import no.nav.helse.sporhund.application.kommando.LagDialogmeldingPdf
 import no.nav.helse.sporhund.application.logg.teamLogs
 import no.nav.helse.sporhund.domain.Dialogstatus
 import no.nav.helse.sporhund.infrastructure.db.DataSourceBuilder
@@ -28,25 +28,22 @@ fun main() {
     teamLogs.info("Purring-jobb ferdig")
 }
 
-internal fun sendPurringerForUtlopteFrister(transactionProvider: TransactionProvider) {
+internal fun sendPurringerForUtlopteFrister(
+    transactionProvider: TransactionProvider,
+    nå: Instant = Instant.now(),
+) {
     transactionProvider.transaction {
-        val now = Instant.now()
         dialogRepository
             .finnÅpneDialoger()
             .filter { dialog ->
                 dialog.status == Dialogstatus.ForespørselSendt &&
                     !dialog.harFåttSvar() &&
-                    dialog.frist() <= now
+                    dialog.frist() <= nå
             }.forEach { dialog ->
                 teamLogs.info("Sender purring for dialog ${dialog.conversationRef.value}")
-                dialog.sendPurring()
-                val events = dialog.events()
+                val purring = dialog.sendPurring()
                 dialogRepository.lagre(dialog)
-                events.forEach {
-                    outbox.nyMelding(
-                        OutboxMelding.nyDialogmeldingFraNav(it),
-                    )
-                }
+                kommandoKø.leggTil(LagDialogmeldingPdf.nyPurring(purring, dialog))
             }
     }
 }

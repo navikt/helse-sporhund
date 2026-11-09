@@ -30,6 +30,8 @@ import no.nav.helse.sporhund.infrastructure.clients.populasjonstilgangskontroll.
 import no.nav.helse.sporhund.infrastructure.clients.populasjonstilgangskontroll.testhelpers.MockTilgangsmaskinenServer
 import no.nav.helse.sporhund.infrastructure.clients.sprinter.SprinterConfig
 import no.nav.helse.sporhund.infrastructure.clients.sprinter.testhelpers.MockSprinterServer
+import no.nav.helse.sporhund.infrastructure.db.DataSourceBuilder
+import no.nav.helse.sporhund.infrastructure.db.PgTransactionProvider
 import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import no.nav.helse.sporhund.infrastructure.db.testhelpers.TestcontainersDatabase
 import no.nav.helse.sporhund.infrastructure.kafka.DialogmeldingTilBehandlerKafkaDto
@@ -38,6 +40,7 @@ import no.nav.helse.sporhund.infrastructure.kafka.ReadTopics
 import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.TestcontainersKafka
 import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.lagDialogmeldingFraBehandlerKafkaDto
 import no.nav.helse.sporhund.infrastructure.kafka.testhelpers.lagDialogmeldingUtenForesporselssvar
+import no.nav.helse.sporhund.sendPurringerForUtlopteFrister
 import no.nav.helse.sporhund.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.sporhund.tilgangskontroll.tilgangsgrupperTilTilganger
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -49,6 +52,7 @@ import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.cfg.DateTimeFeature
 import tools.jackson.module.kotlin.readValue
 import java.net.ServerSocket
+import java.time.Instant
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -69,7 +73,7 @@ internal class E2EMiljø private constructor() {
     private val valkey = TestcontainersValkey(MODULE_LABEL).stoppesVedAvslutning("Valkey") { it.stop() }
     private val mockTexasServer = MockTexasServer().stoppesVedAvslutning("MockTexasServer") { it.stop() }
     private val mockTilgangsmaskinenServer = MockTilgangsmaskinenServer().stoppesVedAvslutning("MockTilgangsmaskinenServer") { it.stop() }
-    private val mockSprinterServer = MockSprinterServer().stoppesVedAvslutning("MockSprinterServer") { it.stop() }
+    val sprinter = MockSprinterServer().stoppesVedAvslutning("MockSprinterServer") { it.stop() }
     val dokarkiv = MockDokarkivServer().stoppesVedAvslutning("MockDokarkivServer") { it.stop() }
 
     val oauth2Server: MockOAuth2Server get() = mockOAuth2Server
@@ -100,6 +104,11 @@ internal class E2EMiljø private constructor() {
 
     @Volatile
     private var appFeil: Throwable? = null
+
+    private val transactionProvider by lazy { PgTransactionProvider(DataSourceBuilder(postgres.dbConfig).build()) }
+
+    /** Kjører purringsjobben slik den ville kjørt ved tidspunktet [nå]. */
+    fun kjørPurringsjobben(nå: Instant) = sendPurringerForUtlopteFrister(transactionProvider, nå)
 
     /** Meldingene sporhund har sendt til behandler på [DIALOGMELDING_FRA_NAY_TOPIC] med nøkkelen [conversationRef]. */
     fun meldingerTilBehandler(conversationRef: String): List<DialogmeldingTilBehandlerKafkaDto> = meldingerTilBehandler[conversationRef]?.toList().orEmpty()
@@ -190,7 +199,7 @@ internal class E2EMiljø private constructor() {
                         ),
                     // E2E-testene henter ikke vedlegg fra behandler, så padm2 blir aldri kalt
                     padm2Config = Padm2Config(baseUrl = "http://localhost:1", scope = "e2e-padm2-scope"),
-                    sprinterConfig = SprinterConfig(baseUrl = mockSprinterServer.baseUrl),
+                    sprinterConfig = SprinterConfig(baseUrl = sprinter.baseUrl),
                     dokarkivConfig = DokarkivConfig(baseUrl = dokarkiv.baseUrl, scope = "e2e-dokarkiv-scope"),
                     port = port,
                     kommandoJobbVentetid = 100.milliseconds,

@@ -93,6 +93,9 @@ class Når internal constructor(
     suspend fun saksbehandlerSvarer(tekst: String) = forløp.sendSvarFraSaksbehandler(tekst)
 
     suspend fun saksbehandlerFerdigstillerDialogen() = forløp.ferdigstill()
+
+    /** Purringsjobben kjører etter at fristen for svar er ute. */
+    fun fristenForSvarGårUt() = forløp.fristenGårUt()
 }
 
 /** Forventninger. Stegene venter til forventningen er oppfylt, eller feiler etter en kort timeout. */
@@ -108,6 +111,12 @@ class Så internal constructor(
 
     /** Den siste meldingen fra saksbehandler er journalført med samme PDF som vedlegget til behandler. */
     suspend fun dialogmeldingenErJournalført() = forløp.ventPåJournalføring()
+
+    /** Behandler har fått nøyaktig én purring, med PDF fra purring-malen i Sprinter. */
+    suspend fun behandlerHarMottattPurring() = forløp.sjekkPurringTilBehandler()
+
+    /** Purringen er journalført på samme sak, bruker og behandler som forespørselen, med samme PDF som vedlegget til behandler. */
+    suspend fun purringenErJournalført() = forløp.ventPåJournalføringAvPurring()
 
     suspend fun saksbehandlerSerSvaret(tekst: String) = forløp.ventPåSvarHosSaksbehandler(tekst)
 

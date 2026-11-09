@@ -53,7 +53,7 @@ class Dialog private constructor(
         status = Dialogstatus.DialogLukket
     }
 
-    fun sendPurring() {
+    fun sendPurring(): Dialogmelding.FraSystem {
         val nyesteFraNav = nyesteMeldingFraNav()
         val opprinneligDato =
             nyesteFraNav.tidspunkt
@@ -79,6 +79,7 @@ class Dialog private constructor(
                 melding = purringTekst,
             )
         nyMelding(purringMelding)
+        return purringMelding
     }
 
     fun gjenåpne() {
@@ -192,15 +193,21 @@ sealed interface Dialogmelding<ID_TYPE> {
     val melding: String
     val behandler: Behandler
 
+    /** En melding Nav sender til behandler: en forespørsel fra saksbehandler eller en purring. */
+    sealed interface Utgående : Dialogmelding<UUID> {
+        val behandlerRef: BehandlerRef
+        val erPurring: Boolean get() = this is FraSystem
+    }
+
     class FraNav private constructor(
         override val id: DialogmeldingId<UUID>,
         override val tidspunkt: Instant,
         override val melding: String,
         override val behandler: Behandler,
         val saksbehandler: NavIdent,
-        val behandlerRef: BehandlerRef,
+        override val behandlerRef: BehandlerRef,
         var kvitteringMottatt: Boolean = false,
-    ) : Dialogmelding<UUID> {
+    ) : Utgående {
         companion object {
             fun ny(
                 saksbehandler: NavIdent,
@@ -282,9 +289,9 @@ sealed interface Dialogmelding<ID_TYPE> {
         override val tidspunkt: Instant,
         override val melding: String,
         override val behandler: Behandler,
-        val behandlerRef: BehandlerRef,
+        override val behandlerRef: BehandlerRef,
         var kvitteringMottatt: Boolean = false,
-    ) : Dialogmelding<UUID> {
+    ) : Utgående {
         companion object {
             fun ny(
                 behandler: Behandler,

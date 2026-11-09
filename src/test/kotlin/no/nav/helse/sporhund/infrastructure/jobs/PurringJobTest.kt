@@ -1,14 +1,14 @@
 package no.nav.helse.sporhund.infrastructure.jobs
 
 import no.nav.helse.sporhund.application.InMemoryTransactionProvider
-import no.nav.helse.sporhund.application.NyDialogmeldingFraNav
-import no.nav.helse.sporhund.application.meldinger
+import no.nav.helse.sporhund.application.kommando.LagDialogmeldingPdf
 import no.nav.helse.sporhund.domain.Dialogstatus
 import no.nav.helse.sporhund.domain.testhelpers.*
 import no.nav.helse.sporhund.sendPurringerForUtlopteFrister
 import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PurringJobTest {
@@ -17,7 +17,7 @@ class PurringJobTest {
     // ── sendPurringerForUtlopteFrister ───────────────────────────────────────
 
     @Test
-    fun `sender purring på kafka når frist er passert og status er ForespørselSendt`() {
+    fun `legger purringen i kommandokøen når frist er passert og status er ForespørselSendt`() {
         val forfallenDialog =
             lagDialog(
                 status = Dialogstatus.ForespørselSendt,
@@ -27,28 +27,11 @@ class PurringJobTest {
 
         sendPurringerForUtlopteFrister(transactionProvider)
 
-        val outboxMeldinger = transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>()
-        assertEquals(1, outboxMeldinger.size)
-        assertEquals(forfallenDialog.conversationRef, outboxMeldinger.single().nyDialogmeldingFraNavEvent.conversationRef)
-    }
-
-    @Test
-    fun `kafka-melding for purring har dialogmeldingKode 2 (erPurring = true)`() {
-        val forfallenDialog =
-            lagDialog(
-                status = Dialogstatus.ForespørselSendt,
-                melding = lagFraNavMelding(opprettet = Instant.now().minusSeconds(22 * 24 * 3600)),
-            )
-        transactionProvider.dialogRepository.lagre(forfallenDialog)
-
-        sendPurringerForUtlopteFrister(transactionProvider)
-
-        val event =
-            transactionProvider.outbox
-                .meldinger<NyDialogmeldingFraNav>()
-                .single()
-                .nyDialogmeldingFraNavEvent
-        assertTrue(event.erPurring)
+        val purring = transactionProvider.dialogRepository.finnDialog(forfallenDialog.conversationRef)!!.nyesteMelding()
+        val kommando = lagPdfKommandoer().single()
+        assertEquals(forfallenDialog.conversationRef, kommando.conversationRef)
+        assertEquals(purring.id, kommando.meldingId)
+        assertNull(kommando.avsenderNavn)
     }
 
     @Test
@@ -77,7 +60,7 @@ class PurringJobTest {
 
         sendPurringerForUtlopteFrister(transactionProvider)
 
-        assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
+        assertTrue(lagPdfKommandoer().isEmpty())
     }
 
     @Test
@@ -91,7 +74,7 @@ class PurringJobTest {
 
         sendPurringerForUtlopteFrister(transactionProvider)
 
-        assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
+        assertTrue(lagPdfKommandoer().isEmpty())
     }
 
     @Test
@@ -105,7 +88,7 @@ class PurringJobTest {
 
         sendPurringerForUtlopteFrister(transactionProvider)
 
-        assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
+        assertTrue(lagPdfKommandoer().isEmpty())
     }
 
     @Test
@@ -119,7 +102,7 @@ class PurringJobTest {
 
         sendPurringerForUtlopteFrister(transactionProvider)
 
-        assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
+        assertTrue(lagPdfKommandoer().isEmpty())
     }
 
     @Test
@@ -134,7 +117,7 @@ class PurringJobTest {
 
         sendPurringerForUtlopteFrister(transactionProvider)
 
-        assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
+        assertTrue(lagPdfKommandoer().isEmpty())
     }
 
     @Test
@@ -146,7 +129,7 @@ class PurringJobTest {
             )
         transactionProvider.dialogRepository.lagre(dialog)
         sendPurringerForUtlopteFrister(transactionProvider)
-        assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
+        assertTrue(lagPdfKommandoer().isEmpty())
     }
 
     @Test
@@ -162,7 +145,7 @@ class PurringJobTest {
 
         sendPurringerForUtlopteFrister(transactionProvider)
 
-        assertTrue(transactionProvider.outbox.meldinger<NyDialogmeldingFraNav>().isEmpty())
+        assertTrue(lagPdfKommandoer().isEmpty())
     }
 
     @Test
@@ -188,12 +171,11 @@ class PurringJobTest {
 
         sendPurringerForUtlopteFrister(transactionProvider)
 
-        val outboxRefs =
-            transactionProvider.outbox
-                .meldinger<NyDialogmeldingFraNav>()
-                .map { it.nyDialogmeldingFraNavEvent.conversationRef }
-        assertEquals(2, outboxRefs.size)
-        assertTrue(forfallen1.conversationRef in outboxRefs)
-        assertTrue(forfallen2.conversationRef in outboxRefs)
+        val refs = lagPdfKommandoer().map { it.conversationRef }
+        assertEquals(2, refs.size)
+        assertTrue(forfallen1.conversationRef in refs)
+        assertTrue(forfallen2.conversationRef in refs)
     }
+
+    private fun lagPdfKommandoer() = transactionProvider.kommandoKø.kommandoer().filterIsInstance<LagDialogmeldingPdf>()
 }
