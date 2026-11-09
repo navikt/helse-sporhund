@@ -32,7 +32,7 @@ class SendPurringTest {
     }
 
     @Test
-    fun `sendPurring emitter event med erPurring = true og ny meldingId`() {
+    fun `sendPurring returnerer purringen, adressert til samme behandler som forespørselen`() {
         val behandlerRef = lagBehandlerRef()
         val dialog =
             lagDialog(
@@ -40,15 +40,11 @@ class SendPurringTest {
                 melding = lagFraNavMelding(behandlerRef = behandlerRef),
             )
 
-        dialog.sendPurring()
+        val purring = dialog.sendPurring()
 
-        val events = dialog.events()
-        assertEquals(1, events.size)
-        val event = events.single()
-        assertTrue(event.erPurring)
-        assertEquals(dialog.conversationRef, event.conversationRef)
-        assertEquals(behandlerRef, event.behandlerRef)
-        assertEquals(dialog.nyesteMelding().id, event.meldingId)
+        assertTrue(purring.erPurring)
+        assertEquals(behandlerRef, purring.behandlerRef)
+        assertEquals(dialog.nyesteMelding().id, purring.id)
     }
 
     @Test

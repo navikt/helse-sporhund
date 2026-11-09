@@ -43,10 +43,6 @@ class Dialog private constructor(
     private val _meldinger = meldinger.toMutableList()
     val meldinger get() = _meldinger.toList()
 
-    private val events = mutableListOf<NyDialogmeldingFraNavEvent>()
-
-    fun events() = events.toList().also { events.clear() }
-
     fun nyesteMelding() = meldinger.last()
 
     fun ferdigstill() {
@@ -120,32 +116,8 @@ class Dialog private constructor(
         _meldinger.add(dialogmelding)
         when (dialogmelding) {
             is Dialogmelding.FraBehandler -> status = Dialogstatus.SvarMottatt
-            is Dialogmelding.FraNav -> {
-                status = Dialogstatus.ForespørselSendt
-                events.add(
-                    NyDialogmeldingFraNavEvent(
-                        conversationRef = conversationRef,
-                        behandlerRef = dialogmelding.behandlerRef,
-                        identitetsnummer = identitetsnummer,
-                        meldingId = dialogmelding.id,
-                        tekst = dialogmelding.melding,
-                    ),
-                )
-            }
-
-            is Dialogmelding.FraSystem -> {
-                status = Dialogstatus.PurringSendt
-                events.add(
-                    NyDialogmeldingFraNavEvent(
-                        conversationRef = conversationRef,
-                        behandlerRef = dialogmelding.behandlerRef,
-                        identitetsnummer = identitetsnummer,
-                        meldingId = dialogmelding.id,
-                        tekst = dialogmelding.melding,
-                        erPurring = true,
-                    ),
-                )
-            }
+            is Dialogmelding.FraNav -> status = Dialogstatus.ForespørselSendt
+            is Dialogmelding.FraSystem -> status = Dialogstatus.PurringSendt
         }
     }
 

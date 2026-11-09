@@ -12,14 +12,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson3.jackson
 import no.nav.helse.sporhund.application.KnyttInnkommendeJournalpost
-import no.nav.helse.sporhund.application.MeldingTilBehandlerPdfInput
-import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
 import no.nav.helse.sporhund.application.OutboxMelding
-import no.nav.helse.sporhund.application.PdfProvider
-import no.nav.helse.sporhund.application.PurringTilBehandlerPdfInput
+import no.nav.helse.sporhund.application.UtgåendeDialogmeldingJournalpost
 import no.nav.helse.sporhund.domain.testhelpers.lagDialog
-import no.nav.helse.sporhund.domain.testhelpers.lagFraNavMelding
-import no.nav.helse.sporhund.domain.testhelpers.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -29,12 +24,6 @@ import kotlin.test.assertTrue
 class DokarkivClientTest {
     private val baseUrl = "http://dokarkiv"
     private val config = DokarkivConfig(baseUrl = baseUrl, scope = "test-scope")
-    private val pdfProvider =
-        object : PdfProvider {
-            override fun genererPdf(meldingTilBehandlerPdfInput: MeldingTilBehandlerPdfInput) = ByteArray(16)
-
-            override fun genererPurringPdf(purringTilBehandlerPdfInput: PurringTilBehandlerPdfInput) = ByteArray(16)
-        }
     private val accessTokenProvider =
         object : AccessTokenProvider {
             override fun machineToken(scope: String): String = "test-token"
@@ -46,7 +35,7 @@ class DokarkivClientTest {
         }
 
     @Test
-    fun `journalførUtgåendeDialogmelding sender POST til riktig URL`() {
+    fun `journalfør sender POST til riktig URL`() {
         val engine =
             lagMockEngine {
                 respond(
@@ -65,7 +54,7 @@ class DokarkivClientTest {
                     headersOf(),
                 )
             }
-        lagDokarkivClient(engine).journalførUtgåendeDialogmelding(lagOpprettUtgåendeJournalpost())
+        lagDokarkivClient(engine).journalfør(lagUtgåendeJournalpost(), ByteArray(16))
 
         assertEquals(1, engine.requestHistory.size)
         assertEquals(HttpMethod.Post, engine.requestHistory[0].method)
@@ -73,18 +62,18 @@ class DokarkivClientTest {
     }
 
     @Test
-    fun `journalførUtgåendeDialogmelding ignorerer 409 Conflict`() {
+    fun `journalfør ignorerer 409 Conflict`() {
         val engine = lagMockEngine { respond("", HttpStatusCode.Conflict, headersOf()) }
         assertDoesNotThrow {
-            lagDokarkivClient(engine).journalførUtgåendeDialogmelding(lagOpprettUtgåendeJournalpost())
+            lagDokarkivClient(engine).journalfør(lagUtgåendeJournalpost(), ByteArray(16))
         }
     }
 
     @Test
-    fun `journalførUtgåendeDialogmelding kaster exception ved feil fra dokarkiv`() {
+    fun `journalfør kaster exception ved feil fra dokarkiv`() {
         val engine = lagMockEngine { respond("feil", HttpStatusCode.InternalServerError, headersOf()) }
         assertThrows<Exception> {
-            lagDokarkivClient(engine).journalførUtgåendeDialogmelding(lagOpprettUtgåendeJournalpost())
+            lagDokarkivClient(engine).journalfør(lagUtgåendeJournalpost(), ByteArray(16))
         }
     }
 
@@ -122,7 +111,6 @@ class DokarkivClientTest {
     private fun lagDokarkivClient(engine: MockEngine) =
         DokarkivClient(
             dokarkivConfig = config,
-            pdfProvider = pdfProvider,
             accessTokenProvider = accessTokenProvider,
             httpClient =
                 HttpClient(engine) {
@@ -130,12 +118,17 @@ class DokarkivClientTest {
                 },
         )
 
-    private fun lagOpprettUtgåendeJournalpost(): OpprettUtgåendeJournalpost =
-        OutboxMelding.opprettUtgåendeJournalpost(
-            melding = lagFraNavMelding(),
-            dialog = lagDialog(),
-            avsender = lagSaksbehandler(),
+    private fun lagUtgåendeJournalpost(): UtgåendeDialogmeldingJournalpost {
+        val dialog = lagDialog()
+        val melding = dialog.nyesteMeldingFraNav()
+        return UtgåendeDialogmeldingJournalpost(
+            conversationRef = dialog.conversationRef,
+            meldingId = melding.id,
+            mottaker = melding.behandler,
+            gjelder = dialog.identitetsnummer,
+            fagområde = dialog.fagområde,
         )
+    }
 
     private fun lagKnyttInnkommendeJournalpost(journalpostId: String = "JP-456"): KnyttInnkommendeJournalpost = OutboxMelding.knyttInnkommendeJournalpost(journalpostId, lagDialog())
 }

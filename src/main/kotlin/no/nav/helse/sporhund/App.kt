@@ -47,7 +47,6 @@ import no.nav.helse.sporhund.infrastructure.db.objectMapper
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaConfig
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaConsumerJobb
 import no.nav.helse.sporhund.infrastructure.kafka.KafkaDialogmeldingSender
-import no.nav.helse.sporhund.infrastructure.kafka.KafkaProducerJobb
 import no.nav.helse.sporhund.infrastructure.kafka.ReadTopics
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -172,14 +171,6 @@ fun app(
             consumerProducerFactory = factory,
             transactionProvider = transactionProvider,
         )
-    val kafkaProducerJobb =
-        KafkaProducerJobb(
-            dialogmeldingFraNayTopic = kafkaConfig.writeTopic,
-            readyToProduce = running,
-            consumerProducerFactory = factory,
-            transactionProvider = transactionProvider,
-        )
-
     val accessTokenProvider =
         TexasClient(
             tokenEndpoint = URI(accessTokenProviderConfig.tokenEndpoint),
@@ -190,7 +181,7 @@ fun app(
 
     val pdfProvider = SprinterClient(sprinterConfig)
 
-    val dokarkivClient = DokarkivClient(dokarkivConfig, pdfProvider, accessTokenProvider)
+    val dokarkivClient = DokarkivClient(dokarkivConfig, accessTokenProvider)
 
     val journalførerJobb = JournalførerJobb(running, transactionProvider, dokarkivClient)
 
@@ -213,7 +204,6 @@ fun app(
             tokenProvider = accessTokenProvider,
         )
 
-    var producerJob: Job? = null
     var consumerJob: Job? = null
     var journalførerJob: Job? = null
     var kommandoJob: Job? = null
@@ -237,14 +227,12 @@ fun app(
                 // Jobbene blokkerer tråden sin så lenge appen kjører, så de må ikke ta tråder fra Dispatchers.Default
                 journalførerJob = launch(Dispatchers.IO + exceptionHandler) { journalførerJobb.start() }
                 consumerJob = launch(Dispatchers.IO + exceptionHandler) { kafkaConsumerJobb.start() }
-                producerJob = launch(Dispatchers.IO + exceptionHandler) { kafkaProducerJobb.start() }
                 kommandoJob = launch(Dispatchers.IO + exceptionHandler) { kommandoJobb.start(running) }
             }
             this.monitor.subscribe(ApplicationStopping) {
                 running.set(false)
                 runBlocking {
                     consumerJob?.join()
-                    producerJob?.join()
                     journalførerJob?.join()
                     kommandoJob?.join()
                 }

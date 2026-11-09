@@ -31,3 +31,18 @@ class KafkaDialogmeldingSender(
             ).get()
     }
 }
+
+private fun NyDialogmeldingFraNavEvent.toKafkaDto(vedlegg: ByteArray): DialogmeldingTilBehandlerKafkaDto =
+    DialogmeldingTilBehandlerKafkaDto(
+        behandlerRef = behandlerRef.value,
+        personIdent = identitetsnummer.value,
+        dialogmeldingUuid = meldingId.value.toString(),
+        dialogmeldingRefParent = null,
+        dialogmeldingRefConversation = conversationRef.value.toString(),
+        dialogmeldingType = "DIALOG_FORESPORSEL",
+        dialogmeldingKodeverk = "FORESPORSEL",
+        dialogmeldingKode = if (erPurring) 2 else 1,
+        dialogmeldingTekst = tekst,
+        dialogmeldingVedlegg = vedlegg,
+        kilde = "sykepenger",
+    )

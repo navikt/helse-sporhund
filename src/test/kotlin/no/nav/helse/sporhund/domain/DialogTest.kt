@@ -9,29 +9,6 @@ import kotlin.test.assertIs
 
 class DialogTest {
     @Test
-    fun `nytt event når det sendes en melding fra Nav`() {
-        val behandlerRef = lagBehandlerRef()
-        val dialog =
-            Dialog.ny(
-                identitetsnummer = lagIdentitetsnummer(),
-                søker = lagSøker(),
-                melding =
-                    lagFraNavMelding(
-                        ident = lagNavIdent(),
-                        behandler = lagBehandler(),
-                        behandlerRef = behandlerRef,
-                        melding = "En melding",
-                    ),
-                fagområde = Fagområde.EnkeltståendeBehandlingsdager,
-            )
-        val events = dialog.events()
-        assertEquals(1, events.size)
-        assertEquals(dialog.conversationRef, events.single().conversationRef)
-        assertEquals(dialog.identitetsnummer, events.single().identitetsnummer)
-        assertEquals(behandlerRef, events.single().behandlerRef)
-    }
-
-    @Test
     fun `nyesteMelding returnerer den eneste meldingen i en ny dialog`() {
         val fraNavMelding = lagFraNavMelding()
         val dialog = lagDialog(melding = fraNavMelding)

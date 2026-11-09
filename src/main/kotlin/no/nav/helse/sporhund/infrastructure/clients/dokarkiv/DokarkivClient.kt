@@ -12,9 +12,6 @@ import io.ktor.http.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.application.KnyttInnkommendeJournalpost
-import no.nav.helse.sporhund.application.MeldingTilBehandlerPdfInput
-import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
-import no.nav.helse.sporhund.application.PdfProvider
 import no.nav.helse.sporhund.application.UtgåendeDialogmeldingJournalfører
 import no.nav.helse.sporhund.application.UtgåendeDialogmeldingJournalpost
 import no.nav.helse.sporhund.application.logg.loggError
@@ -28,37 +25,9 @@ import kotlin.io.encoding.Base64
 
 class DokarkivClient(
     private val dokarkivConfig: DokarkivConfig,
-    private val pdfProvider: PdfProvider,
     private val accessTokenProvider: AccessTokenProvider,
     private val httpClient: HttpClient = HttpClient(CIO),
 ) : UtgåendeDialogmeldingJournalfører {
-    fun journalførUtgåendeDialogmelding(melding: OpprettUtgåendeJournalpost) {
-        val pdf =
-            pdfProvider.genererPdf(
-                MeldingTilBehandlerPdfInput.fra(
-                    conversationRef = melding.conversationRef,
-                    tekst = melding.tekst,
-                    avsenderIdent = melding.avsender.ident,
-                    avsenderNavn = melding.avsender.navn,
-                    mottaker = melding.mottaker,
-                    gjelder = melding.gjelder,
-                    søker = melding.søker,
-                    tidspunkt = melding.tidspunkt,
-                    fagområde = melding.fagområde,
-                ),
-            )
-        journalfør(
-            UtgåendeDialogmeldingJournalpost(
-                conversationRef = melding.conversationRef,
-                meldingId = melding.meldingId,
-                mottaker = melding.mottaker,
-                gjelder = melding.gjelder,
-                fagområde = melding.fagområde,
-            ),
-            pdf,
-        )
-    }
-
     override fun journalfør(
         journalpost: UtgåendeDialogmeldingJournalpost,
         pdf: ByteArray,

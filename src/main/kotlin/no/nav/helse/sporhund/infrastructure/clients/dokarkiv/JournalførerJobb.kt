@@ -3,7 +3,6 @@ package no.nav.helse.sporhund.infrastructure.clients.dokarkiv
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.sporhund.application.KnyttInnkommendeJournalpost
-import no.nav.helse.sporhund.application.OpprettUtgåendeJournalpost
 import no.nav.helse.sporhund.application.TransactionProvider
 import no.nav.helse.sporhund.application.logg.loggDebug
 import no.nav.helse.sporhund.application.logg.loggError
@@ -25,22 +24,17 @@ class JournalførerJobb(
             while (readyToProduce.get()) {
                 runCatching {
                     transactionProvider.transaction {
-                        val opprettUtgåendeJournalposter = outbox.meldinger<OpprettUtgåendeJournalpost>()
                         val innkommendeJournalposter = outbox.meldinger<KnyttInnkommendeJournalpost>()
-                        if (innkommendeJournalposter.isEmpty() && opprettUtgåendeJournalposter.isEmpty()) {
+                        if (innkommendeJournalposter.isEmpty()) {
                             loggDebug("Journalfører-jobb: Ingen journalposter å journalføre, sover $antallMillisekunderLoopenSover ms")
                             return@transaction
                         }
-                        loggDebug("Journalfører-jobb: Fant ${opprettUtgåendeJournalposter.size} utgående journalposter og ${innkommendeJournalposter.size} innkommende journalposter som skal journalføres")
-                        opprettUtgåendeJournalposter.forEach { melding ->
-                            dokarkivClient.journalførUtgåendeDialogmelding(melding)
-                            outbox.meldingSendt(melding.id)
-                        }
+                        loggDebug("Journalfører-jobb: Fant ${innkommendeJournalposter.size} innkommende journalposter som skal journalføres")
                         innkommendeJournalposter.forEach { melding ->
                             dokarkivClient.feilregistrerOgKnyttJournalpost(melding)
                             outbox.meldingSendt(melding.id)
                         }
-                        loggDebug("Journalfører-jobb: Journalført ${opprettUtgåendeJournalposter.size} utgående journalposter og ${innkommendeJournalposter.size} innkommende journalposter")
+                        loggDebug("Journalfører-jobb: Journalført ${innkommendeJournalposter.size} innkommende journalposter")
                     }
                 }.onFailure {
                     loggError(

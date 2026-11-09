@@ -88,7 +88,6 @@ abstract class EndepunktTest {
                     journalfører =
                         DokarkivClient(
                             DokarkivConfig(baseUrl = "http://dokarkiv", scope = "scope"),
-                            pdfProvider,
                             object : AccessTokenProvider {
                                 override fun machineToken(scope: String) = "token"
 
