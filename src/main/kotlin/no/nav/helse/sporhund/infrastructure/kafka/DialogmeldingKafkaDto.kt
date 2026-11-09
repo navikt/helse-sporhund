@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 class DialogmeldingTilBehandlerKafkaDto(
     val behandlerRef: String,
     val personIdent: String,
-    val dialogmeldingUuid: String,
+    val dialogmeldingUuid: String, // også kjent som msgId downstream
     val dialogmeldingRefParent: String?,
     val dialogmeldingRefConversation: String,
     val dialogmeldingType: String,
