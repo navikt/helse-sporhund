@@ -272,4 +272,43 @@ class PgDialogRepositoryTest : DbTest() {
             assertNull(søkPåKvittert)
             assertNotNull(søkPåUkvittert)
         }
+
+    @Test
+    fun `svarErTattInn finner svar i dialog med flere meldinger`() =
+        test {
+            // given
+            val msgId = UUID.randomUUID()
+            val dialog = lagDialog()
+            dialog.nyMelding(lagFraBehandlerMelding())
+            dialog.nyMelding(lagFraBehandlerMelding(msgId = msgId))
+            dialogRepository.lagre(dialog)
+            dialogRepository.lagre(lagDialog().also { it.nyMelding(lagFraBehandlerMelding()) })
+
+            // then
+            assertTrue(dialogRepository.svarErTattInn(msgId.toString()))
+        }
+
+    @Test
+    fun `svarErTattInn finner ikke ukjent msgId`() =
+        test {
+            // given
+            dialogRepository.lagre(lagDialog().also { it.nyMelding(lagFraBehandlerMelding()) })
+
+            // then
+            assertFalse(dialogRepository.svarErTattInn(UUID.randomUUID().toString()))
+        }
+
+    @Test
+    fun `svarErTattInn treffer ikke utgående meldinger`() =
+        test {
+            // given
+            val dialog = lagDialog()
+            dialog.nyMelding(lagFraSystemMelding())
+            dialogRepository.lagre(dialog)
+
+            // then
+            dialog.meldinger.forEach { melding ->
+                assertFalse(dialogRepository.svarErTattInn(melding.id.value.toString()))
+            }
+        }
 }

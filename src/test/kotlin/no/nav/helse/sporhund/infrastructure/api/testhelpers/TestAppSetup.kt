@@ -17,17 +17,23 @@ import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilBruk
 import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.sporhund.domain.NavIdent
 import no.nav.helse.sporhund.domain.Saksbehandler
+import no.nav.helse.sporhund.infrastructure.api.MASKIN_TIL_MASKIN_AUTH
 import no.nav.helse.sporhund.infrastructure.api.appRoutes
 import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
+import no.nav.helse.sporhund.infrastructure.api.auth.MaskinTilMaskinConfig
 import no.nav.helse.sporhund.infrastructure.api.auth.configureJwtAuthentication
+import no.nav.helse.sporhund.infrastructure.api.auth.configureMaskinTilMaskinAuthentication
 import no.nav.helse.sporhund.infrastructure.api.configureOpenApiPlugin
+import no.nav.helse.sporhund.infrastructure.api.endepunkter.DIALOGMELDING_EKSISTERER_ROLLE
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.cfg.DateTimeFeature
 import java.util.*
 
 const val TEST_CLIENT_ID = "test-client-id"
 const val TEST_ISSUER_ID = "TestIssuer"
+const val PREAUTORISERT_KLIENT_ID = "padm2-client-id"
 
 fun ApplicationTestBuilder.setupTestApp(
     personPseudoIdProvider: PersonPseudoIdProvider,
@@ -60,6 +66,9 @@ fun ApplicationTestBuilder.setupTestApp(
                     tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
                     tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
                 )
+            }
+            jwt(MASKIN_TIL_MASKIN_AUTH) {
+                configureMaskinTilMaskinAuthentication(azureAdConfig, MaskinTilMaskinConfig(setOf(PREAUTORISERT_KLIENT_ID)))
             }
         }
         routing {
@@ -104,6 +113,27 @@ fun MockOAuth2Server.utstedToken(
             ),
     ).serialize()
 }
+
+fun MockOAuth2Server.utstedMaskintoken(
+    roller: List<String> = listOf(DIALOGMELDING_EKSISTERER_ROLLE),
+    azp: String = PREAUTORISERT_KLIENT_ID,
+    idtyp: String? = "app",
+): String =
+    issueToken(
+        issuerId = TEST_ISSUER_ID,
+        clientId = azp,
+        tokenCallback =
+            DefaultOAuth2TokenCallback(
+                issuerId = TEST_ISSUER_ID,
+                subject = azp,
+                audience = listOf(TEST_CLIENT_ID),
+                claims =
+                    buildMap {
+                        put("roles", roller)
+                        idtyp?.let { put("idtyp", it) }
+                    },
+            ),
+    ).serialize()
 
 fun MockOAuth2Server.utstedTokenMedLesTilgang(
     saksbehandler: Saksbehandler,

@@ -25,9 +25,12 @@ import no.nav.helse.sporhund.application.kommando.KommandoJobb
 import no.nav.helse.sporhund.application.logg.loggError
 import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.sporhund.application.tilgangskontroll.TilgangsgrupperTilTilganger
+import no.nav.helse.sporhund.infrastructure.api.MASKIN_TIL_MASKIN_AUTH
 import no.nav.helse.sporhund.infrastructure.api.appRoutes
 import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
+import no.nav.helse.sporhund.infrastructure.api.auth.MaskinTilMaskinConfig
 import no.nav.helse.sporhund.infrastructure.api.auth.configureJwtAuthentication
+import no.nav.helse.sporhund.infrastructure.api.auth.configureMaskinTilMaskinAuthentication
 import no.nav.helse.sporhund.infrastructure.api.configureOpenApiPlugin
 import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.AccessTokenProviderConfig
 import no.nav.helse.sporhund.infrastructure.clients.dokarkiv.DokarkivClient
@@ -124,10 +127,21 @@ fun main() {
             scope = env.getValue("DOKARKIV_SCOPE"),
         )
 
+    val maskinTilMaskinConfig =
+        MaskinTilMaskinConfig(
+            preautoriserteKlientIder =
+                objectMapper
+                    .readTree(env.getValue("AZURE_APP_PRE_AUTHORIZED_APPS"))
+                    .values()
+                    .map { it["clientId"].asString() }
+                    .toSet(),
+        )
+
     app(
         kafkaConfig = kafkaConfig,
         dbConfig = dbConfig,
         azureAdConfig = azureAdConfig,
+        maskinTilMaskinConfig = maskinTilMaskinConfig,
         personPseudoIdConfig = personPseudoIdConfig,
         populasjonstilgangskontrollConfig = populasjonstilgangskontrollConfig,
         tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
@@ -143,6 +157,7 @@ fun app(
     kafkaConfig: KafkaConfig,
     dbConfig: DbConfig,
     azureAdConfig: AzureAdConfig,
+    maskinTilMaskinConfig: MaskinTilMaskinConfig,
     personPseudoIdConfig: PersonPseudoIdConfig,
     populasjonstilgangskontrollConfig: PopulasjonstilgangskontrollConfig,
     tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
@@ -241,6 +256,9 @@ fun app(
                         tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
                         tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
                     )
+                }
+                jwt(MASKIN_TIL_MASKIN_AUTH) {
+                    configureMaskinTilMaskinAuthentication(azureAdConfig, maskinTilMaskinConfig)
                 }
             }
 

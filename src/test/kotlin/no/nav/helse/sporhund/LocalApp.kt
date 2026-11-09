@@ -4,6 +4,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.helse.sporhund.domain.testhelpers.lagSaksbehandler
 import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
+import no.nav.helse.sporhund.infrastructure.api.auth.MaskinTilMaskinConfig
+import no.nav.helse.sporhund.infrastructure.api.testhelpers.PREAUTORISERT_KLIENT_ID
 import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.AccessTokenProviderConfig
 import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.testhelpers.MockTexasServer
 import no.nav.helse.sporhund.infrastructure.clients.dokarkiv.DokarkivConfig
@@ -98,6 +100,7 @@ fun main() {
             ),
         dbConfig = postgres.dbConfig,
         azureAdConfig = azureAdConfig,
+        maskinTilMaskinConfig = MaskinTilMaskinConfig(preautoriserteKlientIder = setOf(PREAUTORISERT_KLIENT_ID)),
         personPseudoIdConfig = valkey.personPseudoIdConfig,
         populasjonstilgangskontrollConfig =
             PopulasjonstilgangskontrollConfig(

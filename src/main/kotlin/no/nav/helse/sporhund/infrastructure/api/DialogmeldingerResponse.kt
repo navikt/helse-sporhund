@@ -158,3 +158,9 @@ data class ApiSvarPaDialog(
 data class ApiOppdaterDialogStatus(
     val ferdigstilt: Boolean,
 )
+
+// === Svar fra behandler for isyfo ===
+
+data class ApiDialogmeldingEksisterer(
+    val eksisterer: Boolean,
+)

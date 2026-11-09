@@ -38,5 +38,11 @@ fun Routing.appRoutes(
                 vedleggProvider,
             )
         }
+
+        authenticate(MASKIN_TIL_MASKIN_AUTH) {
+            getDialogmeldingEksistererRoute(transactionProvider)
+        }
     }
 }
+
+const val MASKIN_TIL_MASKIN_AUTH = "maskin"

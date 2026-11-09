@@ -17,6 +17,8 @@ import no.nav.helse.sporhund.DIALOGMELDING_FRA_NAY_TOPIC
 import no.nav.helse.sporhund.DIALOGMELDING_STATUS_TOPIC
 import no.nav.helse.sporhund.app
 import no.nav.helse.sporhund.infrastructure.api.auth.AzureAdConfig
+import no.nav.helse.sporhund.infrastructure.api.auth.MaskinTilMaskinConfig
+import no.nav.helse.sporhund.infrastructure.api.testhelpers.PREAUTORISERT_KLIENT_ID
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.TEST_CLIENT_ID
 import no.nav.helse.sporhund.infrastructure.api.testhelpers.TEST_ISSUER_ID
 import no.nav.helse.sporhund.infrastructure.clients.accesstokenprovider.AccessTokenProviderConfig
@@ -184,6 +186,7 @@ internal class E2EMiljø private constructor() {
                             issuerUrl = mockOAuth2Server.issuerUrl(TEST_ISSUER_ID).toString(),
                             jwkProviderUri = mockOAuth2Server.jwksUrl(TEST_ISSUER_ID).toString(),
                         ),
+                    maskinTilMaskinConfig = MaskinTilMaskinConfig(setOf(PREAUTORISERT_KLIENT_ID)),
                     personPseudoIdConfig = valkey.personPseudoIdConfig,
                     populasjonstilgangskontrollConfig =
                         PopulasjonstilgangskontrollConfig(

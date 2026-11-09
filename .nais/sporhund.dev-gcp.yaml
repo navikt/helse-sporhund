@@ -16,6 +16,12 @@ spec:
       rules:
         - application: speil
           cluster: dev-gcp
+        - application: padm2
+          namespace: teamsykefravr
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - dialogmelding-eksisterer
     outbound:
       external:
         - host: dokarkiv.dev-fss-pub.nais.io

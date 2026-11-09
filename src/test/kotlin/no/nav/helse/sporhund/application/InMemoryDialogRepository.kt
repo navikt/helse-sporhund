@@ -27,4 +27,9 @@ class InMemoryDialogRepository : DialogRepository {
                     }
             }
         }
+
+    override fun svarErTattInn(msgId: String): Boolean =
+        dialoger.values.any { dialog ->
+            dialog.meldinger.any { it is Dialogmelding.FraBehandler && it.id.value == msgId }
+        }
 }

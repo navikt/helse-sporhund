@@ -15,4 +15,6 @@ interface DialogRepository {
     fun finnÅpneDialoger(): List<Dialog>
 
     fun finnDialogVedMeldingId(meldingId: UUID): Dialog?
+
+    fun svarErTattInn(msgId: String): Boolean
 }
