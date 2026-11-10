@@ -1,5 +1,7 @@
 package no.nav.helse.sporhund.infrastructure.db
 
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.sporhund.domain.ConversationRef
 import no.nav.helse.sporhund.domain.Dialogmelding
 import no.nav.helse.sporhund.domain.Dialogstatus
@@ -9,6 +11,7 @@ import no.nav.helse.sporhund.domain.testhelpers.lagFraBehandlerMelding
 import no.nav.helse.sporhund.domain.testhelpers.lagFraNavMelding
 import no.nav.helse.sporhund.domain.testhelpers.lagFraSystemMelding
 import no.nav.helse.sporhund.infrastructure.db.testhelpers.DbTest
+import no.nav.helse.sporhund.infrastructure.db.testhelpers.TestDb
 import java.util.*
 import kotlin.test.*
 
@@ -311,4 +314,18 @@ class PgDialogRepositoryTest : DbTest() {
                 assertFalse(dialogRepository.svarErTattInn(melding.id.value.toString()))
             }
         }
+
+    @Test
+    fun `oppslaget på svar bruker indeksen`() {
+        val query = svarErTattInnQuery("en-msg-id")
+        val plan =
+            sessionOf(TestDb.dataSource).use { session ->
+                session.transaction { tx ->
+                    tx.run(queryOf("SET LOCAL enable_seqscan = off").asExecute)
+                    tx.run(queryOf("EXPLAIN ${query.statement}", query.paramMap).map { it.string(1) }.asList)
+                }
+            }
+
+        assertTrue(plan.any { "dialog_meldinger" in it }, plan.joinToString("\n"))
+    }
 }

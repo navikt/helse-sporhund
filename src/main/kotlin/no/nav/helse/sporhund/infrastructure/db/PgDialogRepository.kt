@@ -72,15 +72,7 @@ class PgDialogRepository(
             objectMapper.readValue<DialogDto>(it.string("json")).tilDomene()
         }
 
-    override fun svarErTattInn(msgId: String): Boolean =
-        asSQL(
-            """
-            SELECT EXISTS (
-                SELECT 1 FROM dialog WHERE json -> 'meldinger' @> :svar::jsonb
-            )
-            """,
-            "svar" to objectMapper.writeValueAsString(listOf(mapOf("type" to "FRA_BEHANDLER", "id" to msgId))),
-        ).single(session) { it.boolean(1) } ?: false
+    override fun svarErTattInn(msgId: String): Boolean = svarErTattInnQuery(msgId).single(session) { it.boolean(1) } ?: false
 
     private data class DialogDto(
         val conversationRef: UUID,
@@ -407,3 +399,14 @@ class PgDialogRepository(
         }
     }
 }
+
+// Uttrykket json -> 'meldinger' må være likt det i indeksen dialog_meldinger, ellers brukes ikke indeksen.
+internal fun svarErTattInnQuery(msgId: String) =
+    asSQL(
+        """
+        SELECT EXISTS (
+            SELECT 1 FROM dialog WHERE json -> 'meldinger' @> :svar::jsonb
+        )
+        """,
+        "svar" to objectMapper.writeValueAsString(listOf(mapOf("type" to "FRA_BEHANDLER", "id" to msgId))),
+    )
