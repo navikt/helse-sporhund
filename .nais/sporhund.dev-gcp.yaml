@@ -1,4 +1,6 @@
 spec:
+  ingresses:
+    - https://sporhund.intern.dev.nav.no
   replicas:
     min: 1
     max: 1
@@ -43,6 +45,8 @@ spec:
   env:
     - name: KAFKA_CONSUMER_GROUP_ID
       value: tbd-sporhund-v1
+    - name: OPENAPI_AKTIVERT
+      value: "true"
     - name: TILGANGSMASKINEN_SCOPE
       value: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
     - name: PADM2_SCOPE

@@ -204,6 +204,7 @@ internal class E2EMiljø private constructor() {
                     padm2Config = Padm2Config(baseUrl = "http://localhost:1", scope = "e2e-padm2-scope"),
                     sprinterConfig = SprinterConfig(baseUrl = sprinter.baseUrl),
                     dokarkivConfig = DokarkivConfig(baseUrl = dokarkiv.baseUrl, scope = "e2e-dokarkiv-scope"),
+                    openApiAktivert = false,
                     port = port,
                     kommandoJobbVentetid = 100.milliseconds,
                 ) { kjørendeApp = application }

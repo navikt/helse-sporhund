@@ -128,6 +128,7 @@ fun main() {
                 baseUrl = mockDokarkivServer.baseUrl,
                 scope = "local-dokarkiv-scope",
             ),
+        openApiAktivert = true,
         port = 8282,
     ) { addAdditionalRoutings(this) }
 }

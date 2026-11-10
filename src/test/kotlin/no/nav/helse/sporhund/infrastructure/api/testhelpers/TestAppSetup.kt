@@ -43,6 +43,7 @@ fun ApplicationTestBuilder.setupTestApp(
     tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     vedleggProvider: VedleggProvider = VedleggProvider { emptyList() },
+    openApiAktivert: Boolean = true,
 ) {
     val azureAdConfig =
         AzureAdConfig(
@@ -72,7 +73,7 @@ fun ApplicationTestBuilder.setupTestApp(
             }
         }
         routing {
-            appRoutes(personPseudoIdProvider, transactionProvider, populasjonstilgangskontrollProvider, vedleggProvider)
+            appRoutes(personPseudoIdProvider, transactionProvider, populasjonstilgangskontrollProvider, vedleggProvider, openApiAktivert)
         }
     }
 }

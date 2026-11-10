@@ -150,6 +150,7 @@ fun main() {
         padm2Config = padm2Config,
         sprinterConfig = sprinterConfig,
         dokarkivConfig = dokarkivConfig,
+        openApiAktivert = env["OPENAPI_AKTIVERT"].toBoolean(),
     )
 }
 
@@ -166,6 +167,7 @@ fun app(
     padm2Config: Padm2Config,
     sprinterConfig: SprinterConfig,
     dokarkivConfig: DokarkivConfig,
+    openApiAktivert: Boolean,
     port: Int = 8080,
     kommandoJobbVentetid: Duration = 5.seconds,
     additionalRoutes: Routing.() -> Unit = { },
@@ -264,7 +266,7 @@ fun app(
 
             routing {
                 additionalRoutes()
-                appRoutes(personPseudoIdProvider, transactionProvider, tilgangsmaskinenClient, padm2Client)
+                appRoutes(personPseudoIdProvider, transactionProvider, tilgangsmaskinenClient, padm2Client, openApiAktivert)
             }
         },
     ).start(wait = true)

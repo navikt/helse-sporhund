@@ -15,13 +15,16 @@ fun Routing.appRoutes(
     transactionProvider: TransactionProvider,
     populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
     vedleggProvider: VedleggProvider,
+    openApiAktivert: Boolean,
 ) {
     route("/api") {
-        route("/openapi.json") {
-            openApi()
-        }
-        route("/swagger") {
-            swaggerUI("../openapi.json")
+        if (openApiAktivert) {
+            route("/openapi.json") {
+                openApi()
+            }
+            route("/swagger") {
+                swaggerUI("../openapi.json")
+            }
         }
 
         authenticate("oidc") {
